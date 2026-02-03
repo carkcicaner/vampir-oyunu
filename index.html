@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Vampir Köylü - Online 2026</title>
+    <!-- Fontlar -->
+    <link href="https://fonts.googleapis.com/css2?family=Creepster&family=Rajdhani:wght@400;600;700&family=Merriweather:ital,wght@0,300;0,700;1,300&display=swap" rel="stylesheet">
+    
+    <!-- FIREBASE KÜTÜPHANELERİ -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+        import { getFirestore, collection, doc, setDoc, updateDoc, onSnapshot, getDoc, arrayUnion, increment, serverTimestamp, query, where, getDocs, deleteDoc } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+
+        // --- BURAYI DÜZENLE: FIREBASE AYARLARINI AŞAĞIYA YAPIŞTIR ---
+        const firebaseConfig = {
+  apiKey: "AIzaSyAu-9xnaZRgcYj58gX3Yrfbj4NqvPI4B5Q",
+  authDomain: "vampirkoyluv3.firebaseapp.com",
+  projectId: "vampirkoyluv3",
+  storageBucket: "vampirkoyluv3.firebasestorage.app",
+  messagingSenderId: "114861911533",
+  appId: "1:114861911533:web:bb012b575860684c764be4"
+};
+        // -----------------------------------------------------------
+
+        // Firebase Başlatma
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+
+        // Global Değişkenler
+        let myUserId = null;
+        let myRoomId = null;
+        let myData = null; // { name, role, isHost ... }
+        let currentRoomData = null;
+        let unsubscribeRoom = null;
+        let unsubscribePlayers = null;
+        let audioCtx = null;
+        let isMuted = true;
+        
+        // --- SES SİSTEMİ ---
+        function initAudio() {
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+        }
+
+        function playSound(type) {
+            if (isMuted || !audioCtx) return;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+
+            const now = audioCtx.currentTime;
+            
+            if (type === 'click') {
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(800, now);
+                osc.frequency.exponentialRampToValueAtTime(100, now + 0.1);
+                gain.gain.setValueAtTime(0.1, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+                osc.start(now);
+                osc.stop(now + 0.1);
+            } else if (type === 'doom') {
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(100, now);
+                osc.frequency.exponentialRampToValueAtTime(10, now + 1.5);
+                gain.gain.setValueAtTime(0.3, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 1.5);
+                osc.start(now);
+                osc.stop(now + 1.5);
+            }
+        }
+
+        window.toggleSound = () => {
+            const btn = document.getElementById('soundBtn');
+            isMuted = !isMuted;
+            if(!isMuted) {
+                initAudio();
+                btn.innerText = "🔊";
+                btn.classList.add('sound-on');
+                playSound('click');
+            } else {
+                btn.innerText = "🔇";
+                btn.classList.remove('sound-on');
+            }
+        };
+
+        window.toggleFullScreen = () => {
+            if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(e=>console.log(e));
+            else if (document.exitFullscreen) document.exitFullscreen();
+        };
+
+        // --- OYUN FONKSİYONLARI ---
+
+        // 1. Giriş ve Oda Kurma
+        window.createGame = async () => {
+            playSound('click');
+            const username = document.getElementById('username').value.trim();
+            const mode = document.querySelector('.mode-option.active').id === 'mode-story' ? 'story' : 'normal';
+            
+            if (!username) return alert("Lütfen bir isim girin!");
+
+            // Rastgele 4 haneli kod
+            const roomCode = Math.floor(1000 + Math.random() * 9000).toString();
+            
+            try {
+                // Önce giriş yap
+                const userCred = await signInAnonymously(auth);
+                myUserId = userCred.user.uid;
+
+                // Odayı oluştur
+                await setDoc(doc(db, "rooms", roomCode), {
+                    hostId: myUserId,
+                    status: 'LOBBY',
+                    mode: mode,
+                    vampireCount: 2,
+                    createdAt: serverTimestamp(),
+                    story: null,
+                    townName: "Karanlık Vadi",
+                    phaseEndTime: null
+                });
+
+                // Kendini oyuncu olarak ekle
+                await setDoc(doc(db, "rooms", roomCode, "players", myUserId), {
+                    name: username,
+                    isHost: true,
+                    role: null,
+                    isAlive: true,
+                    joinedAt: serverTimestamp()
+                });
+
+                myRoomId = roomCode;
+                listenToRoom(roomCode);
+
+            } catch (error) {
+                console.error(error);
+                alert("Oda oluşturulurken hata: " + error.message);
+            }
+        };
+
+        window.joinGame = async () => {
+            playSound('click');
+            const username = document.getElementById('username').value.trim();
+            const roomCode = document.getElementById('roomCodeInput').value.trim();
+
+            if (!username || !roomCode) return alert("İsim ve Oda Kodu gerekli!");
+
+            try {
+                const roomRef = doc(db, "rooms", roomCode);
+                const roomSnap = await getDoc(roomRef);
+
+                if (!roomSnap.exists()) return alert("Böyle bir oda bulunamadı!");
+                if (roomSnap.data().status !== 'LOBBY') return alert("Oyun çoktan başlamış!");
+
+                const userCred = await signInAnonymously(auth);
+                myUserId = userCred.user.uid;
+
+                // Oyuncu ekle
+                await setDoc(doc(db, "rooms", roomCode, "players", myUserId), {
+                    name: username,
+                    isHost: false,
+                    role: null,
+                    isAlive: true,
+                    joinedAt: serverTimestamp()
+                });
+
+                myRoomId = roomCode;
+                listenToRoom(roomCode);
+
+            } catch (error) {
+                console.error(error);
+                alert("Giriş hatası: " + error.message);
+            }
+        };
+
+        // 2. Odayı Dinleme (Realtime Updates)
+        function listenToRoom(roomId) {
+            // Oda Durumu Dinleyicisi
+            unsubscribeRoom = onSnapshot(doc(db, "rooms", roomId), (doc) => {
+                if (!doc.exists()) return alert("Oda kapatıldı.");
+                currentRoomData = doc.data();
+                updateUI(currentRoomData);
+            });
+
+            // Oyuncular Dinleyicisi
+            unsubscribePlayers = onSnapshot(collection(db, "rooms", roomId, "players"), (snapshot) => {
+                const list = document.getElementById('lobby-list');
+                const voteList = document.getElementById('vote-list');
+                list.innerHTML = "";
+                voteList.innerHTML = "";
+                
+                let players = [];
+                snapshot.forEach(doc => {
+                    const p = doc.data();
+                    p.id = doc.id;
+                    players.push(p);
+
+                    // Eğer bu benim verimse, kaydet
+                    if (p.id === myUserId) myData = p;
+
+                    // Lobi Listesi
+                    const li = document.createElement('li');
+                    li.className = 'player-item';
+                    li.innerHTML = `<span>${p.name} ${p.isHost ? '👑' : ''} ${p.id === myUserId ? '(SEN)' : ''}</span>`;
+                    if (p.id === myUserId) li.style.borderColor = 'var(--toxic-green)';
+                    list.appendChild(li);
+                });
+
+                // Oyuncu Sayısı Güncelle
+                document.getElementById('player-count').innerText = players.length + "/20";
+
+                // Oylama Listesini Güncelle (Sadece hayattakiler)
+                const alivePlayers = players.filter(p => p.isAlive && p.id !== myUserId); // Kendine oy vereme
+                alivePlayers.forEach(p => {
+                    const li = document.createElement('li');
+                    li.className = 'player-item vote-item';
+                    li.innerText = p.name;
+                    li.onclick = () => selectVote(li, p.id);
+                    voteList.appendChild(li);
+                });
+            });
+        }
+
+        // 3. UI Güncellemeleri (State Machine)
+        function updateUI(room) {
+            // Ekran değiştir
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+
+            if (room.status === 'LOBBY') {
+                document.getElementById('screen-lobby').classList.add('active');
+                document.getElementById('display-room-code').innerText = myRoomId;
+                document.getElementById('lobby-mode-display').innerText = room.mode === 'story' ? 'HİKAYE (ZOR)' : 'KLASİK';
+                
+                // Admin kontrolü
+                if (myData && myData.isHost) {
+                    document.getElementById('admin-controls').style.display = 'block';
+                    document.getElementById('waiting-text').style.display = 'none';
+                    document.getElementById('vamp-count-display').innerText = room.vampireCount;
+                } else {
+                    document.getElementById('admin-controls').style.display = 'none';
+                    document.getElementById('waiting-text').style.display = 'block';
+                }
+            } 
+            else if (room.status === 'STORY_INTRO') {
+                document.getElementById('screen-story-intro').classList.add('active');
+                document.getElementById('story-heading').innerText = room.story?.title || "VAKA";
+                document.getElementById('story-body').innerHTML = room.story?.text || "...";
+                
+                // Sadece Admin "Devam Et" butonunu görür
+                const btn = document.querySelector('#screen-story-intro .btn');
+                if(myData && myData.isHost) btn.style.display = 'block';
+                else btn.style.display = 'none';
+            }
+            else if (room.status === 'ROLE_REVEAL') {
+                document.getElementById('screen-card').classList.add('active');
+                setupMyCard(room);
+            }
+            else if (room.status === 'DISCUSSION') {
+                document.getElementById('screen-discuss').classList.add('active');
+                document.getElementById('discussion-town-name').innerText = (room.townName || "Kasaba") + " Meydanı";
+                
+                // Sayaç Mantığı (Admin yönetir, burada sadece görsel)
+                // Gerçek süreyi serverTimestamp ile hesaplamak daha iyi ama şimdilik manuel geçiş yeterli.
+                
+                const btn = document.querySelector('#screen-discuss .btn');
+                if(myData && myData.isHost) btn.style.display = 'block';
+                else btn.style.display = 'none';
+            }
+            else if (room.status === 'VOTING') {
+                document.getElementById('screen-vote').classList.add('active');
+            }
+            else if (room.status === 'RESULT') {
+                document.getElementById('screen-result').classList.add('active');
+                document.getElementById('eliminated-name').innerText = (room.lastEliminatedName || "KİMSE") + " ELENDİ";
+                
+                const btn = document.querySelector('#screen-result .btn');
+                if(myData && myData.isHost) btn.style.display = 'block';
+                else btn.style.display = 'none';
+            }
+        }
+
+        // --- ADMİN AKSİYONLARI ---
+
+        window.changeVampCount = async (delta) => {
+            if (!myData.isHost) return;
+            let count = (currentRoomData.vampireCount || 2) + delta;
+            if (count < 1) count = 1;
+            if (count > 4) count = 4;
+            await updateDoc(doc(db, "rooms", myRoomId), { vampireCount: count });
+        };
+
+        // OYUNU BAŞLATMA VE ROL DAĞITIMI
+        window.launchGameSequence = async () => {
+            if (!myData.isHost) return;
+            playSound('click');
+
+            // Oyuncuları çek
+            const playersSnap = await getDocs(collection(db, "rooms", myRoomId, "players"));
+            let playerIds = [];
+            playersSnap.forEach(d => playerIds.push(d.id));
+
+            if (playerIds.length < 2) return alert("En az 2 oyuncu gerekli!");
+
+            // Rolleri Karıştır
+            let vampCount = currentRoomData.vampireCount;
+            if (vampCount >= playerIds.length) vampCount = playerIds.length - 1; // Herkes vampir olamaz
+
+            // Shuffle
+            for (let i = playerIds.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [playerIds[i], playerIds[j]] = [playerIds[j], playerIds[i]];
+            }
+
+            // Atama
+            const batchPromises = [];
+            let vampires = [];
+
+            for (let i = 0; i < playerIds.length; i++) {
+                const uid = playerIds[i];
+                const role = i < vampCount ? 'vampire' : 'villager';
+                if(role === 'vampire') vampires.push(uid); // İsimleri sonra çekmek lazım ama şimdilik ID
+                
+                batchPromises.push(updateDoc(doc(db, "rooms", myRoomId, "players", uid), {
+                    role: role,
+                    isAlive: true
+                }));
+            }
+            await Promise.all(batchPromises);
+
+            // Hikaye Oluştur (Eğer mod story ise)
+            let updates = { status: 'ROLE_REVEAL' };
+            if (currentRoomData.mode === 'story') {
+                const story = generateComplexStory(currentRoomData.vampireCount);
+                updates = { 
+                    status: 'STORY_INTRO', 
+                    story: story,
+                    townName: story.townName
+                };
+            }
+
+            await updateDoc(doc(db, "rooms", myRoomId), updates);
+        };
+
+        window.proceedToCards = async () => {
+             if (myData.isHost) {
+                 playSound('click');
+                 await updateDoc(doc(db, "rooms", myRoomId), { status: 'ROLE_REVEAL' });
+             }
+        };
+
+        window.goToDiscussion = async () => {
+            // Herkes kendi butonuna basar ama sadece admin statüsü değiştirir kuralını 
+            // burada basitleştiriyoruz: Admin basınca herkes geçer.
+            if (myData.isHost) {
+                playSound('click');
+                await updateDoc(doc(db, "rooms", myRoomId), { status: 'DISCUSSION' });
+            } else {
+                alert("Sadece Yönetici oyunu ilerletebilir.");
+            }
+        };
+
+        window.skipTimer = async () => {
+            if (myData.isHost) {
+                playSound('click');
+                // Oyları sıfırla (Gelecekteki tur için) - Şimdilik basit tutalım
+                await updateDoc(doc(db, "rooms", myRoomId), { status: 'VOTING' });
+            }
+        };
+
+        // OYLAMA MANTIĞI (Basitleştirilmiş: Herkes oy verir, Admin "Bitir" der)
+        let selectedVoteId = null;
+        window.selectVote = (el, id) => {
+            playSound('click');
+            document.querySelectorAll('.vote-item').forEach(e => {
+                e.style.background = ""; e.style.color = "";
+            });
+            el.style.background = "var(--blood-red)";
+            el.style.color = "#000";
+            selectedVoteId = id;
+        };
+
+        window.submitVote = async () => {
+            if (!selectedVoteId) return alert("Seçim yapmalısın!");
+            playSound('doom');
+            
+            // Oyu veritabanına işle
+            // Basitlik için: Her oyuncunun "votesReceived" değerini artırabiliriz
+            // Ama gerçek zamanlı hesaplama zor. 
+            // Admin Kararı: Admin manuel olarak listeden seçip "Öldür" desin.
+            // Oylama ekranında Admin'e özel yetki verelim.
+            
+            if (myData.isHost) {
+                // Admin seçtiği kişiyi eler
+                const victimRef = doc(db, "rooms", myRoomId, "players", selectedVoteId);
+                const victimSnap = await getDoc(victimRef);
+                const victimName = victimSnap.data().name;
+
+                await updateDoc(victimRef, { isAlive: false });
+                await updateDoc(doc(db, "rooms", myRoomId), { 
+                    status: 'RESULT',
+                    lastEliminatedName: victimName
+                });
+            } else {
+                alert("Oyunuzu sisteme gönderdiniz. (Simülasyon: Son kararı Admin oylara bakarak verir)");
+                // Gerçek bir oylama sistemi için subcollection gerekir, bu kod admin-driven (admin yönetimli) oldu.
+            }
+        };
+        
+        window.resetGame = async () => {
+            if(myData.isHost) {
+                 await updateDoc(doc(db, "rooms", myRoomId), { status: 'LOBBY' });
+            }
+        };
+
+        // --- YARDIMCI FONKSİYONLAR ---
+        
+        window.selectMode = (mode) => {
+            document.querySelectorAll('.mode-option').forEach(el => el.classList.remove('active'));
+            document.getElementById('mode-' + mode).classList.add('active');
+        };
+
+        window.flipCard = () => {
+            // Sadece tıklanınca ses çalsın
+            if (!document.getElementById('role-card').classList.contains('flipped')) {
+                 if(!isMuted && audioCtx) {
+                     const osc = audioCtx.createOscillator();
+                     const gain = audioCtx.createGain();
+                     osc.frequency.value = 200;
+                     gain.gain.value = 0.05;
+                     osc.connect(gain); gain.connect(audioCtx.destination);
+                     osc.start(); osc.stop(audioCtx.currentTime + 0.1);
+                 }
+            }
+            document.getElementById('role-card').classList.toggle('flipped');
+        };
+
+        function setupMyCard(room) {
+            const cardBack = document.getElementById('card-back-content');
+            cardBack.className = "card-face card-back";
+            
+            // Partnerleri bul (Vampirler birbirini görür)
+            // Bunun için client-side'da tüm vampirleri çekmemiz lazım (Güvenlik açığı ama basit oyun için ok)
+            // Bu örnekte partner ismini boş geçiyoruz, karmaşıklaşmaması için.
+            
+            const role = myData.role;
+            const isVampire = role === 'vampire';
+            
+            let flavor = "";
+            let title = isVampire ? "VAMPİR" : "KÖYLÜ";
+
+            if (room.mode === 'story') {
+                flavor = isVampire 
+                    ? `Bu cinayeti işleyen sensin. ${room.townName} halkı seni arıyor. Gizlen.` 
+                    : `Katil aramızda. İpuçlarını takip et ve onu bul.`;
+            } else {
+                flavor = isVampire 
+                    ? "Gece senin. Kimliğini gizle." 
+                    : "Hayatta kal ve vampirleri bul.";
+            }
+
+            if(isVampire) {
+                cardBack.classList.add('role-vampire');
+                cardBack.innerHTML = `
+                    <div style="font-size:3rem;">🧛‍♂️</div>
+                    <h3 style="color:var(--blood-red); font-family:'Creepster'; margin:0; font-size:2.5rem;">${title}</h3>
+                    <p style="color:#aaa; font-size:0.9rem; text-align:center;">${flavor}</p>
+                `;
+            } else {
+                cardBack.classList.add('role-villager');
+                cardBack.innerHTML = `
+                    <div style="font-size:3rem;">🧑‍🌾</div>
+                    <h3 style="color:var(--toxic-green); font-family:'Creepster'; margin:0; font-size:2.5rem;">${title}</h3>
+                    <p style="color:#aaa; font-size:0.9rem; text-align:center;">${flavor}</p>
+                `;
+            }
+        }
+
+        function generateComplexStory(vampCount) {
+            // Basit hikaye üreteci
+            const towns = ["Kuzgun Vadisi", "Sislitaş", "Ölügöl", "Gölge Sırtı"];
+            const t = towns[Math.floor(Math.random() * towns.length)];
+            
+            const stories = [
+                `Dün gece ${t} meydanında korkunç bir çığlık duyuldu. Kasabanın rahibi ölü bulundu. Boynunda garip izler var.`,
+                `${t} sisler altında. Kütüphaneci Bayan Thorne kayıp. Ofisinde kanlı bir mühür bulundu.`,
+                `Fırtınalı bir gecede, ${t} yetimhanesinin kapısında bir ceset bulundu. Kimse yüzünü tanıyamıyor.`
+            ];
+            
+            return {
+                townName: t,
+                title: t.toUpperCase() + " VAKASI",
+                text: stories[Math.floor(Math.random() * stories.length)] + ` <br><br><b>Aramızda ${vampCount} katil var.</b>`
+            };
+        }
+
+    </script>
+
+    <style>
+        /* CSS TASARIMININ AYNISI (Özetlendi) */
+        :root { --bg-dark: #050505; --blood-red: #ff0f0f; --toxic-green: #39ff14; --text-main: #f0f0f0; --glass-bg: rgba(20, 0, 0, 0.6); }
+        body { background-color: var(--bg-dark); background-image: linear-gradient(0deg, #000, #1a0505); color: var(--text-main); font-family: 'Rajdhani', sans-serif; margin: 0; height: 100dvh; display: flex; justify-content: center; align-items: center; overflow: hidden; user-select: none; }
+        .container { width: 100%; max-width: 600px; padding: 20px; display: flex; flex-direction: column; align-items: center; z-index: 2; }
+        .screen { display: none; width: 100%; flex-direction: column; align-items: center; animation: fadeIn 0.5s; }
+        .screen.active { display: flex; }
+        @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+        
+        /* Fontlar ve Başlıklar */
+        h1 { font-family: 'Creepster'; font-size: 3.5rem; color: var(--blood-red); margin: 0; line-height: 1; text-shadow: 0 0 10px #4a0000; }
+        .title-accent { color: #fff; }
+        .subtitle { font-family: 'Rajdhani'; letter-spacing: 5px; color: #888; border-bottom: 2px solid var(--blood-red); margin-bottom: 20px; }
+        
+        /* Kartlar ve Giriş */
+        .login-card { background: var(--glass-bg); padding: 25px; border-radius: 15px; width: 100%; border: 1px solid rgba(255,50,50,0.3); display: flex; flex-direction: column; gap: 15px; }
+        input { background: rgba(0,0,0,0.3); border: 1px solid #444; color: white; padding: 15px; border-radius: 8px; text-align: center; width: 100%; font-size: 1.1rem; }
+        .btn { background: #f0f0f0; color: #000; padding: 15px; border: none; font-weight: bold; border-radius: 5px; width: 100%; cursor: pointer; text-transform: uppercase; font-family: 'Rajdhani'; font-size: 1.1rem; transition: 0.2s; }
+        .btn-primary { background: var(--blood-red); box-shadow: 0 0 15px rgba(255,0,0,0.4); }
+        .btn-primary:hover { transform: scale(1.02); }
+        .btn-secondary { background: transparent; border: 1px solid #555; color: #aaa; margin-top: 5px; }
+        
+        /* Oyun İçi */
+        .player-list { list-style: none; padding: 0; width: 100%; max-height: 40vh; overflow-y: auto; }
+        .player-item { background: rgba(255,255,255,0.05); padding: 10px; margin: 5px 0; border-left: 3px solid #555; display: flex; justify-content: space-between; }
+        .vote-item { cursor: pointer; } 
+        
+        /* Mod Seçimi */
+        .mode-selector { display: flex; background: rgba(0,0,0,0.5); border-radius: 8px; padding: 5px; }
+        .mode-option { flex: 1; text-align: center; padding: 10px; cursor: pointer; color: #666; border-radius: 5px; }
+        .mode-option.active { background: var(--blood-red); color: #000; }
+
+        /* Kart Çevirme */
+        .card-container { perspective: 1000px; width: 260px; height: 380px; margin: 20px auto; cursor: pointer; }
+        .card { width: 100%; height: 100%; transform-style: preserve-3d; transition: transform 0.6s; position: relative; }
+        .card.flipped { transform: rotateY(180deg); }
+        .card-face { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; background: #111; border: 1px solid #444; border-radius: 15px; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+        .card-back { transform: rotateY(180deg); }
+        .role-vampire { border: 2px solid var(--blood-red); box-shadow: 0 0 20px var(--blood-red); }
+        .role-villager { border: 2px solid var(--toxic-green); box-shadow: 0 0 20px var(--toxic-green); }
+
+        /* Efektler */
+        .blood-rain { position: absolute; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:0; }
+        .pulse-overlay { position: absolute; top:0; left:0; width:100%; height:100%; box-shadow: inset 0 0 100px rgba(0,0,0,0.9); animation: heartbeat 4s infinite; pointer-events:none; z-index:0; }
+        @keyframes heartbeat { 0%,100% { box-shadow: inset 0 0 50px rgba(50,0,0,0.2); } 50% { box-shadow: inset 0 0 150px rgba(255,0,0,0.4); } }
+        
+        .controls-wrapper { position: absolute; top: 15px; right: 15px; display: flex; gap: 10px; z-index: 100; }
+        .control-btn { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #fff; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; display: flex; justify-content: center; align-items: center; }
+        .sound-on { color: var(--toxic-green); border-color: var(--toxic-green); }
+        
+        .story-container { background: rgba(0,0,0,0.9); border: 1px solid var(--blood-red); padding: 20px; border-radius: 10px; max-height: 60vh; overflow-y: auto; text-align: left; margin-bottom: 20px; }
+        .story-title { color: var(--blood-red); font-family: 'Creepster'; font-size: 2rem; text-align: center; margin-bottom: 10px; }
+        .story-text { font-family: 'Merriweather', serif; line-height: 1.6; color: #ccc; }
+    </style>
+</body>
+</html>
