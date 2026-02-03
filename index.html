@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Vampir Köylü - Vampirleri bul oyunu kazan!!</title>
+    <title>Vampir Köylü - 2026 Online</title>
     <!-- Fontlar -->
     <link href="https://fonts.googleapis.com/css2?family=Creepster&family=Rajdhani:wght@400;600;700&family=Merriweather:ital,wght@0,300;0,700;1,300&display=swap" rel="stylesheet">
     
     <style>
-        /* --- CSS TASARIMI (GÜNCELLENDİ) --- */
+        /* --- CSS TASARIMI --- */
         :root { --bg-dark: #050505; --blood-red: #ff0f0f; --toxic-green: #39ff14; --text-main: #f0f0f0; --glass-bg: rgba(20, 0, 0, 0.85); }
         * { box-sizing: border-box; }
         body { 
@@ -87,7 +87,7 @@
         <!-- 1. GİRİŞ EKRANI -->
         <div id="screen-login" class="screen active">
             <h1>VAMPİR KÖYLÜ</h1>
-            <div class="subtitle"> Vampirleri bul oyunu kazan!!</div>
+            <div class="subtitle">Vampir yada Vampirleri bul oyunu kazan!!</div>
             
             <div class="login-card">
                 <div class="mode-selector">
@@ -131,6 +131,7 @@
                 <div id="story-body" style="font-family: 'Merriweather', serif; line-height: 1.6; color: #ccc;">...</div>
             </div>
             <button class="btn btn-primary admin-only" style="display:none;" onclick="proceedToCards()">ROLLERİ DAĞIT</button>
+            <p class="waiting-msg" style="margin-top:20px; color:#666;">Admin bekleniyor...</p>
         </div>
 
         <!-- 4. ROL KARTI -->
@@ -158,6 +159,7 @@
             <p style="color: #aaa; text-align: center;">Vampirleri bulmak için tartışın.</p>
             
             <button class="btn btn-secondary admin-only" style="display:none;" onclick="skipTimer()">OYLAMAYI BAŞLAT (SÜREYİ ATLA)</button>
+            <p class="waiting-msg" style="margin-top:20px; color:#666;">Admin bekleniyor...</p>
         </div>
 
         <!-- 6. OYLAMA (5 DK) -->
@@ -215,6 +217,7 @@
         let myRoomId = null;
         let myData = null;
         let currentRoomData = null;
+        let allPlayers = []; // Tüm oyuncuları burada tutacağız
         let audioCtx = null;
         let isMuted = true;
         let timerInterval = null;
@@ -267,7 +270,7 @@
                 await setDoc(doc(db, "rooms", roomCode), {
                     hostId: myUserId, status: 'LOBBY', mode: mode, vampireCount: 2,
                     createdAt: serverTimestamp(), story: null, townName: "Kasaba",
-                    phaseEndTime: 0 // Sayaç için
+                    phaseEndTime: 0 
                 });
 
                 await setDoc(doc(db, "rooms", roomCode, "players", myUserId), {
@@ -307,8 +310,8 @@
             onSnapshot(doc(db, "rooms", roomId), (docSnap) => {
                 if (!docSnap.exists()) return alert("Oda kapatıldı.");
                 currentRoomData = docSnap.data();
-                updateUI(currentRoomData);
-                updateTimer(); // Sayaç verisi geldikçe güncelle
+                if(myData) updateUI(currentRoomData); // Sadece veri varsa güncelle
+                updateTimer(); 
             });
 
             // Oyuncu Listesi
@@ -318,10 +321,11 @@
                 if(list) list.innerHTML = "";
                 if(voteList) voteList.innerHTML = "";
                 
-                let players = [];
+                allPlayers = []; // Listeyi sıfırla
+                
                 snapshot.forEach(d => {
                     const p = d.data(); p.id = d.id;
-                    players.push(p);
+                    allPlayers.push(p); // Global listeye ekle
                     if (p.id === myUserId) myData = p;
 
                     // Lobi Listesi
@@ -334,9 +338,12 @@
                     }
                 });
 
+                // Veri geldikten sonra UI'ı tazele (Admin kontrolü için kritik)
+                if(currentRoomData) updateUI(currentRoomData);
+
                 // Oylama Listesi (Sadece hayattakiler)
                 if(voteList) {
-                    const alivePlayers = players.filter(p => p.isAlive && p.id !== myUserId); 
+                    const alivePlayers = allPlayers.filter(p => p.isAlive && p.id !== myUserId); 
                     if(alivePlayers.length === 0) {
                         voteList.innerHTML = "<p style='text-align:center; color:#666;'>Oy verecek kimse kalmadı.</p>";
                     } else {
@@ -356,9 +363,6 @@
         function updateTimer() {
             if (!currentRoomData || !currentRoomData.phaseEndTime) return;
             
-            // Eğer sayaç zaten çalışıyorsa temizlemeye gerek yok, sadece hedefi güncellemiyoruz
-            // Ancak UI her saniye güncellenmeli.
-            
             if (timerInterval) clearInterval(timerInterval);
             
             timerInterval = setInterval(() => {
@@ -366,7 +370,6 @@
                 const diff = currentRoomData.phaseEndTime - now;
 
                 if (diff <= 0) {
-                    // Süre bitti
                     document.getElementById('timer-discuss').innerText = "00:00";
                     document.getElementById('timer-vote').innerText = "00:00";
                     clearInterval(timerInterval);
@@ -383,7 +386,7 @@
                 if(timerEl1) timerEl1.innerText = text;
                 if(timerEl2) timerEl2.innerText = text;
 
-                if (diff < 30000) { // Son 30sn kırmızı
+                if (diff < 30000) { 
                     if(timerEl1) timerEl1.classList.add('timer-urgent');
                     if(timerEl2) timerEl2.classList.add('timer-urgent');
                 } else {
@@ -409,8 +412,13 @@
                 document.getElementById('screen-lobby').classList.add('active');
                 document.getElementById('display-room-code').innerText = myRoomId;
                 document.getElementById('lobby-mode-display').innerText = room.mode === 'story' ? 'HİKAYE' : 'KLASİK';
-                if(isHost) document.getElementById('admin-controls').style.display = 'block';
-                else document.getElementById('admin-controls').style.display = 'none';
+                // Lobiye özel admin kontrolü (vampir sayısı da burada)
+                if(isHost) {
+                     document.getElementById('admin-controls').style.display = 'block';
+                     document.getElementById('vamp-count-display').innerText = room.vampireCount || 2;
+                } else {
+                     document.getElementById('admin-controls').style.display = 'none';
+                }
             }
             else if (room.status === 'STORY_INTRO') {
                 document.getElementById('screen-story-intro').classList.add('active');
@@ -441,6 +449,8 @@
             if (!myData.isHost) return;
             let count = (currentRoomData.vampireCount || 2) + delta;
             if (count < 1) count = 1; if (count > 4) count = 4;
+            // Ekranda hemen güncelle (kullanıcı hissetsin), sonra sunucuya yaz
+            document.getElementById('vamp-count-display').innerText = count; 
             await updateDoc(doc(db, "rooms", myRoomId), { vampireCount: count });
         };
 
@@ -454,7 +464,7 @@
             if (ids.length < 2) return alert("En az 2 oyuncu gerekli!");
 
             // Rolleri Dağıt
-            let vampCount = currentRoomData.vampireCount;
+            let vampCount = currentRoomData.vampireCount || 2;
             if (vampCount >= ids.length) vampCount = ids.length - 1;
             
             for (let i = ids.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [ids[i], ids[j]] = [ids[j], ids[i]]; }
@@ -508,9 +518,25 @@
             if (!myData || !myData.role) return;
             
             const isVampire = myData.role === 'vampire';
+            
+            let partnerText = "";
+            if (isVampire) {
+                // Diğer vampirleri bul (Kendi dışındakiler)
+                const partners = allPlayers
+                    .filter(p => p.role === 'vampire' && p.id !== myUserId)
+                    .map(p => p.name)
+                    .join(", ");
+                
+                if (partners.length > 0) {
+                    partnerText = `<div style="margin-top:10px; border-top:1px solid #333; padding-top:10px; width:90%; text-align:center;">ORTAĞIN: <br><span style="color:var(--blood-red); font-weight:bold;">${partners}</span></div>`;
+                } else {
+                    partnerText = `<div style="margin-top:10px; color:#666; font-size:0.8rem;">Tek başınasın.</div>`;
+                }
+            }
+
             if(isVampire) {
                 cardBack.classList.add('role-vampire');
-                cardBack.innerHTML = `<div style="font-size:3rem;">🧛‍♂️</div><h3 style="color:var(--blood-red); margin:0;">VAMPİR</h3><p style="color:#aaa; text-align:center;">Kimliğini gizle.</p>`;
+                cardBack.innerHTML = `<div style="font-size:3rem;">🧛‍♂️</div><h3 style="color:var(--blood-red); margin:0;">VAMPİR</h3><p style="color:#aaa; text-align:center;">Kimliğini gizle.</p>${partnerText}`;
             } else {
                 cardBack.classList.add('role-villager');
                 cardBack.innerHTML = `<div style="font-size:3rem;">🧑‍🌾</div><h3 style="color:var(--toxic-green); margin:0;">KÖYLÜ</h3><p style="color:#aaa; text-align:center;">Vampirleri bul.</p>`;
