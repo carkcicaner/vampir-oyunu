@@ -3,80 +3,150 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Vampir Köylü - 2026 Online</title>
-    <!-- Fontlar -->
-    <link href="https://fonts.googleapis.com/css2?family=Creepster&family=Rajdhani:wght@400;600;700&family=Merriweather:ital,wght@0,300;0,700;1,300&display=swap" rel="stylesheet">
+    <title>Vampir Köylü - Klasik Kasaba</title>
+    
+    <!-- Eski Çağ ve Klasik Fontlar -->
+    <link href="https://fonts.googleapis.com/css2?family=Creepster&family=Cinzel:wght@400;700;900&family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
     
     <style>
-        /* --- CSS TASARIMI (GÜNCELLENDİ) --- */
-        :root { --bg-dark: #050505; --blood-red: #ff0f0f; --toxic-green: #39ff14; --text-main: #f0f0f0; --glass-bg: rgba(20, 0, 0, 0.85); }
+        /* --- KLASİK GOTİK/KASABA TASARIMI --- */
+        :root { 
+            --bg-dark: #0f0a08; 
+            --blood-red: #8a0303; 
+            --dark-red: #3e0000;
+            --gold: #c5a059; 
+            --parchment: #e8dcc4; 
+            --wood: #2c1a12;
+            --glass-bg: rgba(20, 10, 5, 0.85); 
+            --glass-border: #4a3020;
+        }
+        
         * { box-sizing: border-box; }
+        
         body { 
             background-color: var(--bg-dark); 
-            background-image: linear-gradient(0deg, #000, #1a0505); 
-            color: var(--text-main); 
-            font-family: 'Rajdhani', sans-serif; 
+            background-image: radial-gradient(circle at center, #2a1610 0%, #0a0503 100%); 
+            color: var(--parchment); 
+            font-family: 'Cormorant Garamond', serif; 
             margin: 0; padding: 0;
             min-height: 100vh; height: 100dvh; 
             display: flex; justify-content: center; align-items: center; 
             overflow: hidden; user-select: none; 
         }
         
+        /* Sis/Toz Efekti */
+        body::before {
+            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background-image: url('https://www.transparenttextures.com/patterns/stardust.png');
+            opacity: 0.3; pointer-events: none; z-index: 0;
+        }
+        
         .container { width: 100%; max-width: 600px; padding: 20px; display: flex; flex-direction: column; align-items: center; z-index: 2; position: relative; height: 100%; overflow-y: auto; }
-        .screen { display: none; width: 100%; flex-direction: column; align-items: center; animation: fadeIn 0.5s; flex: 1; justify-content: center; }
+        .screen { display: none; width: 100%; flex-direction: column; align-items: center; animation: fadeIn 0.8s ease-in-out; flex: 1; justify-content: center; }
         .screen.active { display: flex; }
-        @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
         
-        h1 { font-family: 'Creepster'; font-size: 3rem; color: var(--blood-red); margin: 0; text-shadow: 0 0 10px #4a0000; text-align: center; line-height: 1.1; }
-        .subtitle { font-family: 'Rajdhani'; letter-spacing: 3px; color: #888; border-bottom: 2px solid var(--blood-red); margin-bottom: 20px; text-align: center; width: 100%; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         
-        .login-card { background: var(--glass-bg); padding: 25px; border-radius: 15px; width: 100%; border: 1px solid rgba(255,50,50,0.3); display: flex; flex-direction: column; gap: 15px; margin-top: 20px; }
-        input { background: rgba(0,0,0,0.3); border: 1px solid #444; color: white; padding: 15px; border-radius: 8px; text-align: center; width: 100%; font-size: 1.1rem; outline: none; }
-        input:focus { border-color: var(--blood-red); box-shadow: 0 0 10px rgba(255,0,0,0.2); }
+        /* Tipografi */
+        h1 { font-family: 'Creepster', cursive; font-size: 4.5rem; color: var(--blood-red); margin: 0; text-shadow: 0 0 15px var(--dark-red); text-align: center; line-height: 1; font-weight: normal; }
+        h2 { font-family: 'Cinzel', serif; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 10px; color: var(--gold); }
+        .subtitle { font-family: 'Cinzel', serif; letter-spacing: 4px; color: #a58a60; border-bottom: 1px solid var(--blood-red); padding-bottom: 10px; margin-bottom: 30px; text-align: center; width: 80%; font-size: 1rem; }
         
-        .btn { background: #f0f0f0; color: #000; padding: 15px; border: none; font-weight: bold; border-radius: 5px; width: 100%; cursor: pointer; text-transform: uppercase; font-family: 'Rajdhani'; font-size: 1.1rem; transition: 0.2s; margin-top: 10px; }
-        .btn-primary { background: var(--blood-red); box-shadow: 0 0 15px rgba(255,0,0,0.4); color: white; text-shadow: 0 1px 2px black; }
-        .btn-primary:active { transform: scale(0.98); }
-        .btn-secondary { background: transparent; border: 1px solid #555; color: #aaa; margin-top: 5px; }
+        /* Ahşap/Parşömen Kartlar */
+        .login-card { 
+            background: var(--glass-bg); padding: 30px; border-radius: 4px; width: 100%; 
+            border: 2px solid var(--glass-border); display: flex; flex-direction: column; gap: 15px; 
+            box-shadow: 0 15px 40px rgba(0,0,0,0.9), inset 0 0 40px rgba(0,0,0,0.5);
+        }
         
-        .player-list { list-style: none; padding: 0; width: 100%; max-height: 35vh; overflow-y: auto; margin: 10px 0; border: 1px solid #333; border-radius: 5px; }
-        .player-item { background: rgba(255,255,255,0.05); padding: 12px; margin: 2px 0; border-left: 3px solid #555; display: flex; justify-content: space-between; align-items: center; font-size: 1.1rem; }
-        .vote-item { cursor: pointer; transition: 0.2s; } 
-        .vote-item:hover { background: rgba(255,0,0,0.1); }
+        input { 
+            background: rgba(0,0,0,0.6); border: 1px solid var(--glass-border); color: var(--parchment); padding: 15px; 
+            border-radius: 2px; text-align: center; width: 100%; font-size: 1.4rem; outline: none; 
+            font-family: 'Cormorant Garamond', serif; transition: 0.3s;
+        }
+        input:focus { border-color: var(--gold); box-shadow: 0 0 10px rgba(197, 160, 89, 0.2); }
         
-        /* ÖLÜ OYUNCU STİLİ */
-        .player-dead { opacity: 0.5; text-decoration: line-through; color: #888; pointer-events: none; border-left-color: #333 !important; background: rgba(0,0,0,0.3); }
+        /* Klasik Butonlar */
+        .btn { 
+            background: linear-gradient(to bottom, #4a2a18, var(--wood)); color: var(--gold); 
+            padding: 15px; border: 1px solid var(--gold); font-weight: 700; width: 100%; 
+            cursor: pointer; text-transform: uppercase; font-family: 'Cinzel', serif; font-size: 1.1rem; 
+            transition: all 0.2s ease; margin-top: 10px; letter-spacing: 1px; border-radius: 2px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.6);
+        }
+        .btn-primary { background: linear-gradient(to bottom, #b31010, var(--blood-red)); color: var(--parchment); border-color: #ff4a4a; text-shadow: 1px 1px 2px black; }
+        .btn-primary:hover { background: linear-gradient(to bottom, #cc1414, #a30000); box-shadow: 0 0 15px var(--blood-red); transform: translateY(-1px); }
+        .btn-primary:active { transform: translateY(1px); }
+        .btn-secondary { background: rgba(0,0,0,0.4); border: 1px solid #555; color: #aaa; margin-top: 5px; }
+        .btn-secondary:hover { border-color: var(--gold); color: var(--gold); }
+        .btn-danger { background: #1a0000; color: var(--blood-red); border: 1px solid var(--blood-red); }
+        .btn-danger:hover { background: var(--blood-red); color: #fff; }
+        
+        /* Oyuncu Listesi (Eski Yazı Tarzı) */
+        .player-list { list-style: none; padding: 0; width: 100%; max-height: 40vh; overflow-y: auto; margin: 15px 0; }
+        .player-item { 
+            background: rgba(0,0,0,0.4); padding: 12px 15px; margin: 4px 0; 
+            border-left: 3px solid var(--glass-border); border-bottom: 1px solid #222;
+            display: flex; justify-content: space-between; align-items: center; 
+            font-size: 1.4rem; font-weight: 600; transition: 0.2s; font-family: 'Cormorant Garamond', serif;
+        }
+        .vote-item { cursor: pointer; } 
+        .vote-item:hover { background: rgba(138, 3, 3, 0.2); border-left-color: var(--blood-red); }
+        .vote-item.selected { border-left-color: var(--gold) !important; border-left-width: 6px; background: rgba(197, 160, 89, 0.1); color: var(--gold); }
+        .vote-item.my-vote { background: rgba(138, 3, 3, 0.3); border-left-color: var(--blood-red); }
+        
+        .player-dead { opacity: 0.4; text-decoration: line-through; color: #777; pointer-events: none; border-left-color: #111 !important; background: transparent; }
 
-        .mode-selector { display: flex; background: rgba(0,0,0,0.5); border-radius: 8px; padding: 5px; }
-        .mode-option { flex: 1; text-align: center; padding: 10px; cursor: pointer; color: #666; border-radius: 5px; transition: 0.3s; }
-        .mode-option.active { background: var(--blood-red); color: white; font-weight: bold; }
+        /* Mod Seçimi */
+        .mode-selector { display: flex; background: rgba(0,0,0,0.8); border: 1px solid var(--glass-border); padding: 4px; border-radius: 2px;}
+        .mode-option { flex: 1; text-align: center; padding: 10px; cursor: pointer; color: #888; transition: 0.3s; font-family: 'Cinzel', serif; font-size: 0.9rem; font-weight: 700;}
+        .mode-option.active { background: var(--blood-red); color: var(--parchment); }
 
-        .card-container { perspective: 1000px; width: 240px; height: 340px; margin: 20px auto; cursor: pointer; }
-        .card { width: 100%; height: 100%; transform-style: preserve-3d; transition: transform 0.6s; position: relative; }
+        /* 3D Tarot Kartı */
+        .card-container { perspective: 1000px; width: 240px; height: 380px; margin: 30px auto; cursor: pointer; }
+        .card { width: 100%; height: 100%; transform-style: preserve-3d; transition: transform 0.8s ease-in-out; position: relative; }
         .card.flipped { transform: rotateY(180deg); }
-        .card-face { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; background: #111; border: 1px solid #444; border-radius: 15px; display: flex; flex-direction: column; justify-content: center; align-items: center; }
-        .card-back { transform: rotateY(180deg); }
-        .role-vampire { border: 2px solid var(--blood-red); box-shadow: 0 0 30px var(--blood-red); }
-        .role-villager { border: 2px solid var(--toxic-green); box-shadow: 0 0 30px var(--toxic-green); }
+        .card-face { 
+            position: absolute; width: 100%; height: 100%; backface-visibility: hidden; background: #0a0a0a; 
+            border-radius: 8px; display: flex; flex-direction: column; justify-content: center; align-items: center; 
+            box-shadow: 0 15px 35px rgba(0,0,0,1); border: 2px solid var(--glass-border);
+        }
+        .card-front { 
+            background: linear-gradient(45deg, #1a0f0a, #0a0503); 
+            background-image: url('https://www.transparenttextures.com/patterns/black-scales.png'); 
+        }
+        .card-back { transform: rotateY(180deg); background: var(--bg-dark); }
+        .role-vampire { border-color: var(--blood-red); box-shadow: 0 0 40px rgba(138,3,3,0.5), inset 0 0 20px rgba(138,3,3,0.3); }
+        .role-villager { border-color: var(--gold); box-shadow: 0 0 40px rgba(197,160,89,0.3), inset 0 0 20px rgba(197,160,89,0.1); }
 
-        .blood-rain { position: absolute; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:0; }
-        .drop { position: absolute; background: rgba(200, 0, 0, 0.6); width: 2px; height: 15px; border-radius: 50%; animation: fall linear infinite; }
+        /* Sayaçlar */
+        .timer-display { font-size: 4.5rem; font-weight: 400; color: var(--gold); font-family: 'Cinzel', serif; text-shadow: 0 0 15px rgba(197,160,89,0.3); margin: 15px 0; }
+        .timer-urgent { color: var(--blood-red); text-shadow: 0 0 20px var(--blood-red); animation: heartbeatTimer 1s infinite; }
+        @keyframes heartbeatTimer { 0% { transform: scale(1); } 20% { transform: scale(1.05); } 40% { transform: scale(1); } }
+
+        /* Kontroller */
+        .controls-wrapper { position: absolute; top: 15px; right: 15px; display: flex; gap: 10px; z-index: 100; }
+        .control-btn { background: rgba(0,0,0,0.6); border: 1px solid var(--glass-border); color: var(--gold); width: 45px; height: 45px; border-radius: 4px; cursor: pointer; display: flex; justify-content: center; align-items: center; font-size: 1.2rem; transition: 0.2s;}
+        .control-btn:hover { background: var(--wood); border-color: var(--gold); }
+        
+        /* Soru Kutusu */
+        .question-box { background: rgba(0,0,0,0.6); border: 1px dashed var(--blood-red); padding: 15px; border-radius: 4px; min-height: 90px; display: flex; align-items: center; justify-content: center; text-align: center; width: 100%; margin: 15px 0; box-shadow: inset 0 0 20px rgba(138, 3, 3, 0.2); }
+        .fade-text { transition: opacity 0.5s ease-in-out; }
+        
+        /* Kan Yağmuru */
+        .blood-rain { position: absolute; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:0; overflow: hidden; }
+        .drop { position: absolute; background: linear-gradient(to bottom, rgba(138,3,3,0), rgba(138,3,3,0.8)); width: 2px; height: 30px; border-radius: 50%; animation: fall linear infinite; }
         @keyframes fall { to { transform: translateY(110vh); opacity: 0; } }
 
-        .controls-wrapper { position: absolute; top: 10px; right: 10px; display: flex; gap: 10px; z-index: 100; }
-        .control-btn { background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.2); color: #fff; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; display: flex; justify-content: center; align-items: center; font-size: 1.2rem; }
+        #error-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 9999; flex-direction: column; justify-content: center; align-items: center; text-align: center; color: var(--blood-red); padding: 20px; font-family: 'Cinzel'; }
         
-        .timer-display { font-size: 4rem; font-weight: bold; color: #fff; font-family: 'Rajdhani'; text-shadow: 0 0 20px rgba(255,255,255,0.2); margin: 10px 0; }
-        .timer-urgent { color: var(--blood-red); animation: pulse 1s infinite; }
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
-
-        #error-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 9999; flex-direction: column; justify-content: center; align-items: center; text-align: center; color: red; padding: 20px; }
+        .admin-only { display: none; }
     </style>
 </head>
 <body>
     <div id="error-overlay">
-        <h2>⚠️ BAĞLANTI HATASI ⚠️</h2>
-        <p id="error-msg">Sunucuya bağlanılamadı.</p>
+        <h2 style="font-size:3rem; margin-bottom:10px;">KARANLIK ÇÖKTÜ</h2>
+        <p id="error-msg" style="color:#aaa; font-family:'Cormorant Garamond'; font-size:1.5rem;">Kayıtlara ulaşılamıyor...</p>
     </div>
 
     <div class="blood-rain" id="bloodRain"></div>
@@ -89,8 +159,9 @@
     <div class="container">
         <!-- 1. GİRİŞ EKRANI -->
         <div id="screen-login" class="screen active">
-            <h1>VAMPİR KÖYLÜ</h1>
-            <div class="subtitle">ONLINE 2026</div>
+            <h1 style="font-size:5rem;">VAMPİR</h1>
+            <h1 style="color:var(--parchment); text-shadow:0 0 10px #fff; margin-top:-10px;">KÖYLÜ</h1>
+            <div class="subtitle" style="margin-top:10px;">KASABAYA HOŞ GELDİN</div>
             
             <div class="login-card">
                 <div class="mode-selector">
@@ -98,96 +169,117 @@
                     <div class="mode-option" id="mode-story" onclick="selectMode('story')">HİKAYE (ZOR)</div>
                 </div>
 
-                <input type="text" id="username" placeholder="Rumuzunuz" autocomplete="off">
-                <input type="number" id="roomCodeInput" placeholder="Oda Kodu (Varsa)" pattern="\d*">
+                <input type="text" id="username" placeholder="Adınız Nedir?" autocomplete="off">
+                <input type="number" id="roomCodeInput" placeholder="Kasaba Kodu (Varsa)" pattern="\d*">
                 
-                <button class="btn btn-primary" onclick="joinGame()">OYUNA KATIL</button>
-                <div style="text-align: center; color: #666; font-size: 0.8rem;">VEYA</div>
-                <button class="btn btn-secondary" onclick="createGame()">YENİ ODA KUR (ADMİN)</button>
+                <button class="btn btn-primary" onclick="joinGame()">KASABAYA GİRİŞ YAP</button>
+                <div style="text-align: center; color: #555; font-size: 1rem; font-weight:bold; font-family:'Cinzel';">- VEYA -</div>
+                <button class="btn btn-secondary" onclick="createGame()">YENİ KASABA KUR (ADMİN)</button>
             </div>
         </div>
 
         <!-- 2. LOBİ EKRANI -->
         <div id="screen-lobby" class="screen">
-            <h2>LOBİ</h2>
-            <div style="font-size: 3rem; color: var(--blood-red); font-weight:bold;" id="display-room-code">...</div>
-            <p>MOD: <span id="lobby-mode-display" style="color:#fff;">KLASİK</span></p>
+            <h2>MEYDAN</h2>
+            <div style="font-size: 5rem; color: var(--gold); font-family:'Cinzel'; font-weight:700; text-shadow: 0 0 20px rgba(197,160,89,0.3);" id="display-room-code">...</div>
+            <p style="color:#aaa; font-size:1.2rem; font-style:italic;">Seçilen Kurallar: <span id="lobby-mode-display" style="color:var(--blood-red); font-weight:bold; font-style:normal;">KLASİK</span></p>
 
             <ul class="player-list" id="lobby-list"></ul>
 
-            <div id="admin-controls" style="display: none; width: 100%; background: rgba(50,0,0,0.5); padding: 10px; border-radius: 10px;">
-                <p style="text-align: center; margin:0; font-size:0.9rem;">VAMPİR SAYISI</p>
-                <div style="display: flex; justify-content: center; gap: 20px; margin: 10px 0;">
-                    <button class="control-btn" onclick="changeVampCount(-1)">-</button>
-                    <span id="vamp-count-display" style="font-size: 2rem; color: var(--blood-red);">2</span>
-                    <button class="control-btn" onclick="changeVampCount(1)">+</button>
+            <div id="admin-controls" class="admin-only" style="width: 100%; background: rgba(0,0,0,0.4); padding: 15px; border-radius: 4px; border: 1px solid var(--glass-border); margin-top:10px;">
+                <p style="text-align: center; margin:0 0 10px 0; font-size:1.1rem; color:var(--gold); font-family:'Cinzel';">VAMPİR SAYISI</p>
+                <div style="display: flex; justify-content: center; align-items:center; gap: 25px;">
+                    <button class="control-btn" style="width:40px; height:40px;" onclick="changeVampCount(-1)">-</button>
+                    <span id="vamp-count-display" style="font-size: 3rem; font-family:'Cinzel'; color: var(--blood-red);">2</span>
+                    <button class="control-btn" style="width:40px; height:40px;" onclick="changeVampCount(1)">+</button>
                 </div>
-                <button class="btn btn-primary" onclick="launchGameSequence()">OYUNU BAŞLAT</button>
+                <button class="btn btn-primary" style="margin-top:15px;" onclick="launchGameSequence()">KASABAYI UYANDIR</button>
             </div>
-            <p id="waiting-text" style="color: #666; font-style: italic; margin-top: 20px;">Admin bekleniyor...</p>
+            <p class="waiting-msg" style="color: #666; font-style: italic; margin-top: 20px; font-size:1.2rem;">Yönetici bekleniyor...</p>
         </div>
 
         <!-- 3. HİKAYE GÖSTERİM -->
         <div id="screen-story-intro" class="screen" style="justify-content: flex-start;">
-            <div style="background: rgba(0,0,0,0.9); border: 1px solid var(--blood-red); padding: 20px; border-radius: 10px; max-height: 60vh; overflow-y: auto; width: 100%;">
-                <h2 id="story-heading" style="color: var(--blood-red); text-align: center;">VAKA</h2>
-                <div id="story-body" style="font-family: 'Merriweather', serif; line-height: 1.6; color: #ccc;">...</div>
+            <div style="background: rgba(15,5,0,0.9); border: 2px solid var(--blood-red); padding: 30px; border-radius: 4px; max-height: 65vh; overflow-y: auto; width: 100%; box-shadow: inset 0 0 50px rgba(0,0,0,0.9);">
+                <h2 id="story-heading" style="color: var(--blood-red); text-align: center; border-bottom:1px solid #333; padding-bottom:15px; font-size:2rem;">KARA GECE</h2>
+                <div id="story-body" style="font-size:1.2rem; line-height: 1.6; color: var(--parchment); margin-top:20px; text-align:justify;">...</div>
             </div>
-            <button class="btn btn-primary admin-only" style="display:none;" onclick="proceedToCards()">ROLLERİ DAĞIT</button>
-            <p class="waiting-msg" style="margin-top:20px; color:#666;">Admin bekleniyor...</p>
+            <button class="btn btn-primary admin-only" onclick="proceedToCards()" style="margin-top:20px;">KADERLERİ DAĞIT</button>
+            <p class="waiting-msg" style="margin-top:20px; color:#666; font-size:1.2rem;">Yönetici bekleniyor...</p>
         </div>
 
         <!-- 4. ROL KARTI -->
         <div id="screen-card" class="screen">
-            <h2>KİMLİĞİN</h2>
+            <h2>KADERİN</h2>
+            <p style="color:#888; font-size:1.2rem; margin-top:-10px;">Öğrenmek için karta dokun</p>
             <div class="card-container" onclick="flipCard()">
                 <div class="card" id="role-card">
                     <div class="card-face card-front">
-                        <span style="font-size: 5rem; color: #fff; opacity: 0.5;">?</span>
-                        <p style="position: absolute; bottom: 20px; color: var(--blood-red);">DOKUN</p>
+                        <span style="font-size: 6rem; color: #111; font-family:'Cinzel'; opacity:0.5;">?</span>
                     </div>
                     <div class="card-face card-back" id="card-back-content"></div>
                 </div>
             </div>
-            <button class="btn btn-secondary admin-only" style="display:none;" onclick="goToDiscussion()">TARTIŞMAYI BAŞLAT</button>
-            <p class="waiting-msg" style="margin-top:20px; color:#666;">Admin bekleniyor...</p>
+            <button class="btn btn-secondary admin-only" onclick="goToDiscussion()">GÜNÜ BAŞLAT</button>
+            <p class="waiting-msg" style="margin-top:20px; color:#666; font-size:1.2rem;">Diğerleri bekleniyor...</p>
         </div>
 
-        <!-- 5. TARTIŞMA (10 DK) -->
+        <!-- 5. TARTIŞMA -->
         <div id="screen-discuss" class="screen">
-            <h2 style="color: var(--toxic-green);">TARTIŞMA</h2>
-            <p id="discussion-town-name" style="color: #888;">MEYDAN</p>
+            <h2 style="color: var(--gold); font-size:3rem; margin-bottom:0;">GÜNDÜZ</h2>
+            <p id="discussion-town-name" style="color: #a58a60; letter-spacing:3px; font-family:'Cinzel'; margin-top:5px;">KASABA MEYDANI</p>
             
-            <div id="timer-discuss" class="timer-display">10:00</div>
-            <p style="color: #aaa; text-align: center;">Vampirleri bulmak için tartışın.</p>
+            <div id="timer-discuss" class="timer-display" style="margin: 5px 0;">10:00</div>
             
-            <button class="btn btn-secondary admin-only" style="display:none;" onclick="skipTimer()">OYLAMAYI BAŞLAT (SÜREYİ ATLA)</button>
-            <p class="waiting-msg" style="margin-top:20px; color:#666;">Admin bekleniyor...</p>
-        </div>
-
-        <!-- 6. OYLAMA (5 DK) -->
-        <div id="screen-vote" class="screen">
-            <h1>İNFAZ</h1>
-            <p style="color: var(--blood-red);">ŞÜPHELİ VAMPİR KİM?</p>
-            <div id="timer-vote" class="timer-display" style="font-size: 2.5rem;">05:00</div>
-            
-            <ul class="player-list" id="vote-list">
-                <!-- Oyuncular buraya gelecek -->
-            </ul>
-            
-            <button class="btn btn-primary" id="vote-submit-btn" onclick="submitVote()">KARARI ONAYLA</button>
-            <p id="dead-msg" style="color: #666; display:none; margin-top:10px;">💀 ÖLÜLER OY KULLANAMAZ 💀</p>
-        </div>
-
-        <!-- 7. SONUÇ -->
-        <div id="screen-result" class="screen">
-            <div style="font-size: 5rem; margin-bottom: 20px;">⚖️</div>
-            <h1>SONUÇ</h1>
-            <div style="padding: 20px; border: 1px solid var(--blood-red); background: rgba(50,0,0,0.5); border-radius: 10px; width: 100%; text-align: center;">
-                <p id="eliminated-name" style="font-size: 1.5rem; font-weight: bold; margin: 0; color: #fff;">...</p>
+            <!-- Soru Havuzu Kutusu -->
+            <div class="question-box">
+                <p id="random-question-text" class="fade-text" style="font-size: 1.3rem; font-style: italic; color: var(--parchment); margin: 0;">Sessizlik...</p>
             </div>
-            <button class="btn btn-secondary admin-only" style="display:none; margin-top:20px;" onclick="startNextRound()">YENİ TUR (TARTIŞMA)</button>
-            <p class="waiting-msg" style="margin-top:20px; color:#666;">Admin bekleniyor...</p>
+            <button class="btn btn-secondary" style="border-color:var(--gold); color:var(--gold);" onclick="showRandomQuestion()">BAŞKA SORU ÖNER</button>
+
+            <p style="color: #aaa; text-align: center; max-width:80%; font-size:1.1rem; margin-top:20px;">Vampirleri bulmak için konuşun. Kimseye güvenmeyin.</p>
+            
+            <button class="btn btn-secondary admin-only" style="margin-top:20px;" onclick="skipTimer()">SÜREYİ ATLA VE OYLAMAYA GEÇ</button>
+            <p class="waiting-msg" style="margin-top:20px; color:#666; font-size:1.2rem;">Güneşin batması bekleniyor...</p>
+        </div>
+
+        <!-- 6. OYLAMA VE SAVUNMA -->
+        <div id="screen-vote" class="screen">
+            <h1 id="vote-title" style="font-size: 3.5rem; margin-bottom:5px;">İNFAZ</h1>
+            <p id="vote-subtitle" style="color: var(--blood-red); font-weight:bold; letter-spacing:2px; margin-bottom:0; font-family:'Cinzel'; font-size:1.2rem;">KİMİ SUÇLUYORSUN?</p>
+            <div id="timer-vote" class="timer-display" style="font-size: 3rem; margin-top:5px; margin-bottom:0;">05:00</div>
+            
+            <ul class="player-list" id="vote-list"></ul>
+            
+            <button class="btn btn-primary" id="vote-submit-btn" onclick="submitVote()">OYUMU KULLAN / DEĞİŞTİR</button>
+            
+            <p id="dead-msg" style="color: #555; display:none; margin-top:10px; font-weight:bold; font-style:italic; font-size:1.2rem;">Ruhlar oy kullanamaz...</p>
+            
+            <div class="admin-only" style="width:100%; border-top:1px solid #333; padding-top:15px; margin-top:15px;">
+                <button class="btn btn-secondary" id="btn-start-defense" style="border-color:var(--gold); color:var(--gold);" onclick="startDefense()">🛡️ SAVUNMA İÇİN SÜRE VER (2 DK)</button>
+                <button class="btn btn-danger" id="vote-end-btn" onclick="endVoting()">⚖️ KARARI VER VE İNFAZ ET</button>
+            </div>
+        </div>
+
+        <!-- 7. SONUÇ (BİRİ ELENDİ VEYA EŞİTLİK) -->
+        <div id="screen-result" class="screen">
+            <div id="result-icon" style="font-size: 6rem; margin-bottom: 10px; text-shadow:0 0 30px #000;">⚖️</div>
+            <h1 id="result-title" style="font-size:3rem; color:var(--gold);">KARAR</h1>
+            <div style="padding: 30px 20px; border: 1px solid var(--glass-border); background: rgba(0,0,0,0.5); border-radius: 4px; width: 100%; text-align: center; margin: 20px 0;">
+                <p id="eliminated-name" style="font-size: 2.5rem; font-family:'Cinzel'; font-weight: 700; margin: 0; color: var(--blood-red);">...</p>
+                <div style="width:60px; height:1px; background:var(--gold); margin:15px auto;"></div>
+                <p id="eliminated-role" style="font-size: 1.4rem; margin: 0; color: #ccc; font-style:italic;">...</p>
+            </div>
+            <button class="btn btn-secondary admin-only" onclick="startNextRound()">YENİ GÜNE UYAN</button>
+            <p class="waiting-msg" style="margin-top:20px; color:#666; font-size:1.2rem;">Yönetici bekleniyor...</p>
+        </div>
+
+        <!-- 8. OYUN BİTTİ EKRANI -->
+        <div id="screen-gameover" class="screen">
+            <h1 id="winner-title" style="font-size: 4rem; line-height:1.2;">...</h1>
+            <p id="winner-desc" style="font-size: 1.5rem; color: #ccc; text-align:center; margin: 20px 0 40px 0; font-style:italic;">...</p>
+            <button class="btn btn-primary admin-only" onclick="resetGame()">YENİ KASABA KUR</button>
+            <p class="waiting-msg" style="margin-top:20px; color:#666; font-size:1.2rem;">Yönetici bekleniyor...</p>
         </div>
     </div>
 
@@ -197,7 +289,6 @@
         import { getFirestore, collection, doc, setDoc, updateDoc, onSnapshot, getDoc, serverTimestamp, getDocs } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
 
-        // --- FIREBASE AYARLARI ---
         const firebaseConfig = {
             apiKey: "AIzaSyAu-9xnaZRgcYj58gX3Yrfbj4NqvPI4B5Q",
             authDomain: "vampirkoyluv3.firebaseapp.com",
@@ -216,15 +307,97 @@
             document.getElementById('error-overlay').style.display = 'flex';
         }
 
-        // Global Değişkenler
         let myUserId = null;
         let myRoomId = null;
         let myData = null;
         let currentRoomData = null;
-        let allPlayers = []; // Tüm oyuncuları burada tutacağız
+        let allPlayers = []; 
         let audioCtx = null;
         let isMuted = true;
         let timerInterval = null;
+        let selectedVoteId = null; 
+        let questionInterval = null;
+
+        // Soru Havuzu (Yan Yana Oynanışa Özel Psikolojik Sorular)
+        const interrogationQuestions = [
+            "Gözlerime bakıp yalan söylemeden 'Ben vampir değilim' diyebilir misin?",
+            "Neden son 5 dakikadır göz temasından özellikle kaçınıyorsun?",
+            "Az önce X suçlandığında yüzünde anlık bir rahatlama gördüm, sebebi neydi?",
+            "Şu an masada elleri en çok oynayan/titreyen kişi sensin, neden bu kadar gerginsin?",
+            "Neden sürekli konuşmayı başka bir yöne, özellikle başka birinin üzerine çekmeye çalışıyorsun?",
+            "Sessiz kalıp köşende bizim birbirimizi yememizi mi izliyorsun?",
+            "Siz ikiniz neden sürekli birbirinizin sözünü destekliyorsunuz? Yoksa gece ortak mısınız?",
+            "Eğer masumsan, masadaki en büyük tehlike sence kim ve neden?",
+            "Savunman çok ezberlenmiş gibi duruyor, bu senaryoyu oyundan önce mi hazırladın?",
+            "Neden az önce tam cevap verecekken yutkunup durakladın?",
+            "Bacaklarını bu kadar hızlı sallamanın sebebi masumiyetin mi yoksa yakalanma korkun mu?",
+            "Eğer vampir olsaydın, ilk gece kimi avlardın? Şu an o kişi yaşıyor mu?",
+            "Bizi ikna etmeye çalışırken ses tonun neden aniden bu kadar yükseldi?",
+            "Sana yöneltilen soruya neden soruyla karşılık verdin? Zaman mı kazanıyorsun?",
+            "X'i bu kadar hararetli savunman, onun vampir ortağın olmasından mı kaynaklı?",
+            "Masada en güvendiğin kişi kim? Neden konuşurken sadece ona bakarak onay arıyorsun?",
+            "Neden gülmemen gereken gergin bir anda gülümsedin? Bizimle oyun mu oynuyorsun?",
+            "Dikkatleri dağıtmak için çok fazla alakasız detay veriyorsun, asıl sakladığın şey ne?",
+            "Geçen turda X'e şüpheyle bakıyordun, şimdi neden birden onu savunmaya başladın?",
+            "Kollarını bağlayıp arkana yaslanman kendini bize kapattığını gösteriyor, neyden korkuyorsun?",
+            "Aramızda en masum görüneni seçip onu kalkan olarak mı kullanıyorsun?",
+            "Sana yöneltilen şüpheleri hemen başkasına yansıtıyorsun, bu bir panik tepkisi mi?",
+            "Vampirler genellikle kurbanlarını överler. Sen kimi bu kadar çok övüyorsun?",
+            "Masadaki gerginliği azaltmaya çalışıyorsun. Yoksa vampirlerin hedef olmasını mı engelliyorsun?",
+            "Gözlerin neden sürekli masanın aynı köşesine/kişisine kayıyor? Sessiz bir anlaşmanız mı var?",
+            "Sence bu masada kim 'rolünü' en iyi yapıyor?",
+            "Eğer bu tur seni asarsak, senden sonra kime dikkat etmeliyiz? Bize bir isim ver.",
+            "'Ben köylüyüm' derken neden sesin titredi?",
+            "Neden doğrudan kimseyi suçlamıyorsun? Sorumluluk almaktan mı kaçıyorsun?",
+            "Oylama yaklaştıkça duruşun değişti, neden geriye yaslanıp savunmaya geçtin?",
+            "X senin hakkında bir teori ortaya attığında neden aşırı tepki verdin?",
+            "Gerçekten masumsan, neden bizimle mantıklı bir ipucu paylaşmak yerine sadece kendini savunuyorsun?",
+            "Yüzündeki o şaşırmış ifade çok yapmacık duruyor, sence de öyle değil mi?",
+            "Konuşurken neden sürekli yüzüne veya saçına dokunuyorsun? Stresini mi atıyorsun?",
+            "Siz ikiniz oyuna başladığımızdan beri neden hiç birbirinizden şüphelenmediniz?",
+            "Neden aniden masadaki en sessiz kişiye saldırmaya karar verdin? Kolay hedef mi arıyorsun?",
+            "Bugün kimin asılmasını istersin? İsim vermekten korkma, eğer masumsan.",
+            "Vampir olduğunu öğrenseydik şu an verdiğin tepkilerden farklı ne yapardın? Hiçbir şey, değil mi?",
+            "Az önce dudaklarını ısırdın, bu genellikle yalan söyleyenlerin yaptığı bir harekettir. Ne gizliyorsun?",
+            "Çok fazla 'Ben yapmadım', 'Ben masumum' diyorsun. Psikolojide buna aşırı telafi denir.",
+            "Neden olayları mantıklı analiz etmek yerine sadece insanların açıklarını arıyorsun?",
+            "Gece birisi öldüğünde verdiğin tepkiyi hiç inandırıcı bulmadım. Sence de abartılı değil miydi?",
+            "Biri sana suçlama yönelttiğinde neden hemen gülerek/alay ederek konuyu kapatmaya çalışıyorsun?",
+            "Gözlerini benden kaçırma. Sence bu kasabanın sonunu kim getirecek?",
+            "Şu anki rahatlığın, gece birini yemiş olmanın verdiği bir doygunluk olabilir mi?",
+            "'Bilmiyorum' demek bazen en güvenli yalandır. Neden hiçbir şey hakkında kesin bir fikrin yok?",
+            "Neden masada kaos çıktığında arkanı yaslanıp sessizce izlemeyi tercih ettin?",
+            "Bu kadar çok konuşarak, sessiz kalan vampir ortağını mı kamufle ediyorsun?",
+            "Sence aramızdaki en tehlikeli oyuncu kim? Ve neden hala hayatta?",
+            "Dudakların kuruduğu için sürekli yutkunuyorsun. Bu yalan söylerken olan bir strestir. Ne saklıyorsun?",
+            "Sesinin tonu az önceki tura göre neden düştü? Enerjin mi bitti, yoksa yalan bulmakta mı zorlanıyorsun?",
+            "Eğer vampir olsan, masada ilk kimi kandırmaya çalışırdın? Ve şu an tam olarak bunu kime yapıyorsun?",
+            "Sürekli 'mantıklı düşünün' diyorsun ama kendi teorilerin tamamen altı boş. Neden?",
+            "Neden herkesin seni suçladığını düşünerek sürekli bir kurban psikolojisine giriyorsun?",
+            "Çaprazındaki kişiyle az önce göz göze geldiniz ve hemen kaçırdınız. O senin ortağın mı?",
+            "Şu an en ufak bir suçlamada bile tetikte bekliyorsun. Masum bir insan bu kadar saldırgan olmaz.",
+            "Nefes alışverişin hızlandı. Yalanların ortaya çıkmak üzere diye mi bu panik?",
+            "Eğer masumsan, masada kimin kesinlikle köylü olduğuna kefil olabilirsin?",
+            "Sürekli kendi 'dürüstlüğünden' bahsediyorsun. Gerçekten dürüst insanlar bunu kanıtlama ihtiyacı duymaz.",
+            "X'in üzerine gidilirken konuyu değiştiren sendin. Neden onu kurtarmaya çalıştın?",
+            "Sence vampirler şu an aramızda sessiz mi kalıyor yoksa çok mu konuşuyor? Sen hangi taraftasın?",
+            "Omuzlarını neden bu kadar kastın? Kendini koruma içgüdüsü mü bu?",
+            "Gece olduğunda bu masada en rahat uyuyan kişi sence kim? Belki de uyanık kalanlardan birisidir.",
+            "Gerçek bir köylü bu kadar çabuk pes etmez, neden 'istiyorsanız beni asın' diyerek duygu sömürüsü yapıyorsun?",
+            "Masadaki gerilimi azaltmak için yaptığın yersiz şakalar, suçluluk duygunu örtbas etmek için mi?",
+            "Kimliğini saklarken adrenalin mi salgılıyorsun? Hareketlerin çok ani ve kesik kesik."
+        ];
+
+        window.showRandomQuestion = () => {
+            const qText = document.getElementById('random-question-text');
+            if(!qText) return;
+            qText.style.opacity = 0;
+            setTimeout(() => {
+                const randomIndex = Math.floor(Math.random() * interrogationQuestions.length);
+                qText.innerText = `"${interrogationQuestions[randomIndex]}"`;
+                qText.style.opacity = 1;
+            }, 500);
+        };
 
         // --- SES FONKSİYONLARI ---
         function initAudio() {
@@ -238,9 +411,18 @@
             osc.connect(gain); gain.connect(audioCtx.destination);
             const now = audioCtx.currentTime;
             if (type === 'click') {
-                osc.type = 'triangle'; osc.frequency.setValueAtTime(800, now);
+                osc.type = 'triangle'; osc.frequency.setValueAtTime(400, now);
                 gain.gain.setValueAtTime(0.1, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
                 osc.start(now); osc.stop(now + 0.1);
+            } else if (type === 'doom') {
+                osc.type = 'sawtooth'; osc.frequency.setValueAtTime(80, now);
+                gain.gain.setValueAtTime(0.3, now); gain.gain.exponentialRampToValueAtTime(0.001, now + 2);
+                osc.start(now); osc.stop(now + 2);
+            } else if (type === 'win') {
+                osc.type = 'sine'; osc.frequency.setValueAtTime(440, now);
+                osc.frequency.setValueAtTime(554, now + 0.3); osc.frequency.setValueAtTime(659, now + 0.6);
+                gain.gain.setValueAtTime(0.2, now); gain.gain.linearRampToValueAtTime(0, now + 2);
+                osc.start(now); osc.stop(now + 2);
             }
         }
         window.toggleSound = () => {
@@ -254,17 +436,18 @@
             else if (document.exitFullscreen) document.exitFullscreen();
         };
 
-        // --- OYUN FONKSİYONLARI ---
+        // --- OYUN KURULUMU ---
         window.selectMode = (mode) => {
             document.querySelectorAll('.mode-option').forEach(el => el.classList.remove('active'));
             document.getElementById('mode-' + mode).classList.add('active');
+            playSound('click');
         };
 
         window.createGame = async () => {
             playSound('click');
             const username = document.getElementById('username').value.trim();
             const mode = document.querySelector('.mode-option.active').id === 'mode-story' ? 'story' : 'normal';
-            if (!username) return alert("İsim giriniz!");
+            if (!username) return alert("Adınızı girmelisiniz!");
 
             const roomCode = Math.floor(1000 + Math.random() * 9000).toString();
             try {
@@ -273,12 +456,12 @@
 
                 await setDoc(doc(db, "rooms", roomCode), {
                     hostId: myUserId, status: 'LOBBY', mode: mode, vampireCount: 2,
-                    createdAt: serverTimestamp(), story: null, townName: "Kasaba",
-                    phaseEndTime: 0 
+                    createdAt: serverTimestamp(), story: null, townName: "Karanlık Vadi",
+                    phaseEndTime: 0, lastEliminatedName: null, lastEliminatedRole: null
                 });
 
                 await setDoc(doc(db, "rooms", roomCode, "players", myUserId), {
-                    name: username, isHost: true, role: null, isAlive: true, joinedAt: serverTimestamp()
+                    name: username, isHost: true, role: null, isAlive: true, joinedAt: serverTimestamp(), votedFor: null
                 });
 
                 myRoomId = roomCode;
@@ -290,97 +473,109 @@
             playSound('click');
             const username = document.getElementById('username').value.trim();
             const roomCode = document.getElementById('roomCodeInput').value.trim();
-            if (!username || !roomCode) return alert("Bilgileri giriniz!");
+            if (!username || !roomCode) return alert("Bilgiler eksik!");
 
             try {
                 const roomSnap = await getDoc(doc(db, "rooms", roomCode));
-                if (!roomSnap.exists()) return alert("Oda bulunamadı!");
+                if (!roomSnap.exists()) return alert("Kasaba bulunamadı!");
                 
                 const userCred = await signInAnonymously(auth);
                 myUserId = userCred.user.uid;
 
                 await setDoc(doc(db, "rooms", roomCode, "players", myUserId), {
-                    name: username, isHost: false, role: null, isAlive: true, joinedAt: serverTimestamp()
+                    name: username, isHost: false, role: null, isAlive: true, joinedAt: serverTimestamp(), votedFor: null
                 });
 
                 myRoomId = roomCode;
                 listenToRoom(roomCode);
-            } catch (error) { alert("Hata: " + error.message); }
+            } catch (error) { alert("Bağlantı Hatası: " + error.message); }
         };
 
-        // --- ODA DİNLEME VE UI GÜNCELLEME ---
+        // --- ODA DİNLEME VE UI ---
         function listenToRoom(roomId) {
-            // Oda verisi (Durum ve Sayaç)
             onSnapshot(doc(db, "rooms", roomId), (docSnap) => {
-                if (!docSnap.exists()) return alert("Oda kapatıldı.");
+                if (!docSnap.exists()) return alert("Kasaba dağıldı.");
                 currentRoomData = docSnap.data();
-                if(myData) updateUI(currentRoomData); // Sadece veri varsa güncelle
+                if(myData) updateUI(currentRoomData);
                 updateTimer(); 
             });
 
-            // Oyuncu Listesi
             onSnapshot(collection(db, "rooms", roomId, "players"), (snapshot) => {
                 const list = document.getElementById('lobby-list');
                 const voteList = document.getElementById('vote-list');
                 if(list) list.innerHTML = "";
                 if(voteList) voteList.innerHTML = "";
                 
-                allPlayers = []; // Listeyi sıfırla
+                allPlayers = []; 
+                const voteCounts = {};
                 
                 snapshot.forEach(d => {
                     const p = d.data(); p.id = d.id;
-                    allPlayers.push(p); // Global listeye ekle
+                    allPlayers.push(p); 
                     if (p.id === myUserId) myData = p;
+                    if (p.isAlive && p.votedFor) {
+                        voteCounts[p.votedFor] = (voteCounts[p.votedFor] || 0) + 1;
+                    }
+                });
 
-                    // Lobi Listesi
+                // Lobi Render
+                allPlayers.forEach(p => {
                     if(list) {
                         const li = document.createElement('li');
                         li.className = 'player-item';
-                        // Ölüleri işaretle
                         if (!p.isAlive) {
                             li.classList.add('player-dead');
-                            li.innerHTML = `<span>${p.name} 💀</span>`;
+                            li.innerHTML = `<span>${p.name}</span> <span>💀</span>`;
                         } else {
-                            li.innerHTML = `<span>${p.name} ${p.isHost ? '👑' : ''}</span>`;
+                            li.innerHTML = `<span>${p.name}</span> <span>${p.isHost ? '👑' : ''}</span>`;
                         }
-                        
-                        if (p.id === myUserId) li.style.borderColor = 'var(--toxic-green)';
+                        if (p.id === myUserId) li.style.borderColor = 'var(--gold)';
                         list.appendChild(li);
                     }
                 });
 
-                // Veri geldikten sonra UI'ı tazele
                 if(currentRoomData) updateUI(currentRoomData);
 
-                // Oylama Listesi (Ölüleri göster ama pasif yap)
+                // Oylama Render
                 if(voteList) {
-                    // Kendini hariç tut
-                    const targets = allPlayers.filter(p => p.id !== myUserId); 
-                    
-                    targets.forEach(p => {
-                        const li = document.createElement('li');
-                        li.className = 'player-item vote-item';
-                        
-                        if (!p.isAlive) {
-                            // Ölü oyuncu: Pasif, tıklanamaz, gri
-                            li.classList.add('player-dead');
-                            li.innerHTML = `<span>${p.name} 💀</span>`;
-                            // onclick eklemiyoruz
-                        } else {
-                            // Canlı oyuncu: Tıklanabilir
-                            li.innerText = p.name;
-                            li.onclick = () => selectVote(li, p.id);
-                        }
-                        voteList.appendChild(li);
-                    });
+                    const alivePlayers = allPlayers.filter(p => p.isAlive); 
+                    if(alivePlayers.length === 0) {
+                        voteList.innerHTML = "<p style='text-align:center; color:#666;'>Kimse kalmadı...</p>";
+                    } else {
+                        alivePlayers.forEach(p => {
+                            const li = document.createElement('li');
+                            li.className = 'player-item vote-item';
+                            li.id = "vote-item-" + p.id;
+                            
+                            const vCount = voteCounts[p.id] || 0;
+                            const voteText = vCount > 0 ? `<span style="color:var(--blood-red); font-family:'Cinzel'; font-weight:bold; font-size:1.4rem;">${vCount} OY</span>` : `<span style="color:#555; font-family:'Cinzel'; font-size:1rem;">0 OY</span>`;
+                            
+                            if (p.id === myUserId) {
+                                li.innerHTML = `<span>${p.name} <span style="font-size:0.9rem; color:#888; font-style:italic;">(Sen)</span></span> ${voteText}`;
+                                li.style.cursor = "not-allowed";
+                            } else {
+                                li.innerHTML = `<span>${p.name}</span> ${voteText}`;
+                                li.onclick = () => selectVote(li, p.id);
+                            }
+
+                            if (myData && myData.votedFor === p.id) {
+                                li.classList.add('my-vote');
+                                li.innerHTML = `<span>${p.name} <span style="color:var(--gold); font-size:0.9rem; font-style:italic;">(Kararın)</span></span> ${voteText}`;
+                            }
+
+                            if (selectedVoteId === p.id && p.id !== myUserId) {
+                                li.classList.add('selected');
+                            }
+                            
+                            voteList.appendChild(li);
+                        });
+                    }
                 }
             });
         }
 
-        // --- SAYAÇ MANTIĞI ---
         function updateTimer() {
             if (!currentRoomData || !currentRoomData.phaseEndTime) return;
-            
             if (timerInterval) clearInterval(timerInterval);
             
             timerInterval = setInterval(() => {
@@ -417,7 +612,6 @@
         function updateUI(room) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             
-            // Admin Butonlarını Gizle/Göster
             const isHost = myData && myData.isHost;
             document.querySelectorAll('.admin-only').forEach(btn => {
                 btn.style.display = isHost ? 'block' : 'none';
@@ -429,14 +623,8 @@
             if (room.status === 'LOBBY') {
                 document.getElementById('screen-lobby').classList.add('active');
                 document.getElementById('display-room-code').innerText = myRoomId;
-                document.getElementById('lobby-mode-display').innerText = room.mode === 'story' ? 'HİKAYE' : 'KLASİK';
-                // Lobiye özel admin kontrolü (vampir sayısı da burada)
-                if(isHost) {
-                     document.getElementById('admin-controls').style.display = 'block';
-                     document.getElementById('vamp-count-display').innerText = room.vampireCount || 2;
-                } else {
-                     document.getElementById('admin-controls').style.display = 'none';
-                }
+                document.getElementById('lobby-mode-display').innerText = room.mode === 'story' ? 'HİKAYE (ZOR)' : 'KLASİK';
+                if(isHost) document.getElementById('vamp-count-display').innerText = room.vampireCount || 2;
             }
             else if (room.status === 'STORY_INTRO') {
                 document.getElementById('screen-story-intro').classList.add('active');
@@ -451,11 +639,35 @@
             }
             else if (room.status === 'DISCUSSION') {
                 document.getElementById('screen-discuss').classList.add('active');
-                document.getElementById('discussion-town-name').innerText = room.townName || "MEYDAN";
+                document.getElementById('discussion-town-name').innerText = room.townName || "KASABA MEYDANI";
+                
+                window.showRandomQuestion();
+                if(questionInterval) clearInterval(questionInterval);
+                questionInterval = setInterval(window.showRandomQuestion, 12000);
             }
-            else if (room.status === 'VOTING') {
+            else if (room.status === 'VOTING' || room.status === 'DEFENSE') {
                 document.getElementById('screen-vote').classList.add('active');
-                // Ölü oyuncu kontrolü
+                
+                if(questionInterval) clearInterval(questionInterval);
+                
+                if (room.status === 'DEFENSE') {
+                    document.getElementById('vote-title').innerText = "SAVUNMA SÜRESİ";
+                    document.getElementById('vote-subtitle').innerText = "KARARINIZI DEĞİŞTİREBİLİRSİNİZ";
+                    document.getElementById('vote-subtitle').style.color = "var(--gold)";
+                    if(isHost) {
+                        document.getElementById('btn-start-defense').style.display = 'none';
+                        document.getElementById('vote-end-btn').style.display = 'block';
+                    }
+                } else {
+                    document.getElementById('vote-title').innerText = "İNFAZ";
+                    document.getElementById('vote-subtitle').innerText = "KİMİ SUÇLUYORSUN?";
+                    document.getElementById('vote-subtitle').style.color = "var(--blood-red)";
+                    if(isHost) {
+                        document.getElementById('btn-start-defense').style.display = 'block';
+                        document.getElementById('vote-end-btn').style.display = 'none'; 
+                    }
+                }
+
                 if (myData && !myData.isAlive) {
                     document.getElementById('vote-submit-btn').style.display = 'none';
                     document.getElementById('dead-msg').style.display = 'block';
@@ -466,7 +678,34 @@
             }
             else if (room.status === 'RESULT') {
                 document.getElementById('screen-result').classList.add('active');
-                document.getElementById('eliminated-name').innerText = (room.lastEliminatedName || "KİMSE") + " ELENDİ";
+                document.getElementById('eliminated-name').innerText = room.lastEliminatedName || "KİMSE";
+                
+                if (room.lastEliminatedRole === "EŞİTLİK") {
+                    document.getElementById('result-icon').innerText = "⚖️";
+                    document.getElementById('eliminated-name').style.color = "var(--parchment)";
+                    document.getElementById('eliminated-role').innerHTML = `Kimse asılmadı.`;
+                } else {
+                    document.getElementById('result-icon').innerText = "💀";
+                    document.getElementById('eliminated-name').style.color = "var(--blood-red)";
+                    const roleText = room.lastEliminatedRole === 'vampire' ? "VAMPİR" : (room.lastEliminatedRole ? "KÖYLÜ" : "BİLİNMİYOR");
+                    const roleColor = room.lastEliminatedRole === 'vampire' ? "var(--blood-red)" : "var(--gold)";
+                    document.getElementById('eliminated-role').innerHTML = `Gerçek Kimliği: <span style="color:${roleColor}; font-weight:bold; font-family:'Cinzel';">${roleText}</span>`;
+                }
+            }
+            else if (room.status === 'GAME_OVER_VILLAGERS') {
+                document.getElementById('screen-gameover').classList.add('active');
+                playSound('win');
+                document.getElementById('winner-title').innerText = "KÖYLÜLER KAZANDI";
+                document.getElementById('winner-title').style.color = "var(--gold)";
+                document.getElementById('winner-desc').innerText = "Kasabadaki tüm vampirler avlandı. Güneş yeniden doğuyor.";
+            }
+            else if (room.status === 'GAME_OVER_VAMPIRES') {
+                document.getElementById('screen-gameover').classList.add('active');
+                playSound('doom');
+                document.getElementById('winner-title').innerText = "VAMPİRLER KAZANDI";
+                document.getElementById('winner-title').style.color = "var(--blood-red)";
+                document.getElementById('winner-title').style.fontFamily = "Creepster";
+                document.getElementById('winner-desc').innerText = "Karanlık galip geldi. Kasaba kana bulandı...";
             }
         }
 
@@ -475,7 +714,6 @@
             if (!myData.isHost) return;
             let count = (currentRoomData.vampireCount || 2) + delta;
             if (count < 1) count = 1; if (count > 4) count = 4;
-            // Ekranda hemen güncelle (kullanıcı hissetsin), sonra sunucuya yaz
             document.getElementById('vamp-count-display').innerText = count; 
             await updateDoc(doc(db, "rooms", myRoomId), { vampireCount: count });
         };
@@ -487,19 +725,19 @@
             const playersSnap = await getDocs(collection(db, "rooms", myRoomId, "players"));
             let ids = [];
             playersSnap.forEach(d => ids.push(d.id));
-            if (ids.length < 2) return alert("En az 2 oyuncu gerekli!");
+            if (ids.length < 3) return alert("Oyunu başlatmak için en az 3 kişi gereklidir!");
 
-            // Rolleri Dağıt
             let vampCount = currentRoomData.vampireCount || 2;
             if (vampCount >= ids.length) vampCount = ids.length - 1;
             
             for (let i = ids.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [ids[i], ids[j]] = [ids[j], ids[i]]; }
 
-            const batch = [];
+            const batchPromises = [];
             for (let i = 0; i < ids.length; i++) {
                 const role = i < vampCount ? 'vampire' : 'villager';
-                await updateDoc(doc(db, "rooms", myRoomId, "players", ids[i]), { role: role, isAlive: true });
+                batchPromises.push(updateDoc(doc(db, "rooms", myRoomId, "players", ids[i]), { role: role, isAlive: true, votedFor: null }));
             }
+            await Promise.all(batchPromises);
 
             let updates = { status: 'ROLE_REVEAL' };
             if (currentRoomData.mode === 'story') {
@@ -513,41 +751,43 @@
         
         window.goToDiscussion = async () => { 
             if(myData.isHost) {
-                // 10 Dakika Ekle (Şu an + 10dk)
+                const batchPromises = [];
+                allPlayers.forEach(p => { batchPromises.push(updateDoc(doc(db, "rooms", myRoomId, "players", p.id), { votedFor: null })); });
                 const endTime = Date.now() + (10 * 60 * 1000); 
-                await updateDoc(doc(db, "rooms", myRoomId), { 
-                    status: 'DISCUSSION',
-                    phaseEndTime: endTime
-                }); 
+                batchPromises.push(updateDoc(doc(db, "rooms", myRoomId), { status: 'DISCUSSION', phaseEndTime: endTime }));
+                await Promise.all(batchPromises);
             }
         };
         
-        // Yeni Tur Başlatma (Döngü)
         window.startNextRound = async () => {
             if(myData.isHost) {
-                // Tartışma için 10 Dakika
+                const batchPromises = [];
+                allPlayers.forEach(p => { batchPromises.push(updateDoc(doc(db, "rooms", myRoomId, "players", p.id), { votedFor: null })); });
                 const endTime = Date.now() + (10 * 60 * 1000); 
-                await updateDoc(doc(db, "rooms", myRoomId), { 
-                    status: 'DISCUSSION',
-                    phaseEndTime: endTime
-                }); 
+                batchPromises.push(updateDoc(doc(db, "rooms", myRoomId), { status: 'DISCUSSION', phaseEndTime: endTime }));
+                await Promise.all(batchPromises);
             }
         };
 
         window.skipTimer = async () => { 
             if(myData.isHost) {
-                // Oylama için 5 Dakika Ekle
                 const endTime = Date.now() + (5 * 60 * 1000);
-                await updateDoc(doc(db, "rooms", myRoomId), { 
-                    status: 'VOTING',
-                    phaseEndTime: endTime
-                }); 
+                await updateDoc(doc(db, "rooms", myRoomId), { status: 'VOTING', phaseEndTime: endTime }); 
+            }
+        };
+
+        window.startDefense = async () => {
+            if(myData.isHost) {
+                playSound('click');
+                const endTime = Date.now() + (2 * 60 * 1000); 
+                await updateDoc(doc(db, "rooms", myRoomId), { status: 'DEFENSE', phaseEndTime: endTime }); 
             }
         };
 
         // --- KART VE OYLAMA ---
-        window.flipCard = () => {
+        window.flipCard = () => { 
             document.getElementById('role-card').classList.toggle('flipped');
+            playSound('click');
         };
 
         function setupMyCard(room) {
@@ -556,72 +796,108 @@
             if (!myData || !myData.role) return;
             
             const isVampire = myData.role === 'vampire';
-            
             let partnerText = "";
             if (isVampire) {
-                // Diğer vampirleri bul (Kendi dışındakiler)
-                const partners = allPlayers
-                    .filter(p => p.role === 'vampire' && p.id !== myUserId)
-                    .map(p => p.name)
-                    .join(", ");
-                
-                if (partners.length > 0) {
-                    partnerText = `<div style="margin-top:10px; border-top:1px solid #333; padding-top:10px; width:90%; text-align:center;">ORTAĞIN: <br><span style="color:var(--blood-red); font-weight:bold;">${partners}</span></div>`;
-                } else {
-                    partnerText = `<div style="margin-top:10px; color:#666; font-size:0.8rem;">Tek başınasın.</div>`;
-                }
+                const partners = allPlayers.filter(p => p.role === 'vampire' && p.id !== myUserId).map(p => p.name).join(", ");
+                if (partners.length > 0) partnerText = `<div style="margin-top:15px; border-top:1px solid #444; padding-top:10px; width:80%; text-align:center;">DİĞER VAMPİRLER: <br><span style="color:var(--blood-red); font-weight:bold; font-family:'Cinzel'; font-size:1.3rem;">${partners}</span></div>`;
+                else partnerText = `<div style="margin-top:15px; color:#888; font-style:italic;">Yalnız avlanıyorsun.</div>`;
             }
 
             if(isVampire) {
                 cardBack.classList.add('role-vampire');
-                cardBack.innerHTML = `<div style="font-size:3rem;">🧛‍♂️</div><h3 style="color:var(--blood-red); margin:0;">VAMPİR</h3><p style="color:#aaa; text-align:center;">Kimliğini gizle.</p>${partnerText}`;
+                cardBack.innerHTML = `<div style="font-size:4rem; margin-bottom:10px; color:var(--blood-red);">🧛‍♂️</div><h3 style="color:var(--blood-red); margin:0; font-family:'Cinzel'; font-size:2.5rem;">VAMPİR</h3><p style="color:#ccc; text-align:center; font-size:1.1rem;">Gecenin efendisi sensin.</p>${partnerText}`;
             } else {
                 cardBack.classList.add('role-villager');
-                cardBack.innerHTML = `<div style="font-size:3rem;">🧑‍🌾</div><h3 style="color:var(--toxic-green); margin:0;">KÖYLÜ</h3><p style="color:#aaa; text-align:center;">Vampirleri bul.</p>`;
+                cardBack.innerHTML = `<div style="font-size:4rem; margin-bottom:10px;">🧑‍🌾</div><h3 style="color:var(--gold); margin:0; font-family:'Cinzel'; font-size:2.5rem;">KÖYLÜ</h3><p style="color:#ccc; text-align:center; font-size:1.1rem; padding: 0 10px;">Kasabayı korumak için vampirleri bulmalısın.</p>`;
             }
         }
 
-        let selectedVoteId = null;
         window.selectVote = (el, id) => {
             playSound('click');
-            document.querySelectorAll('.vote-item').forEach(e => { e.style.background = ""; e.style.color = "#ccc"; });
-            el.style.background = "var(--blood-red)"; el.style.color = "#000";
+            document.querySelectorAll('.vote-item').forEach(e => { e.classList.remove('selected'); });
+            el.classList.add('selected');
             selectedVoteId = id;
         };
 
         window.submitVote = async () => {
-            if (!selectedVoteId) return alert("Seçim yapmalısın!");
-            if (myData && !myData.isAlive) return alert("Ölüler oy kullanamaz!");
+            if (!selectedVoteId) return alert("Listeden bir hedef seçmelisiniz.");
+            if (myData && !myData.isAlive) return alert("Ölüler konuşamaz.");
+            playSound('click');
+            await updateDoc(doc(db, "rooms", myRoomId, "players", myUserId), { votedFor: selectedVoteId });
+        };
+
+        // --- İNFAZ VE KAZANMA MANTIĞI ---
+        window.endVoting = async () => {
+            if (!myData.isHost) return;
             
-            // Şimdilik sadece Admin'in oyu geçerli olsun veya herkesin oyu gönderilsin
-            // Basit versiyon: Admin seçtiği kişiyi eler.
-            if(myData.isHost) {
-                const pSnap = await getDoc(doc(db, "rooms", myRoomId, "players", selectedVoteId));
-                const pName = pSnap.data().name;
-                await updateDoc(doc(db, "rooms", myRoomId, "players", selectedVoteId), { isAlive: false });
-                await updateDoc(doc(db, "rooms", myRoomId), { status: 'RESULT', lastEliminatedName: pName });
-            } else {
-                alert("Oyunuz alındı. Son kararı Yönetici (Host) verecek.");
+            const voteCounts = {};
+            allPlayers.forEach(p => {
+                if (p.isAlive && p.votedFor) {
+                    voteCounts[p.votedFor] = (voteCounts[p.votedFor] || 0) + 1;
+                }
+            });
+
+            let maxVotes = 0;
+            let eliminatedId = null;
+            let isTie = false;
+
+            for (const [uid, count] of Object.entries(voteCounts)) {
+                if (count > maxVotes) { maxVotes = count; eliminatedId = uid; isTie = false; } 
+                else if (count === maxVotes) { isTie = true; }
             }
+
+            if (maxVotes === 0) return alert("Kimse oy kullanmadı!");
+
+            // EŞİTLİK DURUMU
+            if (isTie) {
+                playSound('click');
+                await updateDoc(doc(db, "rooms", myRoomId), { 
+                    status: 'RESULT', 
+                    lastEliminatedName: "HALK KARARSIZ KALDI",
+                    lastEliminatedRole: "EŞİTLİK" 
+                });
+                return;
+            }
+
+            // BİRİSİ ELENDİ
+            playSound('doom');
+            const victim = allPlayers.find(p => p.id === eliminatedId);
+
+            await updateDoc(doc(db, "rooms", myRoomId, "players", eliminatedId), { isAlive: false });
+            
+            // OYUN BİTTİ Mİ KONTROLÜ
+            const updatedPlayersSnap = await getDocs(collection(db, "rooms", myRoomId, "players"));
+            let aliveVamps = 0;
+            let aliveVills = 0;
+            
+            updatedPlayersSnap.forEach(d => {
+                const p = d.data();
+                if (p.isAlive) {
+                    if (p.role === 'vampire') aliveVamps++;
+                    else if (p.role === 'villager') aliveVills++;
+                }
+            });
+
+            let nextStatus = 'RESULT'; // Oyun devam eder
+            if (aliveVamps === 0) {
+                nextStatus = 'GAME_OVER_VILLAGERS'; // Vampir kalmadı
+            } else if (aliveVamps >= aliveVills) {
+                nextStatus = 'GAME_OVER_VAMPIRES'; // Vampirler çoğunlukta veya eşit
+            }
+
+            await updateDoc(doc(db, "rooms", myRoomId), { 
+                status: nextStatus, 
+                lastEliminatedName: victim.name,
+                lastEliminatedRole: victim.role 
+            });
         };
 
         window.resetGame = async () => { if(myData.isHost) await updateDoc(doc(db, "rooms", myRoomId), { status: 'LOBBY', phaseEndTime: 0 }); };
 
         function generateStory(vampCount) {
-            const t = ["Kuzgun Vadisi", "Sislitaş", "Ölügöl"][Math.floor(Math.random()*3)];
-            return { townName: t, title: t + " VAKASI", text: `Dün gece ${t} meydanında korkunç bir olay yaşandı... Aramızda ${vampCount} katil var.` };
+            const t = ["Kuzgun Vadisi", "Sislitaş", "Ölügöl", "Kanlı Dere"][Math.floor(Math.random()*4)];
+            return { townName: t, title: t + " GÜNLÜKLERİ", text: `Dün gece ${t} meydanında tüyler ürpertici bir çığlık duyuldu. Kasabanın koruyucusu ölü bulundu, boynunda derin iki delik vardı... Efsaneler gerçekmiş. Aramızda gizlenen ${vampCount} kana susamış canavar var. Güneş batmadan onları bulmalısınız, yoksa sıra size gelecek.` };
         }
-        
-        // Animasyon
-        function createRain() {
-            const c = document.getElementById('bloodRain');
-            for(let i=0;i<20;i++){
-                let d=document.createElement('div'); d.className='drop';
-                d.style.left=Math.random()*100+'vw'; d.style.animationDuration=(Math.random()*2+1)+'s';
-                c.appendChild(d);
-            }
-        }
-        createRain();
     </script>
 </body>
 </html>
