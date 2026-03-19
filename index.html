@@ -1,903 +1,1330 @@
-<!DOCTYPE html>
-<html lang="tr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Vampir Köylü - Klasik Kasaba</title>
-    
-    <!-- Eski Çağ ve Klasik Fontlar -->
-    <link href="https://fonts.googleapis.com/css2?family=Creepster&family=Cinzel:wght@400;700;900&family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
-    
-    <style>
-        /* --- KLASİK GOTİK/KASABA TASARIMI --- */
-        :root { 
-            --bg-dark: #0f0a08; 
-            --blood-red: #8a0303; 
-            --dark-red: #3e0000;
-            --gold: #c5a059; 
-            --parchment: #e8dcc4; 
-            --wood: #2c1a12;
-            --glass-bg: rgba(20, 10, 5, 0.85); 
-            --glass-border: #4a3020;
-        }
-        
-        * { box-sizing: border-box; }
-        
-        body { 
-            background-color: var(--bg-dark); 
-            background-image: radial-gradient(circle at center, #2a1610 0%, #0a0503 100%); 
-            color: var(--parchment); 
-            font-family: 'Cormorant Garamond', serif; 
-            margin: 0; padding: 0;
-            min-height: 100vh; height: 100dvh; 
-            display: flex; justify-content: center; align-items: center; 
-            overflow: hidden; user-select: none; 
-        }
-        
-        /* Sis/Toz Efekti */
-        body::before {
-            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background-image: url('https://www.transparenttextures.com/patterns/stardust.png');
-            opacity: 0.3; pointer-events: none; z-index: 0;
-        }
-        
-        .container { width: 100%; max-width: 600px; padding: 20px; display: flex; flex-direction: column; align-items: center; z-index: 2; position: relative; height: 100%; overflow-y: auto; }
-        .screen { display: none; width: 100%; flex-direction: column; align-items: center; animation: fadeIn 0.8s ease-in-out; flex: 1; justify-content: center; }
-        .screen.active { display: flex; }
-        
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        
-        /* Tipografi */
-        h1 { font-family: 'Creepster', cursive; font-size: 4.5rem; color: var(--blood-red); margin: 0; text-shadow: 0 0 15px var(--dark-red); text-align: center; line-height: 1; font-weight: normal; }
-        h2 { font-family: 'Cinzel', serif; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 10px; color: var(--gold); }
-        .subtitle { font-family: 'Cinzel', serif; letter-spacing: 4px; color: #a58a60; border-bottom: 1px solid var(--blood-red); padding-bottom: 10px; margin-bottom: 30px; text-align: center; width: 80%; font-size: 1rem; }
-        
-        /* Ahşap/Parşömen Kartlar */
-        .login-card { 
-            background: var(--glass-bg); padding: 30px; border-radius: 4px; width: 100%; 
-            border: 2px solid var(--glass-border); display: flex; flex-direction: column; gap: 15px; 
-            box-shadow: 0 15px 40px rgba(0,0,0,0.9), inset 0 0 40px rgba(0,0,0,0.5);
-        }
-        
-        input { 
-            background: rgba(0,0,0,0.6); border: 1px solid var(--glass-border); color: var(--parchment); padding: 15px; 
-            border-radius: 2px; text-align: center; width: 100%; font-size: 1.4rem; outline: none; 
-            font-family: 'Cormorant Garamond', serif; transition: 0.3s;
-        }
-        input:focus { border-color: var(--gold); box-shadow: 0 0 10px rgba(197, 160, 89, 0.2); }
-        
-        /* Klasik Butonlar */
-        .btn { 
-            background: linear-gradient(to bottom, #4a2a18, var(--wood)); color: var(--gold); 
-            padding: 15px; border: 1px solid var(--gold); font-weight: 700; width: 100%; 
-            cursor: pointer; text-transform: uppercase; font-family: 'Cinzel', serif; font-size: 1.1rem; 
-            transition: all 0.2s ease; margin-top: 10px; letter-spacing: 1px; border-radius: 2px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.6);
-        }
-        .btn-primary { background: linear-gradient(to bottom, #b31010, var(--blood-red)); color: var(--parchment); border-color: #ff4a4a; text-shadow: 1px 1px 2px black; }
-        .btn-primary:hover { background: linear-gradient(to bottom, #cc1414, #a30000); box-shadow: 0 0 15px var(--blood-red); transform: translateY(-1px); }
-        .btn-primary:active { transform: translateY(1px); }
-        .btn-secondary { background: rgba(0,0,0,0.4); border: 1px solid #555; color: #aaa; margin-top: 5px; }
-        .btn-secondary:hover { border-color: var(--gold); color: var(--gold); }
-        .btn-danger { background: #1a0000; color: var(--blood-red); border: 1px solid var(--blood-red); }
-        .btn-danger:hover { background: var(--blood-red); color: #fff; }
-        
-        /* Oyuncu Listesi (Eski Yazı Tarzı) */
-        .player-list { list-style: none; padding: 0; width: 100%; max-height: 40vh; overflow-y: auto; margin: 15px 0; }
-        .player-item { 
-            background: rgba(0,0,0,0.4); padding: 12px 15px; margin: 4px 0; 
-            border-left: 3px solid var(--glass-border); border-bottom: 1px solid #222;
-            display: flex; justify-content: space-between; align-items: center; 
-            font-size: 1.4rem; font-weight: 600; transition: 0.2s; font-family: 'Cormorant Garamond', serif;
-        }
-        .vote-item { cursor: pointer; } 
-        .vote-item:hover { background: rgba(138, 3, 3, 0.2); border-left-color: var(--blood-red); }
-        .vote-item.selected { border-left-color: var(--gold) !important; border-left-width: 6px; background: rgba(197, 160, 89, 0.1); color: var(--gold); }
-        .vote-item.my-vote { background: rgba(138, 3, 3, 0.3); border-left-color: var(--blood-red); }
-        
-        .player-dead { opacity: 0.4; text-decoration: line-through; color: #777; pointer-events: none; border-left-color: #111 !important; background: transparent; }
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { initializeApp } from 'firebase/app';
+import { getAuth, signInAnonymously, onAuthStateChanged } from 'firebase/auth';
+import { getFirestore, doc, setDoc, getDoc, updateDoc, onSnapshot, collection, getDocs } from 'firebase/firestore';
 
-        /* Mod Seçimi */
-        .mode-selector { display: flex; background: rgba(0,0,0,0.8); border: 1px solid var(--glass-border); padding: 4px; border-radius: 2px;}
-        .mode-option { flex: 1; text-align: center; padding: 10px; cursor: pointer; color: #888; transition: 0.3s; font-family: 'Cinzel', serif; font-size: 0.9rem; font-weight: 700;}
-        .mode-option.active { background: var(--blood-red); color: var(--parchment); }
+// ─── GÜVENLİK ─────────────────────────────────────────────────────────────────
+function checkAccess() {
+  const h = window.location.hostname;
+  return h === 'localhost' || h === '127.0.0.1' ||
+    h === 'forgeandplay.com' || h === 'www.forgeandplay.com' ||
+    (h.includes('vercel.app') && h.includes('vampir'));
+}
+const IS_AUTHORIZED = checkAccess();
 
-        /* 3D Tarot Kartı */
-        .card-container { perspective: 1000px; width: 240px; height: 380px; margin: 30px auto; cursor: pointer; }
-        .card { width: 100%; height: 100%; transform-style: preserve-3d; transition: transform 0.8s ease-in-out; position: relative; }
-        .card.flipped { transform: rotateY(180deg); }
-        .card-face { 
-            position: absolute; width: 100%; height: 100%; backface-visibility: hidden; background: #0a0a0a; 
-            border-radius: 8px; display: flex; flex-direction: column; justify-content: center; align-items: center; 
-            box-shadow: 0 15px 35px rgba(0,0,0,1); border: 2px solid var(--glass-border);
-        }
-        .card-front { 
-            background: linear-gradient(45deg, #1a0f0a, #0a0503); 
-            background-image: url('https://www.transparenttextures.com/patterns/black-scales.png'); 
-        }
-        .card-back { transform: rotateY(180deg); background: var(--bg-dark); }
-        .role-vampire { border-color: var(--blood-red); box-shadow: 0 0 40px rgba(138,3,3,0.5), inset 0 0 20px rgba(138,3,3,0.3); }
-        .role-villager { border-color: var(--gold); box-shadow: 0 0 40px rgba(197,160,89,0.3), inset 0 0 20px rgba(197,160,89,0.1); }
+// ─── FIREBASE ─────────────────────────────────────────────────────────────────
+const firebaseConfig = {
+  apiKey: "AIzaSyBbOk7SKfWHHo382MQx7hZ3cCdJDOtQmyc",
+  authDomain: "isim-sehir-online-49a06.firebaseapp.com",
+  projectId: "isim-sehir-online-49a06",
+  storageBucket: "isim-sehir-online-49a06.firebasestorage.app",
+  messagingSenderId: "516400795880",
+  appId: "1:516400795880:web:9032edf79db1598db6b95d"
+};
+const fbApp = initializeApp(firebaseConfig, 'vampir');
+const auth = getAuth(fbApp);
+const db = getFirestore(fbApp);
+const APP_ID = 'vampir-koylu';
 
-        /* Sayaçlar */
-        .timer-display { font-size: 4.5rem; font-weight: 400; color: var(--gold); font-family: 'Cinzel', serif; text-shadow: 0 0 15px rgba(197,160,89,0.3); margin: 15px 0; }
-        .timer-urgent { color: var(--blood-red); text-shadow: 0 0 20px var(--blood-red); animation: heartbeatTimer 1s infinite; }
-        @keyframes heartbeatTimer { 0% { transform: scale(1); } 20% { transform: scale(1.05); } 40% { transform: scale(1); } }
+// ─── SABİTLER ─────────────────────────────────────────────────────────────────
+const AVATARS = ['🧛','👻','🕷️','🦇','💀','🌙','⚰️','🔮','🕯️','🌑',
+                 '🧟','🎭','🗡️','🩸','🌹','👁️','🐺','🦉','🕸️','⚡'];
 
-        /* Kontroller */
-        .controls-wrapper { position: absolute; top: 15px; right: 15px; display: flex; gap: 10px; z-index: 100; }
-        .control-btn { background: rgba(0,0,0,0.6); border: 1px solid var(--glass-border); color: var(--gold); width: 45px; height: 45px; border-radius: 4px; cursor: pointer; display: flex; justify-content: center; align-items: center; font-size: 1.2rem; transition: 0.2s;}
-        .control-btn:hover { background: var(--wood); border-color: var(--gold); }
-        
-        /* Soru Kutusu */
-        .question-box { background: rgba(0,0,0,0.6); border: 1px dashed var(--blood-red); padding: 15px; border-radius: 4px; min-height: 90px; display: flex; align-items: center; justify-content: center; text-align: center; width: 100%; margin: 15px 0; box-shadow: inset 0 0 20px rgba(138, 3, 3, 0.2); }
-        .fade-text { transition: opacity 0.5s ease-in-out; }
-        
-        /* Kan Yağmuru */
-        .blood-rain { position: absolute; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:0; overflow: hidden; }
-        .drop { position: absolute; background: linear-gradient(to bottom, rgba(138,3,3,0), rgba(138,3,3,0.8)); width: 2px; height: 30px; border-radius: 50%; animation: fall linear infinite; }
-        @keyframes fall { to { transform: translateY(110vh); opacity: 0; } }
+const ROLES = {
+  vampire:   { id:'vampire',   label:'Vampir',    emoji:'🧛', desc:'Her gece bir köylüyü öldürürsünüz. Diğer vampirleri tanırsınız.', color:'text-red-400',   bg:'bg-red-950/50',   border:'border-red-500' },
+  villager:  { id:'villager',  label:'Köylü',     emoji:'🏘️', desc:'Gündüzleri vampirleri tespit edip oydan çıkarın!',                color:'text-green-400', bg:'bg-green-950/50', border:'border-green-500' },
+  doctor:    { id:'doctor',    label:'Doktor',     emoji:'💉', desc:'Her gece bir kişiyi vampirlerden koruyabilirsiniz.',              color:'text-blue-400',  bg:'bg-blue-950/50',  border:'border-blue-500' },
+  detective: { id:'detective', label:'Dedektif',   emoji:'🔍', desc:'Her gece bir kişinin vampir olup olmadığını öğrenirsiniz.',      color:'text-yellow-400',bg:'bg-yellow-950/50',border:'border-yellow-500' },
+};
 
-        #error-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 9999; flex-direction: column; justify-content: center; align-items: center; text-align: center; color: var(--blood-red); padding: 20px; font-family: 'Cinzel'; }
-        
-        .admin-only { display: none; }
-    </style>
-</head>
-<body>
-    <div id="error-overlay">
-        <h2 style="font-size:3rem; margin-bottom:10px;">KARANLIK ÇÖKTÜ</h2>
-        <p id="error-msg" style="color:#aaa; font-family:'Cormorant Garamond'; font-size:1.5rem;">Kayıtlara ulaşılamıyor...</p>
+const PHASE_DURATION = { night: 45, day: 90, vote: 30 };
+
+const sanitize = s => (!s || typeof s !== 'string') ? '' : s.replace(/[<>'"&]/g,'').trim().substring(0,30);
+const rand = arr => arr[Math.floor(Math.random() * arr.length)];
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+// ─── ROL DAĞITIMI ─────────────────────────────────────────────────────────────
+function assignRoles(players) {
+  const ids = Object.keys(players);
+  const n = ids.length;
+  let roleList = [];
+
+  if (n <= 4)      roleList = ['vampire','doctor','villager','villager'].slice(0,n);
+  else if (n <= 6) roleList = ['vampire','vampire','doctor','villager','villager','villager'].slice(0,n);
+  else if (n <= 9) roleList = ['vampire','vampire','doctor','detective',...Array(n-4).fill('villager')];
+  else             roleList = ['vampire','vampire','vampire','doctor','detective',...Array(n-5).fill('villager')];
+
+  // Karıştır
+  for (let i = roleList.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [roleList[i], roleList[j]] = [roleList[j], roleList[i]];
+  }
+
+  const assigned = {};
+  ids.forEach((id, i) => { assigned[id] = roleList[i]; });
+  return assigned;
+}
+
+// ─── KAZANMA KOŞULU ───────────────────────────────────────────────────────────
+function checkWin(players) {
+  const alive = Object.values(players).filter(p => p.isAlive);
+  const vampires = alive.filter(p => p.role === 'vampire');
+  const others = alive.filter(p => p.role !== 'vampire');
+  if (vampires.length === 0) return 'villagers';
+  if (vampires.length >= others.length) return 'vampires';
+  return null;
+}
+
+// ─── GECE OLAYLARI ────────────────────────────────────────────────────────────
+function processNight(players, nightActions) {
+  const target = nightActions.vampireTarget;
+  const protected_ = nightActions.doctorSave;
+  const events = [];
+  let updatedPlayers = { ...players };
+
+  if (target) {
+    if (target === protected_) {
+      events.push({ type:'saved', text:'Doktor birini vampirlerden kurtardı! 💉', uid: target });
+    } else {
+      updatedPlayers[target] = { ...updatedPlayers[target], isAlive: false };
+      events.push({ type:'killed', text:`${players[target]?.name || 'Biri'} vampirler tarafından öldürüldü! 🩸`, uid: target });
+    }
+  } else {
+    events.push({ type:'safe', text:'Bu gece kimse ölmedi... Şimdilik. 🌙' });
+  }
+
+  return { updatedPlayers, events };
+}
+
+// ─── ERIŞIM ENGEL ─────────────────────────────────────────────────────────────
+const BlockedScreen = () => (
+  <div className="min-h-screen bg-black flex items-center justify-center p-4">
+    <div className="bg-red-950/40 border-2 border-red-800 rounded-3xl p-10 max-w-md text-center">
+      <div className="text-6xl mb-4">🔒</div>
+      <h1 className="text-2xl font-black text-red-400 mb-2">Erişim Kısıtlı</h1>
+      <p className="text-red-200/70 text-sm mb-6">Bu oyuna yalnızca <strong className="text-red-300">Forge&Play</strong> üzerinden erişilebilir.</p>
+      <a href="https://www.forgeandplay.com" className="inline-block bg-red-700 hover:bg-red-600 text-white font-black px-8 py-4 rounded-2xl text-lg transition-all hover:scale-105">
+        forgeandplay.com'a Git
+      </a>
     </div>
+  </div>
+);
 
-    <div class="blood-rain" id="bloodRain"></div>
+// ─── SETUP / GİRİŞ EKRANI ─────────────────────────────────────────────────────
+// ─── NASIL OYNANIR MODALİ ────────────────────────────────────────────────────
+const HowToPlayModal = ({ onClose }) => {
+  const [step, setStep] = useState(0);
 
-    <div class="controls-wrapper">
-        <button class="control-btn" onclick="toggleSound()" id="soundBtn">🔇</button>
-        <button class="control-btn" onclick="toggleFullScreen()">⛶</button>
+  const steps = [
+    {
+      icon: '🏘️',
+      title: 'Amaç',
+      color: 'from-amber-900/60 to-red-950/60',
+      border: 'border-amber-700/50',
+      content: (
+        <div className="space-y-3">
+          <p className="text-white/80 text-sm leading-relaxed">
+            Kasabada gizlice yaşayan <span className="text-red-400 font-black">Vampirler</span> her gece bir köylüyü öldürür.
+            <span className="text-green-400 font-black"> Köylülerin</span> görevi gündüzleri birlikte düşünerek vampirleri bulup oylamak.
+          </p>
+          <div className="grid grid-cols-2 gap-2 mt-3">
+            <div className="bg-red-950/40 border border-red-800/50 rounded-xl p-3 text-center">
+              <div className="text-2xl mb-1">🧛</div>
+              <div className="text-xs font-black text-red-300">Vampirler Kazanır</div>
+              <div className="text-xs text-red-400/60 mt-1">Vampir sayısı ≥ diğerleri</div>
+            </div>
+            <div className="bg-green-950/40 border border-green-800/50 rounded-xl p-3 text-center">
+              <div className="text-2xl mb-1">🏘️</div>
+              <div className="text-xs font-black text-green-300">Köylüler Kazanır</div>
+              <div className="text-xs text-green-400/60 mt-1">Tüm vampirler elenir</div>
+            </div>
+          </div>
+        </div>
+      ),
+    },
+    {
+      icon: '🌙',
+      title: 'Gece Fazı',
+      color: 'from-indigo-900/60 to-black',
+      border: 'border-indigo-700/50',
+      content: (
+        <div className="space-y-3">
+          <p className="text-white/70 text-sm">Her tur önce gece gelir. Herkes rolüne göre gizlice eylemini seçer:</p>
+          <div className="space-y-2">
+            {[
+              { emoji:'🧛', role:'Vampir', desc:'Öldürmek istediğin köylüyü seç. Diğer vampirlerle koordineli hareket et!', color:'text-red-300', bg:'bg-red-950/40 border-red-800/40' },
+              { emoji:'💉', role:'Doktor', desc:'Bir oyuncuyu vampirlerden koru. Kendini de seçebilirsin!', color:'text-blue-300', bg:'bg-blue-950/40 border-blue-800/40' },
+              { emoji:'🔍', role:'Dedektif', desc:'Bir oyuncunun vampir olup olmadığını öğren. Bilgiyi akıllıca kullan!', color:'text-yellow-300', bg:'bg-yellow-950/40 border-yellow-800/40' },
+              { emoji:'🏘️', role:'Köylü', desc:'Gece uyursun. Gündüz ipuçlarını gözlemleyerek konuş!', color:'text-green-300', bg:'bg-green-950/40 border-green-800/40' },
+            ].map(r => (
+              <div key={r.role} className={`${r.bg} border rounded-xl p-3 flex gap-3 items-start`}>
+                <span className="text-xl shrink-0">{r.emoji}</span>
+                <div>
+                  <div className={`text-xs font-black ${r.color} mb-0.5`}>{r.role}</div>
+                  <div className="text-xs text-white/60">{r.desc}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      ),
+    },
+    {
+      icon: '☀️',
+      title: 'Gündüz Tartışma',
+      color: 'from-amber-900/50 to-red-950/60',
+      border: 'border-amber-700/50',
+      content: (
+        <div className="space-y-3">
+          <p className="text-white/70 text-sm leading-relaxed">
+            Sabah olunca gece olanlar açıklanır. Herkes şüphelerini paylaşır, tartışır.
+          </p>
+          <div className="space-y-2">
+            {[
+              { emoji:'🗣️', title:'Tartışın', desc:'Kim vampire benziyor? Davranışları, reaksiyonları, sözleri... Her şey ipucu!' },
+              { emoji:'🤫', title:'Dikkat Et', desc:'Vampirler yalan söyler. Doktor ve Dedektif bilgilerini saklar. Güvenme!' },
+              { emoji:'⚖️', title:'Oylayın', desc:'Süre dolunca ya da host hazır olduğunda oylama başlar.' },
+              { emoji:'💀', title:'İnfaz', desc:'En çok oy alan kişi kasabadan kovulur. Rolü herkese açıklanır!' },
+            ].map(tip => (
+              <div key={tip.title} className="bg-amber-950/20 border border-amber-800/30 rounded-xl p-3 flex gap-3 items-start">
+                <span className="text-xl shrink-0">{tip.emoji}</span>
+                <div>
+                  <div className="text-xs font-black text-amber-300 mb-0.5">{tip.title}</div>
+                  <div className="text-xs text-white/60">{tip.desc}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      ),
+    },
+    {
+      icon: '⚔️',
+      title: 'Strateji İpuçları',
+      color: 'from-purple-900/60 to-red-950/60',
+      border: 'border-purple-700/50',
+      content: (
+        <div className="space-y-3">
+          <p className="text-white/70 text-sm">Profesyonel bir kasabalı olmak için:</p>
+          <div className="space-y-2">
+            {[
+              { emoji:'👁️', tip:'Sessiz kalanlara dikkat.', sub:'Vampirler genellikle konuşmayı minimumda tutar.' },
+              { emoji:'🎭', tip:'Aşırı savunmacılar şüpheli.', sub:'Hiç suçlanmadığı halde kendini savunan biri neden?'},
+              { emoji:'🤝', tip:'İttifakları gözlemle.', sub:'Kim kimi her zaman savunuyor? Vampir ekibi olabilir.' },
+              { emoji:'💡', tip:'Dedektif bilgisini saklayabilir.', sub:'Herkese açıklarsa vampirler onu hedef alır!' },
+              { emoji:'🩺', tip:'Doktor kendini koruyabilir.', sub:'Ama bunu yaparsa kimse korunmuyor. Zor seçim!' },
+              { emoji:'🎯', tip:'İlk oylamalar önemli.', sub:'Vampirler genellikle ilk turda köylüyü hedef alır.' },
+            ].map(tip => (
+              <div key={tip.tip} className="bg-purple-950/20 border border-purple-800/30 rounded-xl p-2.5 flex gap-3 items-start">
+                <span className="text-lg shrink-0">{tip.emoji}</span>
+                <div>
+                  <div className="text-xs font-black text-purple-200">{tip.tip}</div>
+                  <div className="text-xs text-white/50 mt-0.5">{tip.sub}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      ),
+    },
+    {
+      icon: '🎮',
+      title: 'Hızlı Başlangıç',
+      color: 'from-red-900/60 to-black',
+      border: 'border-red-700/50',
+      content: (
+        <div className="space-y-4">
+          <div className="space-y-3">
+            {[
+              { n:1, title:'Oda Kur', desc:'Admin "Yeni Oda Kur" butonuna basar, oda kodunu arkadaşlarıyla paylaşır.', icon:'⚰️' },
+              { n:2, title:'Katıl', desc:'Diğer oyuncular "Odaya Katıl" ile oda kodunu girer. Min 4 kişi gerekli.', icon:'🗡️' },
+              { n:3, title:'Başlat', desc:'Admin oyunu başlatır. Roller otomatik dağıtılır, kimseye söyleme!', icon:'🌙' },
+              { n:4, title:'Oyna', desc:'Gece → Sabah olayları → Tartışma → Oylama → tekrar Gece...', icon:'🔄' },
+              { n:5, title:'Kazan', desc:'Vampirleri bul ve as — ya da köylüleri kandırarak çoğunluğa ulaş!', icon:'🏆' },
+            ].map(step => (
+              <div key={step.n} className="flex gap-3 items-start">
+                <div className="w-8 h-8 rounded-xl bg-red-800/60 border border-red-700/50 flex items-center justify-center font-black text-red-200 text-sm shrink-0">{step.n}</div>
+                <div className="flex-1 bg-red-950/20 border border-red-900/30 rounded-xl p-3">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span>{step.icon}</span>
+                    <span className="font-black text-white text-sm">{step.title}</span>
+                  </div>
+                  <div className="text-xs text-white/50">{step.desc}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="bg-red-900/20 border border-red-800/30 rounded-xl p-3 text-center">
+            <p className="text-red-300/80 text-xs font-bold">🩸 Minimum 4, Optimal 6-8, Maksimum 10 oyuncu</p>
+          </div>
+        </div>
+      ),
+    },
+  ];
+
+  const current = steps[step];
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+      <div className="w-full max-w-md bg-gray-950 border-2 border-red-900/50 rounded-3xl overflow-hidden shadow-2xl shadow-red-900/20 flex flex-col max-h-[90vh]">
+
+        {/* Header */}
+        <div className={`bg-gradient-to-r ${current.color} border-b border-red-900/30 p-5 flex items-center justify-between shrink-0`}>
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 bg-black/40 border border-white/10 rounded-2xl flex items-center justify-center text-2xl">
+              {current.icon}
+            </div>
+            <div>
+              <div className="text-xs font-black text-red-400/60 uppercase tracking-widest">Nasıl Oynanır</div>
+              <h2 className="text-xl font-black text-white">{current.title}</h2>
+            </div>
+          </div>
+          <button onClick={onClose}
+            className="w-9 h-9 bg-black/40 hover:bg-red-900/40 border border-red-900/30 rounded-xl flex items-center justify-center text-red-400 hover:text-white transition-all font-black">
+            ✕
+          </button>
+        </div>
+
+        {/* İçerik */}
+        <div className="p-5 overflow-y-auto flex-1">
+          {current.content}
+        </div>
+
+        {/* Navigasyon */}
+        <div className="p-4 border-t border-red-900/30 bg-black/40 shrink-0">
+          {/* Adım göstergesi */}
+          <div className="flex justify-center gap-1.5 mb-3">
+            {steps.map((_, i) => (
+              <button key={i} onClick={() => setStep(i)}
+                className={`h-1.5 rounded-full transition-all duration-300 ${
+                  i === step ? 'bg-red-500 w-6' : 'bg-red-900/40 w-1.5 hover:bg-red-700/60'
+                }`}/>
+            ))}
+          </div>
+
+          <div className="flex gap-2">
+            <button onClick={() => setStep(s => Math.max(0, s-1))} disabled={step === 0}
+              className="flex-1 py-3 bg-red-950/40 hover:bg-red-900/40 border border-red-900/30 text-red-300 font-black rounded-2xl transition-all disabled:opacity-30 text-sm">
+              ← Önceki
+            </button>
+            {step < steps.length - 1 ? (
+              <button onClick={() => setStep(s => s + 1)}
+                className="flex-1 py-3 bg-gradient-to-r from-red-800 to-red-900 hover:from-red-700 text-white font-black rounded-2xl transition-all text-sm">
+                Sonraki →
+              </button>
+            ) : (
+              <button onClick={onClose}
+                className="flex-1 py-3 bg-gradient-to-r from-red-700 to-red-900 hover:from-red-600 text-white font-black rounded-2xl transition-all shadow-lg shadow-red-900/40 text-sm">
+                Oynamaya Hazırım! 🧛
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
     </div>
+  );
+};
 
-    <div class="container">
-        <!-- 1. GİRİŞ EKRANI -->
-        <div id="screen-login" class="screen active">
-            <h1 style="font-size:5rem;">VAMPİR</h1>
-            <h1 style="color:var(--parchment); text-shadow:0 0 10px #fff; margin-top:-10px;">KÖYLÜ</h1>
-            <div class="subtitle" style="margin-top:10px;">KASABAYA HOŞ GELDİN</div>
-            
-            <div class="login-card">
-                <div class="mode-selector">
-                    <div class="mode-option active" id="mode-normal" onclick="selectMode('normal')">KLASİK</div>
-                    <div class="mode-option" id="mode-story" onclick="selectMode('story')">HİKAYE (ZOR)</div>
+const SetupScreen = ({ onCreate, onJoin }) => {
+  const [name, setName] = useState('');
+  const [avatar, setAvatar] = useState(AVATARS[0]);
+  const [mode, setMode] = useState('home'); // home | create | join
+  const [code, setCode] = useState('');
+  const [playerCount, setPlayerCount] = useState(6);
+  const [showHowTo, setShowHowTo] = useState(false);
+
+  const valid = name.trim().length >= 2;
+
+  // Animasyon için
+  const bats = Array.from({length:8}, (_,i) => i);
+
+  return (
+    <div className="min-h-screen bg-black text-white relative overflow-hidden flex items-center justify-center">
+
+      {showHowTo && <HowToPlayModal onClose={() => setShowHowTo(false)}/>}
+
+      {/* Arka plan: kanlı ay + sis */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute top-16 left-1/2 -translate-x-1/2 w-72 h-72 bg-red-800/20 rounded-full blur-[80px] animate-pulse"/>
+        <div className="absolute top-12 left-1/2 -translate-x-1/2 w-40 h-40 bg-red-600/10 rounded-full blur-[30px]"/>
+        {/* Yarasa animasyonları */}
+        {bats.map(i => (
+          <div key={i} className="absolute text-2xl animate-bounce opacity-30"
+            style={{
+              left:`${10 + i*11}%`,
+              top:`${5 + (i%3)*8}%`,
+              animationDelay:`${i*0.4}s`,
+              animationDuration:`${2+i*0.3}s`,
+              fontSize:`${14+i%3*6}px`
+            }}>🦇</div>
+        ))}
+        {/* Zemin sisi */}
+        <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-red-950/30 to-transparent"/>
+        {/* Arka plan deseni */}
+        <div className="absolute inset-0 opacity-5" style={{backgroundImage:'radial-gradient(circle at 1px 1px, red 1px, transparent 0)', backgroundSize:'40px 40px'}}/>
+      </div>
+
+      <div className="relative z-10 w-full max-w-lg px-4">
+
+        {/* Logo bölümü */}
+        <div className="text-center mb-8">
+          <div className="relative inline-block mb-4">
+            <div className="text-[80px] leading-none filter drop-shadow-[0_0_30px_rgba(220,38,38,0.8)] animate-pulse">🧛</div>
+            {/* Kan damlaları */}
+            <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 flex gap-1">
+              {[...Array(3)].map((_,i) => (
+                <div key={i} className="w-1.5 bg-red-600 rounded-b-full animate-pulse"
+                  style={{height:`${8+i*4}px`, animationDelay:`${i*0.2}s`}}/>
+              ))}
+            </div>
+          </div>
+          <h1 className="text-5xl md:text-6xl font-black tracking-tight mb-1"
+            style={{textShadow:'0 0 40px rgba(220,38,38,0.8)', background:'linear-gradient(135deg,#ef4444,#991b1b,#ef4444)', WebkitBackgroundClip:'text', WebkitTextFillColor:'transparent'}}>
+            Vampir Köylü
+          </h1>
+          <p className="text-red-400/60 text-sm font-bold uppercase tracking-[0.3em]">Online Sosyal Dedüksiyon</p>
+        </div>
+
+        {/* Kart */}
+        <div className="bg-red-950/20 backdrop-blur-xl border-2 border-red-900/50 rounded-3xl p-6 md:p-8 shadow-2xl shadow-red-900/30">
+
+          {mode === 'home' && (
+            <>
+              {/* İsim + Avatar */}
+              <div className="mb-5">
+                <label className="block text-xs font-black text-red-400 uppercase tracking-widest mb-2">Oyuncu Adın</label>
+                <input type="text" maxLength={20} value={name}
+                  onChange={e => setName(sanitize(e.target.value))}
+                  placeholder="Adını gir... Karanlık bekliyor 🌑"
+                  autoComplete="off"
+                  className="w-full bg-black/50 border-2 border-red-900/60 rounded-2xl px-4 py-3.5 text-white text-base font-bold placeholder-red-900/60 focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20 transition-all"/>
+              </div>
+
+              {/* Avatar seçimi */}
+              <div className="mb-6">
+                <label className="block text-xs font-black text-red-400 uppercase tracking-widest mb-2">Maskeni Seç</label>
+                <div className="grid grid-cols-10 gap-1.5 bg-black/30 p-3 rounded-2xl border border-red-900/30">
+                  {AVATARS.map(a => (
+                    <button key={a} onClick={() => setAvatar(a)}
+                      className={`text-xl w-9 h-9 rounded-xl flex items-center justify-center transition-all ${
+                        avatar === a
+                          ? 'bg-red-600 shadow-lg shadow-red-600/50 scale-110'
+                          : 'bg-red-950/30 hover:bg-red-900/50 hover:scale-105'
+                      }`}>{a}</button>
+                  ))}
                 </div>
+              </div>
 
-                <input type="text" id="username" placeholder="Adınız Nedir?" autocomplete="off">
-                <input type="number" id="roomCodeInput" placeholder="Kasaba Kodu (Varsa)" pattern="\d*">
-                
-                <button class="btn btn-primary" onclick="joinGame()">KASABAYA GİRİŞ YAP</button>
-                <div style="text-align: center; color: #555; font-size: 1rem; font-weight:bold; font-family:'Cinzel';">- VEYA -</div>
-                <button class="btn btn-secondary" onclick="createGame()">YENİ KASABA KUR (ADMİN)</button>
-            </div>
-        </div>
+              {/* Butonlar */}
+              <div className="space-y-3">
+                <button onClick={() => setMode('create')} disabled={!valid}
+                  className="w-full py-4 bg-gradient-to-r from-red-700 to-red-900 hover:from-red-600 hover:to-red-800 text-white font-black text-lg rounded-2xl shadow-xl shadow-red-900/40 transition-all hover:-translate-y-1 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-3">
+                  ⚰️ Yeni Oda Kur
+                </button>
+                <button onClick={() => setMode('join')} disabled={!valid}
+                  className="w-full py-4 bg-red-950/60 hover:bg-red-900/60 border-2 border-red-800/50 text-white font-black text-lg rounded-2xl transition-all hover:-translate-y-1 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-3">
+                  🗡️ Odaya Katıl
+                </button>
+                <button onClick={() => setShowHowTo(true)}
+                  className="w-full py-3 bg-purple-950/40 hover:bg-purple-900/40 border-2 border-purple-800/40 text-purple-300 hover:text-purple-200 font-black text-base rounded-2xl transition-all hover:-translate-y-1 flex items-center justify-center gap-2">
+                  📖 Nasıl Oynanır?
+                </button>
+              </div>
 
-        <!-- 2. LOBİ EKRANI -->
-        <div id="screen-lobby" class="screen">
-            <h2>MEYDAN</h2>
-            <div style="font-size: 5rem; color: var(--gold); font-family:'Cinzel'; font-weight:700; text-shadow: 0 0 20px rgba(197,160,89,0.3);" id="display-room-code">...</div>
-            <p style="color:#aaa; font-size:1.2rem; font-style:italic;">Seçilen Kurallar: <span id="lobby-mode-display" style="color:var(--blood-red); font-weight:bold; font-style:normal;">KLASİK</span></p>
+              {/* Kural özeti */}
+              <div className="mt-5 grid grid-cols-2 gap-2">
+                {Object.values(ROLES).map(r => (
+                  <div key={r.id} className={`${r.bg} border ${r.border}/40 rounded-xl p-2.5 text-center`}>
+                    <div className="text-2xl mb-0.5">{r.emoji}</div>
+                    <div className={`text-xs font-black ${r.color}`}>{r.label}</div>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
 
-            <ul class="player-list" id="lobby-list"></ul>
-
-            <div id="admin-controls" class="admin-only" style="width: 100%; background: rgba(0,0,0,0.4); padding: 15px; border-radius: 4px; border: 1px solid var(--glass-border); margin-top:10px;">
-                <p style="text-align: center; margin:0 0 10px 0; font-size:1.1rem; color:var(--gold); font-family:'Cinzel';">VAMPİR SAYISI</p>
-                <div style="display: flex; justify-content: center; align-items:center; gap: 25px;">
-                    <button class="control-btn" style="width:40px; height:40px;" onclick="changeVampCount(-1)">-</button>
-                    <span id="vamp-count-display" style="font-size: 3rem; font-family:'Cinzel'; color: var(--blood-red);">2</span>
-                    <button class="control-btn" style="width:40px; height:40px;" onclick="changeVampCount(1)">+</button>
+          {mode === 'create' && (
+            <div className="space-y-5">
+              <button onClick={() => setMode('home')} className="text-red-400/60 hover:text-red-400 text-sm font-bold transition-colors">← Geri</button>
+              <div>
+                <label className="block text-xs font-black text-red-400 uppercase tracking-widest mb-2">Oyuncu Sayısı (min 4)</label>
+                <div className="flex gap-2 flex-wrap">
+                  {[4,5,6,7,8,9,10].map(n => (
+                    <button key={n} onClick={() => setPlayerCount(n)}
+                      className={`w-12 h-12 rounded-xl font-black text-xl transition-all ${playerCount===n?'bg-red-600 text-white shadow-lg shadow-red-600/40 scale-110':'bg-red-950/40 text-red-400 hover:bg-red-900/40'}`}>
+                      {n}
+                    </button>
+                  ))}
                 </div>
-                <button class="btn btn-primary" style="margin-top:15px;" onclick="launchGameSequence()">KASABAYI UYANDIR</button>
+                {/* Rol dağılımı önizleme */}
+                <div className="mt-3 bg-black/30 rounded-xl p-3 text-xs text-red-300/70">
+                  {playerCount <= 4 && '🧛×1  💉×1  🏘️×2'}
+                  {playerCount === 5 && '🧛×1  💉×1  🏘️×3'}
+                  {playerCount === 6 && '🧛×2  💉×1  🏘️×3'}
+                  {playerCount === 7 && '🧛×2  💉×1  🔍×1  🏘️×3'}
+                  {playerCount === 8 && '🧛×2  💉×1  🔍×1  🏘️×4'}
+                  {playerCount === 9 && '🧛×2  💉×1  🔍×1  🏘️×5'}
+                  {playerCount >= 10 && '🧛×3  💉×1  🔍×1  🏘️×5+'}
+                </div>
+              </div>
+              <button onClick={() => onCreate({ name: sanitize(name), avatar, playerCount })}
+                className="w-full py-4 bg-gradient-to-r from-red-700 to-red-900 hover:from-red-600 text-white font-black text-xl rounded-2xl shadow-xl transition-all hover:-translate-y-1 flex items-center justify-center gap-2">
+                🌙 Karanlığı Başlat!
+              </button>
             </div>
-            <p class="waiting-msg" style="color: #666; font-style: italic; margin-top: 20px; font-size:1.2rem;">Yönetici bekleniyor...</p>
+          )}
+
+          {mode === 'join' && (
+            <div className="space-y-5">
+              <button onClick={() => setMode('home')} className="text-red-400/60 hover:text-red-400 text-sm font-bold transition-colors">← Geri</button>
+              <div>
+                <label className="block text-xs font-black text-red-400 uppercase tracking-widest mb-2">Oda Kodu</label>
+                <input type="text" maxLength={4} value={code}
+                  onChange={e => setCode(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g,''))}
+                  placeholder="• • • •" autoComplete="off"
+                  className="w-full bg-black/50 border-2 border-red-900/60 rounded-2xl px-4 py-4 text-white text-center font-black text-4xl tracking-[0.5em] focus:outline-none focus:border-red-500 uppercase"/>
+              </div>
+              <button onClick={() => onJoin(code, { name: sanitize(name), avatar })}
+                disabled={code.length !== 4}
+                className="w-full py-4 bg-red-800 hover:bg-red-700 text-white font-black text-xl rounded-2xl shadow-xl transition-all hover:-translate-y-1 disabled:opacity-40 flex items-center justify-center gap-2">
+                🗡️ Kasabaya Gir
+              </button>
+            </div>
+          )}
         </div>
 
-        <!-- 3. HİKAYE GÖSTERİM -->
-        <div id="screen-story-intro" class="screen" style="justify-content: flex-start;">
-            <div style="background: rgba(15,5,0,0.9); border: 2px solid var(--blood-red); padding: 30px; border-radius: 4px; max-height: 65vh; overflow-y: auto; width: 100%; box-shadow: inset 0 0 50px rgba(0,0,0,0.9);">
-                <h2 id="story-heading" style="color: var(--blood-red); text-align: center; border-bottom:1px solid #333; padding-bottom:15px; font-size:2rem;">KARA GECE</h2>
-                <div id="story-body" style="font-size:1.2rem; line-height: 1.6; color: var(--parchment); margin-top:20px; text-align:justify;">...</div>
-            </div>
-            <button class="btn btn-primary admin-only" onclick="proceedToCards()" style="margin-top:20px;">KADERLERİ DAĞIT</button>
-            <p class="waiting-msg" style="margin-top:20px; color:#666; font-size:1.2rem;">Yönetici bekleniyor...</p>
+        <p className="text-center text-red-900/40 text-xs font-bold mt-4 uppercase tracking-widest">forgeandplay.com</p>
+      </div>
+    </div>
+  );
+};
+
+// ─── LOBBY ────────────────────────────────────────────────────────────────────
+const LobbyScreen = ({ room, user, onStart, onAddBot }) => {
+  const isHost = room.hostId === user.uid;
+  const players = Object.values(room.players || {});
+  const canStart = players.length >= 4;
+
+  return (
+    <div className="min-h-screen bg-black text-white p-4 flex flex-col items-center pt-8">
+      <div className="w-full max-w-2xl">
+
+        {/* Header */}
+        <div className="bg-red-950/30 border-2 border-red-900/50 rounded-3xl p-6 mb-6 text-center">
+          <h2 className="text-3xl font-black text-red-300 mb-2">🌙 Bekleme Odası</h2>
+          <div className="inline-block bg-black/50 border border-red-800/50 px-6 py-2 rounded-full">
+            <span className="text-xs text-red-400 font-bold uppercase tracking-widest">Oda Kodu: </span>
+            <span className="text-2xl font-mono font-black text-red-300 tracking-[0.3em]">{room.id}</span>
+          </div>
+          <p className="text-red-400/50 text-xs mt-2 font-bold">Oyunun başlaması için en az 4 oyuncu gerekli</p>
         </div>
 
-        <!-- 4. ROL KARTI -->
-        <div id="screen-card" class="screen">
-            <h2>KADERİN</h2>
-            <p style="color:#888; font-size:1.2rem; margin-top:-10px;">Öğrenmek için karta dokun</p>
-            <div class="card-container" onclick="flipCard()">
-                <div class="card" id="role-card">
-                    <div class="card-face card-front">
-                        <span style="font-size: 6rem; color: #111; font-family:'Cinzel'; opacity:0.5;">?</span>
+        {/* Oyuncular */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+          {players.map(p => (
+            <div key={p.id} className={`bg-red-950/20 border-2 ${p.isBot?'border-purple-700/50':'border-red-900/40'} rounded-2xl p-4 text-center`}>
+              <div className="text-4xl mb-2">{p.avatar}</div>
+              <div className="font-black text-sm text-white truncate">{p.name}</div>
+              {p.isBot && <div className="text-xs text-purple-400 font-bold mt-1">🤖 Bot</div>}
+              {p.id === room.hostId && <div className="text-xs text-red-400 font-bold mt-1">👑 Kurucu</div>}
+            </div>
+          ))}
+          {/* Boş slotlar */}
+          {[...Array(Math.max(0, 4 - players.length))].map((_, i) => (
+            <div key={`empty-${i}`} className="bg-red-950/10 border-2 border-dashed border-red-900/20 rounded-2xl p-4 text-center opacity-40">
+              <div className="text-4xl mb-2">💀</div>
+              <div className="text-xs text-red-800 font-bold">Bekleniyor...</div>
+            </div>
+          ))}
+        </div>
+
+        {/* Butonlar */}
+        {isHost ? (
+          <div className="space-y-3">
+            <div className="flex gap-3">
+              <button onClick={onAddBot} disabled={players.length >= 10}
+                className="flex-1 py-3 bg-purple-900/50 border-2 border-purple-700/50 hover:bg-purple-800/50 text-purple-300 font-black rounded-2xl transition-all disabled:opacity-40 flex items-center justify-center gap-2">
+                🤖 Bot Ekle
+              </button>
+              <button onClick={onStart} disabled={!canStart}
+                className="flex-1 py-4 bg-gradient-to-r from-red-700 to-red-900 hover:from-red-600 text-white font-black text-lg rounded-2xl shadow-xl transition-all hover:-translate-y-1 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+                🧛 Oyunu Başlat!
+              </button>
+            </div>
+            {!canStart && <p className="text-center text-red-600 text-xs font-bold">{4 - players.length} oyuncu daha gerekli</p>}
+          </div>
+        ) : (
+          <div className="text-center p-6 bg-red-950/20 border-2 border-red-900/30 rounded-2xl">
+            <p className="text-red-400 font-black animate-pulse text-lg">🌙 Kurucu oyunu başlatmayı bekliyor...</p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+// ─── ROL AÇIKLAMA EKRANI ──────────────────────────────────────────────────────
+const RoleRevealScreen = ({ myPlayer, room, onReady }) => {
+  const [revealed, setRevealed] = useState(false);
+  const [countdown, setCountdown] = useState(10);
+  const role = ROLES[myPlayer?.role] || ROLES.villager;
+
+  // Vampirleri bul (sadece vampirlere göster)
+  const teammates = myPlayer?.role === 'vampire'
+    ? Object.values(room.players || {}).filter(p => p.id !== myPlayer.id && p.role === 'vampire')
+    : [];
+
+  useEffect(() => {
+    const t = setTimeout(() => setRevealed(true), 1000);
+    return () => clearTimeout(t);
+  }, []);
+
+  useEffect(() => {
+    if (!revealed) return;
+    if (countdown <= 0) { onReady(); return; }
+    const t = setTimeout(() => setCountdown(c => c - 1), 1000);
+    return () => clearTimeout(t);
+  }, [revealed, countdown]);
+
+  return (
+    <div className="min-h-screen bg-black text-white flex items-center justify-center p-4">
+      <div className="text-center max-w-md w-full">
+        <p className="text-red-400/60 text-sm font-bold uppercase tracking-widest mb-4">Senin Rolün</p>
+
+        {/* Kart açılış animasyonu */}
+        <div className={`transition-all duration-1000 ${revealed ? 'opacity-100 scale-100' : 'opacity-0 scale-75'}`}>
+          <div className={`${role.bg} border-4 ${role.border} rounded-3xl p-8 mb-6 shadow-2xl`}
+            style={{boxShadow: myPlayer?.role==='vampire' ? '0 0 60px rgba(220,38,38,0.4)' : ''}}>
+            <div className="text-8xl mb-4 filter drop-shadow-lg">{role.emoji}</div>
+            <h2 className={`text-4xl font-black ${role.color} mb-3`}>{role.label}</h2>
+            <p className="text-white/70 text-sm leading-relaxed">{role.desc}</p>
+          </div>
+
+          {/* Vampir takım arkadaşları */}
+          {teammates.length > 0 && (
+            <div className="bg-red-950/40 border border-red-800/50 rounded-2xl p-4 mb-6">
+              <p className="text-red-400 text-xs font-black uppercase tracking-wider mb-3">🩸 Vampir Kardeşlerin</p>
+              <div className="flex justify-center gap-3 flex-wrap">
+                {teammates.map(t => (
+                  <div key={t.id} className="flex items-center gap-2 bg-black/30 px-3 py-2 rounded-xl">
+                    <span className="text-xl">{t.avatar}</span>
+                    <span className="font-bold text-red-200 text-sm">{t.name}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <button onClick={onReady}
+            className={`w-full py-4 ${role.bg} border-2 ${role.border} ${role.color} font-black text-lg rounded-2xl transition-all hover:scale-105`}>
+            Hazırım! ({countdown})
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ─── GECE EKRANI ──────────────────────────────────────────────────────────────
+const NightScreen = ({ room, user, onAction }) => {
+  const myPlayer = room.players?.[user?.uid];
+  const [selected, setSelected] = useState(null);
+  const [submitted, setSubmitted] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(PHASE_DURATION.night);
+  const role = myPlayer?.role;
+  const nightActions = room.nightActions || {};
+
+  useEffect(() => {
+    if (timeLeft <= 0) {
+      if (!submitted) handleSubmit(null);
+      return;
+    }
+    const t = setTimeout(() => setTimeLeft(p => p - 1), 1000);
+    return () => clearTimeout(t);
+  }, [timeLeft, submitted]);
+
+  const alivePlayers = Object.values(room.players || {}).filter(p => p.isAlive && p.id !== user?.uid);
+  const aliveNonVampires = alivePlayers.filter(p => p.role !== 'vampire');
+  const submittedCount = Object.keys(nightActions.submitted || {}).length;
+  const totalCount = Object.values(room.players || {}).filter(p => p.isAlive).length;
+
+  const handleSubmit = (target) => {
+    if (submitted) return;
+    setSubmitted(true);
+    onAction(target || selected);
+  };
+
+  // Vampirlerin ortak hedefi
+  const vampireVotes = nightActions.vampireVotes || {};
+  const vampireTarget = Object.values(vampireVotes).length > 0
+    ? Object.entries(Object.values(vampireVotes).reduce((acc,v)=>{acc[v]=(acc[v]||0)+1;return acc;},{}))
+        .sort((a,b)=>b[1]-a[1])[0]?.[0]
+    : null;
+
+  return (
+    <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center p-4">
+      {/* Gece arka planı */}
+      <div className="fixed inset-0 pointer-events-none">
+        <div className="absolute inset-0 bg-gradient-to-b from-black via-red-950/10 to-black"/>
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-96 h-96 bg-red-900/10 rounded-full blur-[100px]"/>
+      </div>
+
+      <div className="relative z-10 w-full max-w-lg">
+        {/* Başlık */}
+        <div className="text-center mb-6">
+          <div className="text-6xl mb-2 animate-pulse">🌙</div>
+          <h2 className="text-3xl font-black text-red-300">Gece {room.phase || 1}</h2>
+          <div className={`inline-block mt-2 px-4 py-1 rounded-full font-mono font-black text-lg ${timeLeft <= 10 ? 'bg-red-600 animate-pulse' : 'bg-red-950/50 border border-red-800'}`}>
+            {timeLeft}s
+          </div>
+        </div>
+
+        {/* İlerleme */}
+        <div className="bg-red-950/20 border border-red-900/30 rounded-2xl p-3 mb-5 text-center">
+          <p className="text-red-400/70 text-xs font-bold">{submittedCount}/{totalCount} oyuncu eylemini tamamladı</p>
+        </div>
+
+        {!submitted ? (
+          <>
+            {/* ROL BAZLI AKSYON */}
+            {role === 'vampire' && (
+              <div>
+                <div className="flex items-center gap-2 mb-4">
+                  <span className="text-2xl">🧛</span>
+                  <h3 className="font-black text-red-300 text-lg">Kurbanını seç</h3>
+                </div>
+                <div className="space-y-2">
+                  {aliveNonVampires.map(p => (
+                    <button key={p.id} onClick={() => setSelected(p.id)}
+                      className={`w-full flex items-center gap-3 p-4 rounded-2xl border-2 transition-all ${
+                        selected === p.id
+                          ? 'bg-red-700/40 border-red-500 scale-[1.02]'
+                          : 'bg-red-950/20 border-red-900/30 hover:border-red-700/50'
+                      }`}>
+                      <span className="text-3xl">{p.avatar}</span>
+                      <span className="font-black text-white">{p.name}</span>
+                      {vampireVotes[user.uid] === p.id && <span className="ml-auto text-red-400 text-xs font-bold">✓ Oyun</span>}
+                    </button>
+                  ))}
+                </div>
+                {vampireTarget && vampireTarget !== selected && (
+                  <p className="text-center text-red-400/60 text-xs font-bold mt-2">
+                    Diğer vampirler: {room.players[vampireTarget]?.name} → hedef
+                  </p>
+                )}
+              </div>
+            )}
+
+            {role === 'doctor' && (
+              <div>
+                <div className="flex items-center gap-2 mb-4">
+                  <span className="text-2xl">💉</span>
+                  <h3 className="font-black text-blue-300 text-lg">Kimi koruyacaksın?</h3>
+                </div>
+                <div className="space-y-2">
+                  {[...alivePlayers, myPlayer].filter(Boolean).map(p => (
+                    <button key={p.id} onClick={() => setSelected(p.id)}
+                      className={`w-full flex items-center gap-3 p-4 rounded-2xl border-2 transition-all ${
+                        selected === p.id
+                          ? 'bg-blue-700/30 border-blue-500 scale-[1.02]'
+                          : 'bg-blue-950/10 border-blue-900/30 hover:border-blue-700/40'
+                      }`}>
+                      <span className="text-3xl">{p.avatar}</span>
+                      <span className="font-black text-white">{p.name} {p.id === user.uid ? '(Sen)' : ''}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {role === 'detective' && (
+              <div>
+                <div className="flex items-center gap-2 mb-4">
+                  <span className="text-2xl">🔍</span>
+                  <h3 className="font-black text-yellow-300 text-lg">Kimi sorgulayacaksın?</h3>
+                </div>
+                <div className="space-y-2">
+                  {alivePlayers.map(p => {
+                    const prevResult = (nightActions.detectiveResults || {})[p.id];
+                    return (
+                      <button key={p.id} onClick={() => setSelected(p.id)}
+                        className={`w-full flex items-center gap-3 p-4 rounded-2xl border-2 transition-all ${
+                          selected === p.id
+                            ? 'bg-yellow-700/20 border-yellow-500 scale-[1.02]'
+                            : 'bg-yellow-950/10 border-yellow-900/20 hover:border-yellow-700/30'
+                        }`}>
+                        <span className="text-3xl">{p.avatar}</span>
+                        <span className="font-black text-white">{p.name}</span>
+                        {prevResult !== undefined && (
+                          <span className={`ml-auto text-xs font-black ${prevResult ? 'text-red-400' : 'text-green-400'}`}>
+                            {prevResult ? '🧛 Vampir!' : '✓ Temiz'}
+                          </span>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {role === 'villager' && (
+              <div className="text-center py-10">
+                <div className="text-7xl mb-4 opacity-30">😴</div>
+                <h3 className="text-2xl font-black text-white/50">Uyuyorsun...</h3>
+                <p className="text-white/30 text-sm mt-2">Gündüz vampirleri bulmak sana kalmış!</p>
+              </div>
+            )}
+
+            {/* Gönder butonu */}
+            {role !== 'villager' && (
+              <button onClick={() => handleSubmit(selected)} disabled={!selected}
+                className="w-full mt-5 py-4 bg-red-800 hover:bg-red-700 text-white font-black text-lg rounded-2xl transition-all hover:-translate-y-1 disabled:opacity-40 disabled:cursor-not-allowed">
+                Eylemi Onayla →
+              </button>
+            )}
+            {role === 'villager' && (
+              <button onClick={() => handleSubmit(null)}
+                className="w-full mt-5 py-4 bg-red-950/40 border border-red-900/30 text-red-400/60 font-bold text-sm rounded-2xl transition-all">
+                Uyumaya Devam Et
+              </button>
+            )}
+          </>
+        ) : (
+          <div className="text-center py-10">
+            <div className="text-7xl mb-4">🌙</div>
+            <h3 className="text-2xl font-black text-red-300">Sabah bekleniyor...</h3>
+            <p className="text-red-400/60 text-sm mt-2">{submittedCount}/{totalCount} tamamladı</p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+// ─── GÜNDÜZ / OY EKRANI ───────────────────────────────────────────────────────
+const DayScreen = ({ room, user, onVote, onNextPhase }) => {
+  const isHost = room.hostId === user?.uid;
+  const myPlayer = room.players?.[user?.uid];
+  const [timeLeft, setTimeLeft] = useState(room.status === 'vote' ? PHASE_DURATION.vote : PHASE_DURATION.day);
+  const [myVote, setMyVote] = useState(null);
+  const [voted, setVoted] = useState(false);
+
+  const alivePlayers = Object.values(room.players || {}).filter(p => p.isAlive && p.id !== user?.uid);
+  const dayVotes = room.dayVotes || {};
+  const events = room.currentEvents || [];
+
+  useEffect(() => {
+    setTimeLeft(room.status === 'vote' ? PHASE_DURATION.vote : PHASE_DURATION.day);
+    setVoted(!!dayVotes[user?.uid]);
+    setMyVote(dayVotes[user?.uid] || null);
+  }, [room.status]);
+
+  useEffect(() => {
+    if (timeLeft <= 0) {
+      if (room.status === 'vote' && !voted && myPlayer?.isAlive) {
+        handleVote(rand(alivePlayers)?.id || null);
+      }
+      return;
+    }
+    const t = setTimeout(() => setTimeLeft(p => p - 1), 1000);
+    return () => clearTimeout(t);
+  }, [timeLeft, room.status]);
+
+  const handleVote = (targetId) => {
+    if (voted || !myPlayer?.isAlive) return;
+    setVoted(true);
+    setMyVote(targetId);
+    onVote(targetId);
+  };
+
+  // Oy sayıları
+  const voteCounts = Object.values(dayVotes).reduce((acc, v) => {
+    acc[v] = (acc[v] || 0) + 1;
+    return acc;
+  }, {});
+
+  const maxVotes = Math.max(0, ...Object.values(voteCounts));
+
+  return (
+    <div className="min-h-screen bg-black text-white p-4 flex flex-col items-center">
+      <div className="w-full max-w-2xl pt-6">
+
+        {/* Başlık */}
+        <div className="text-center mb-5">
+          <div className="text-5xl mb-2">{room.status === 'vote' ? '⚖️' : '☀️'}</div>
+          <h2 className="text-3xl font-black text-amber-300">
+            {room.status === 'vote' ? 'Oylama!' : `Gündüz ${room.phase || 1}`}
+          </h2>
+          <div className={`inline-block mt-2 px-4 py-1 rounded-full font-mono font-black text-lg ${timeLeft <= 10 ? 'bg-red-600 animate-pulse' : 'bg-amber-900/40 border border-amber-800'}`}>
+            {timeLeft}s
+          </div>
+        </div>
+
+        {/* Gece olayları */}
+        {events.length > 0 && (
+          <div className="bg-red-950/30 border border-red-900/50 rounded-2xl p-4 mb-5 space-y-2">
+            {events.map((e, i) => (
+              <div key={i} className={`font-bold text-center ${e.type==='killed'?'text-red-300':e.type==='saved'?'text-blue-300':'text-green-300'}`}>
+                {e.text}
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Yaşayan oyuncular + oylama */}
+        <div className="space-y-2.5 mb-5">
+          <h3 className="text-xs font-black text-amber-400/60 uppercase tracking-widest">Yaşayan Oyuncular</h3>
+          {Object.values(room.players || {}).filter(p => p.isAlive).map(p => {
+            const voteCount = voteCounts[p.id] || 0;
+            const isTarget = myVote === p.id;
+            const isMe = p.id === user?.uid;
+            const pct = maxVotes > 0 ? (voteCount / maxVotes) * 100 : 0;
+
+            return (
+              <div key={p.id} className={`relative overflow-hidden rounded-2xl border-2 transition-all ${
+                isTarget ? 'border-red-500 bg-red-900/20' : 'border-red-900/30 bg-red-950/10'
+              }`}>
+                {/* Oy çubuğu */}
+                <div className="absolute inset-0 bg-red-700/20 transition-all duration-500"
+                  style={{width:`${pct}%`}}/>
+
+                <div className="relative flex items-center gap-3 p-3.5">
+                  <span className="text-3xl">{p.avatar}</span>
+                  <div className="flex-1">
+                    <div className="font-black text-white text-sm">{p.name} {isMe && '(Sen)'}</div>
+                    {/* Kişinin rolü - sadece game_over'da göster */}
+                    {room.status === 'game_over' && (
+                      <div className={`text-xs font-bold ${ROLES[p.role]?.color}`}>
+                        {ROLES[p.role]?.emoji} {ROLES[p.role]?.label}
+                      </div>
+                    )}
+                  </div>
+                  {voteCount > 0 && (
+                    <div className="bg-red-800/60 px-2.5 py-1 rounded-lg text-xs font-black text-red-200">
+                      {voteCount} oy
                     </div>
-                    <div class="card-face card-back" id="card-back-content"></div>
+                  )}
+                  {!isMe && myPlayer?.isAlive && room.status === 'vote' && !voted && (
+                    <button onClick={() => handleVote(p.id)}
+                      className="bg-red-700 hover:bg-red-600 text-white font-black px-4 py-2 rounded-xl text-sm transition-all hover:scale-105">
+                      Oy Ver
+                    </button>
+                  )}
+                  {!isMe && myPlayer?.isAlive && room.status === 'vote' && voted && isTarget && (
+                    <span className="text-red-400 font-black text-xs">✓ Oyun</span>
+                  )}
                 </div>
+              </div>
+            );
+          })}
+
+          {/* Ölü oyuncular */}
+          {Object.values(room.players || {}).filter(p => !p.isAlive).map(p => (
+            <div key={p.id} className="flex items-center gap-3 p-3.5 rounded-2xl border-2 border-red-900/10 bg-red-950/5 opacity-40">
+              <span className="text-3xl grayscale">{p.avatar}</span>
+              <div className="font-black text-white/50 text-sm line-through">{p.name}</div>
+              <span className="ml-auto text-xs text-red-600">💀 Ölü</span>
             </div>
-            <button class="btn btn-secondary admin-only" onclick="goToDiscussion()">GÜNÜ BAŞLAT</button>
-            <p class="waiting-msg" style="margin-top:20px; color:#666; font-size:1.2rem;">Diğerleri bekleniyor...</p>
+          ))}
         </div>
 
-        <!-- 5. TARTIŞMA -->
-        <div id="screen-discuss" class="screen">
-            <h2 style="color: var(--gold); font-size:3rem; margin-bottom:0;">GÜNDÜZ</h2>
-            <p id="discussion-town-name" style="color: #a58a60; letter-spacing:3px; font-family:'Cinzel'; margin-top:5px;">KASABA MEYDANI</p>
-            
-            <div id="timer-discuss" class="timer-display" style="margin: 5px 0;">10:00</div>
-            
-            <!-- Soru Havuzu Kutusu -->
-            <div class="question-box">
-                <p id="random-question-text" class="fade-text" style="font-size: 1.3rem; font-style: italic; color: var(--parchment); margin: 0;">Sessizlik...</p>
-            </div>
-            <button class="btn btn-secondary" style="border-color:var(--gold); color:var(--gold);" onclick="showRandomQuestion()">BAŞKA SORU ÖNER</button>
+        {/* Host kontrolü */}
+        {isHost && room.status === 'day' && (
+          <button onClick={onNextPhase}
+            className="w-full py-4 bg-amber-800 hover:bg-amber-700 text-white font-black text-lg rounded-2xl transition-all hover:-translate-y-1">
+            ⚖️ Oylamayı Başlat
+          </button>
+        )}
 
-            <p style="color: #aaa; text-align: center; max-width:80%; font-size:1.1rem; margin-top:20px;">Vampirleri bulmak için konuşun. Kimseye güvenmeyin.</p>
-            
-            <button class="btn btn-secondary admin-only" style="margin-top:20px;" onclick="skipTimer()">SÜREYİ ATLA VE OYLAMAYA GEÇ</button>
-            <p class="waiting-msg" style="margin-top:20px; color:#666; font-size:1.2rem;">Güneşin batması bekleniyor...</p>
-        </div>
-
-        <!-- 6. OYLAMA VE SAVUNMA -->
-        <div id="screen-vote" class="screen">
-            <h1 id="vote-title" style="font-size: 3.5rem; margin-bottom:5px;">İNFAZ</h1>
-            <p id="vote-subtitle" style="color: var(--blood-red); font-weight:bold; letter-spacing:2px; margin-bottom:0; font-family:'Cinzel'; font-size:1.2rem;">KİMİ SUÇLUYORSUN?</p>
-            <div id="timer-vote" class="timer-display" style="font-size: 3rem; margin-top:5px; margin-bottom:0;">05:00</div>
-            
-            <ul class="player-list" id="vote-list"></ul>
-            
-            <button class="btn btn-primary" id="vote-submit-btn" onclick="submitVote()">OYUMU KULLAN / DEĞİŞTİR</button>
-            
-            <p id="dead-msg" style="color: #555; display:none; margin-top:10px; font-weight:bold; font-style:italic; font-size:1.2rem;">Ruhlar oy kullanamaz...</p>
-            
-            <div class="admin-only" style="width:100%; border-top:1px solid #333; padding-top:15px; margin-top:15px;">
-                <button class="btn btn-secondary" id="btn-start-defense" style="border-color:var(--gold); color:var(--gold);" onclick="startDefense()">🛡️ SAVUNMA İÇİN SÜRE VER (2 DK)</button>
-                <button class="btn btn-danger" id="vote-end-btn" onclick="endVoting()">⚖️ KARARI VER VE İNFAZ ET</button>
-            </div>
-        </div>
-
-        <!-- 7. SONUÇ (BİRİ ELENDİ VEYA EŞİTLİK) -->
-        <div id="screen-result" class="screen">
-            <div id="result-icon" style="font-size: 6rem; margin-bottom: 10px; text-shadow:0 0 30px #000;">⚖️</div>
-            <h1 id="result-title" style="font-size:3rem; color:var(--gold);">KARAR</h1>
-            <div style="padding: 30px 20px; border: 1px solid var(--glass-border); background: rgba(0,0,0,0.5); border-radius: 4px; width: 100%; text-align: center; margin: 20px 0;">
-                <p id="eliminated-name" style="font-size: 2.5rem; font-family:'Cinzel'; font-weight: 700; margin: 0; color: var(--blood-red);">...</p>
-                <div style="width:60px; height:1px; background:var(--gold); margin:15px auto;"></div>
-                <p id="eliminated-role" style="font-size: 1.4rem; margin: 0; color: #ccc; font-style:italic;">...</p>
-            </div>
-            <button class="btn btn-secondary admin-only" onclick="startNextRound()">YENİ GÜNE UYAN</button>
-            <p class="waiting-msg" style="margin-top:20px; color:#666; font-size:1.2rem;">Yönetici bekleniyor...</p>
-        </div>
-
-        <!-- 8. OYUN BİTTİ EKRANI -->
-        <div id="screen-gameover" class="screen">
-            <h1 id="winner-title" style="font-size: 4rem; line-height:1.2;">...</h1>
-            <p id="winner-desc" style="font-size: 1.5rem; color: #ccc; text-align:center; margin: 20px 0 40px 0; font-style:italic;">...</p>
-            <button class="btn btn-primary admin-only" onclick="resetGame()">YENİ KASABA KUR</button>
-            <p class="waiting-msg" style="margin-top:20px; color:#666; font-size:1.2rem;">Yönetici bekleniyor...</p>
-        </div>
+        {!myPlayer?.isAlive && (
+          <div className="text-center py-4 text-red-600/60 font-bold text-sm">
+            💀 Ölüsün — Sadece izleyebilirsin
+          </div>
+        )}
+      </div>
     </div>
+  );
+};
 
-    <!-- SCRIPTS -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
-        import { getFirestore, collection, doc, setDoc, updateDoc, onSnapshot, getDoc, serverTimestamp, getDocs } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
-        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+// ─── OYUN SONU ────────────────────────────────────────────────────────────────
+const GameOverScreen = ({ room, user }) => {
+  const winner = room.winner;
+  const myPlayer = room.players?.[user?.uid];
+  const iWon = (winner === 'vampires' && myPlayer?.role === 'vampire') ||
+               (winner === 'villagers' && myPlayer?.role !== 'vampire');
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyAu-9xnaZRgcYj58gX3Yrfbj4NqvPI4B5Q",
-            authDomain: "vampirkoyluv3.firebaseapp.com",
-            projectId: "vampirkoyluv3",
-            storageBucket: "vampirkoyluv3.firebasestorage.app",
-            messagingSenderId: "114861911533",
-            appId: "1:114861911533:web:bb012b575860684c764be4"
-        };
-
-        let app, db, auth;
-        try {
-            app = initializeApp(firebaseConfig);
-            db = getFirestore(app);
-            auth = getAuth(app);
-        } catch (e) {
-            document.getElementById('error-overlay').style.display = 'flex';
+  return (
+    <div className="min-h-screen bg-black text-white flex items-center justify-center p-4">
+      {/* Arka plan efekti */}
+      <div className="fixed inset-0 pointer-events-none">
+        {winner === 'vampires'
+          ? <div className="absolute inset-0 bg-red-900/20 animate-pulse"/>
+          : <div className="absolute inset-0 bg-yellow-900/10"/>
         }
+      </div>
 
-        let myUserId = null;
-        let myRoomId = null;
-        let myData = null;
-        let currentRoomData = null;
-        let allPlayers = []; 
-        let audioCtx = null;
-        let isMuted = true;
-        let timerInterval = null;
-        let selectedVoteId = null; 
-        let questionInterval = null;
+      <div className="relative z-10 w-full max-w-2xl text-center">
+        {/* Kazanan */}
+        <div className="mb-8">
+          <div className="text-[100px] mb-4 filter drop-shadow-2xl">
+            {winner === 'vampires' ? '🧛' : '🏘️'}
+          </div>
+          <h1 className={`text-5xl font-black mb-2 ${winner === 'vampires' ? 'text-red-400' : 'text-yellow-400'}`}
+            style={{textShadow: winner === 'vampires' ? '0 0 40px rgba(220,38,38,0.5)' : '0 0 40px rgba(234,179,8,0.5)'}}>
+            {winner === 'vampires' ? 'Vampirler Kazandı!' : 'Köylüler Kazandı!'}
+          </h1>
+          <div className={`inline-block px-6 py-2 rounded-full font-black text-lg ${iWon ? 'bg-yellow-600/20 border-2 border-yellow-500 text-yellow-300' : 'bg-red-950/40 border-2 border-red-800 text-red-300'}`}>
+            {iWon ? '🏆 Sen kazandın!' : '💀 Sen kaybettin'}
+          </div>
+        </div>
 
-        // Soru Havuzu (Yan Yana Oynanışa Özel Psikolojik Sorular)
-        const interrogationQuestions = [
-            "Gözlerime bakıp yalan söylemeden 'Ben vampir değilim' diyebilir misin?",
-            "Neden son 5 dakikadır göz temasından özellikle kaçınıyorsun?",
-            "Az önce X suçlandığında yüzünde anlık bir rahatlama gördüm, sebebi neydi?",
-            "Şu an masada elleri en çok oynayan/titreyen kişi sensin, neden bu kadar gerginsin?",
-            "Neden sürekli konuşmayı başka bir yöne, özellikle başka birinin üzerine çekmeye çalışıyorsun?",
-            "Sessiz kalıp köşende bizim birbirimizi yememizi mi izliyorsun?",
-            "Siz ikiniz neden sürekli birbirinizin sözünü destekliyorsunuz? Yoksa gece ortak mısınız?",
-            "Eğer masumsan, masadaki en büyük tehlike sence kim ve neden?",
-            "Savunman çok ezberlenmiş gibi duruyor, bu senaryoyu oyundan önce mi hazırladın?",
-            "Neden az önce tam cevap verecekken yutkunup durakladın?",
-            "Bacaklarını bu kadar hızlı sallamanın sebebi masumiyetin mi yoksa yakalanma korkun mu?",
-            "Eğer vampir olsaydın, ilk gece kimi avlardın? Şu an o kişi yaşıyor mu?",
-            "Bizi ikna etmeye çalışırken ses tonun neden aniden bu kadar yükseldi?",
-            "Sana yöneltilen soruya neden soruyla karşılık verdin? Zaman mı kazanıyorsun?",
-            "X'i bu kadar hararetli savunman, onun vampir ortağın olmasından mı kaynaklı?",
-            "Masada en güvendiğin kişi kim? Neden konuşurken sadece ona bakarak onay arıyorsun?",
-            "Neden gülmemen gereken gergin bir anda gülümsedin? Bizimle oyun mu oynuyorsun?",
-            "Dikkatleri dağıtmak için çok fazla alakasız detay veriyorsun, asıl sakladığın şey ne?",
-            "Geçen turda X'e şüpheyle bakıyordun, şimdi neden birden onu savunmaya başladın?",
-            "Kollarını bağlayıp arkana yaslanman kendini bize kapattığını gösteriyor, neyden korkuyorsun?",
-            "Aramızda en masum görüneni seçip onu kalkan olarak mı kullanıyorsun?",
-            "Sana yöneltilen şüpheleri hemen başkasına yansıtıyorsun, bu bir panik tepkisi mi?",
-            "Vampirler genellikle kurbanlarını överler. Sen kimi bu kadar çok övüyorsun?",
-            "Masadaki gerginliği azaltmaya çalışıyorsun. Yoksa vampirlerin hedef olmasını mı engelliyorsun?",
-            "Gözlerin neden sürekli masanın aynı köşesine/kişisine kayıyor? Sessiz bir anlaşmanız mı var?",
-            "Sence bu masada kim 'rolünü' en iyi yapıyor?",
-            "Eğer bu tur seni asarsak, senden sonra kime dikkat etmeliyiz? Bize bir isim ver.",
-            "'Ben köylüyüm' derken neden sesin titredi?",
-            "Neden doğrudan kimseyi suçlamıyorsun? Sorumluluk almaktan mı kaçıyorsun?",
-            "Oylama yaklaştıkça duruşun değişti, neden geriye yaslanıp savunmaya geçtin?",
-            "X senin hakkında bir teori ortaya attığında neden aşırı tepki verdin?",
-            "Gerçekten masumsan, neden bizimle mantıklı bir ipucu paylaşmak yerine sadece kendini savunuyorsun?",
-            "Yüzündeki o şaşırmış ifade çok yapmacık duruyor, sence de öyle değil mi?",
-            "Konuşurken neden sürekli yüzüne veya saçına dokunuyorsun? Stresini mi atıyorsun?",
-            "Siz ikiniz oyuna başladığımızdan beri neden hiç birbirinizden şüphelenmediniz?",
-            "Neden aniden masadaki en sessiz kişiye saldırmaya karar verdin? Kolay hedef mi arıyorsun?",
-            "Bugün kimin asılmasını istersin? İsim vermekten korkma, eğer masumsan.",
-            "Vampir olduğunu öğrenseydik şu an verdiğin tepkilerden farklı ne yapardın? Hiçbir şey, değil mi?",
-            "Az önce dudaklarını ısırdın, bu genellikle yalan söyleyenlerin yaptığı bir harekettir. Ne gizliyorsun?",
-            "Çok fazla 'Ben yapmadım', 'Ben masumum' diyorsun. Psikolojide buna aşırı telafi denir.",
-            "Neden olayları mantıklı analiz etmek yerine sadece insanların açıklarını arıyorsun?",
-            "Gece birisi öldüğünde verdiğin tepkiyi hiç inandırıcı bulmadım. Sence de abartılı değil miydi?",
-            "Biri sana suçlama yönelttiğinde neden hemen gülerek/alay ederek konuyu kapatmaya çalışıyorsun?",
-            "Gözlerini benden kaçırma. Sence bu kasabanın sonunu kim getirecek?",
-            "Şu anki rahatlığın, gece birini yemiş olmanın verdiği bir doygunluk olabilir mi?",
-            "'Bilmiyorum' demek bazen en güvenli yalandır. Neden hiçbir şey hakkında kesin bir fikrin yok?",
-            "Neden masada kaos çıktığında arkanı yaslanıp sessizce izlemeyi tercih ettin?",
-            "Bu kadar çok konuşarak, sessiz kalan vampir ortağını mı kamufle ediyorsun?",
-            "Sence aramızdaki en tehlikeli oyuncu kim? Ve neden hala hayatta?",
-            "Dudakların kuruduğu için sürekli yutkunuyorsun. Bu yalan söylerken olan bir strestir. Ne saklıyorsun?",
-            "Sesinin tonu az önceki tura göre neden düştü? Enerjin mi bitti, yoksa yalan bulmakta mı zorlanıyorsun?",
-            "Eğer vampir olsan, masada ilk kimi kandırmaya çalışırdın? Ve şu an tam olarak bunu kime yapıyorsun?",
-            "Sürekli 'mantıklı düşünün' diyorsun ama kendi teorilerin tamamen altı boş. Neden?",
-            "Neden herkesin seni suçladığını düşünerek sürekli bir kurban psikolojisine giriyorsun?",
-            "Çaprazındaki kişiyle az önce göz göze geldiniz ve hemen kaçırdınız. O senin ortağın mı?",
-            "Şu an en ufak bir suçlamada bile tetikte bekliyorsun. Masum bir insan bu kadar saldırgan olmaz.",
-            "Nefes alışverişin hızlandı. Yalanların ortaya çıkmak üzere diye mi bu panik?",
-            "Eğer masumsan, masada kimin kesinlikle köylü olduğuna kefil olabilirsin?",
-            "Sürekli kendi 'dürüstlüğünden' bahsediyorsun. Gerçekten dürüst insanlar bunu kanıtlama ihtiyacı duymaz.",
-            "X'in üzerine gidilirken konuyu değiştiren sendin. Neden onu kurtarmaya çalıştın?",
-            "Sence vampirler şu an aramızda sessiz mi kalıyor yoksa çok mu konuşuyor? Sen hangi taraftasın?",
-            "Omuzlarını neden bu kadar kastın? Kendini koruma içgüdüsü mü bu?",
-            "Gece olduğunda bu masada en rahat uyuyan kişi sence kim? Belki de uyanık kalanlardan birisidir.",
-            "Gerçek bir köylü bu kadar çabuk pes etmez, neden 'istiyorsanız beni asın' diyerek duygu sömürüsü yapıyorsun?",
-            "Masadaki gerilimi azaltmak için yaptığın yersiz şakalar, suçluluk duygunu örtbas etmek için mi?",
-            "Kimliğini saklarken adrenalin mi salgılıyorsun? Hareketlerin çok ani ve kesik kesik."
-        ];
+        {/* Tüm roller */}
+        <div className="bg-red-950/20 border-2 border-red-900/30 rounded-3xl p-6 mb-6">
+          <h3 className="text-sm font-black text-red-400 uppercase tracking-widest mb-4">Gizli Roller Açıklanıyor</h3>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+            {Object.values(room.players || {}).map(p => {
+              const role = ROLES[p.role] || ROLES.villager;
+              return (
+                <div key={p.id} className={`${role.bg} border-2 ${role.border}/50 rounded-2xl p-3 text-center ${!p.isAlive?'opacity-50':''}`}>
+                  <div className="flex justify-center gap-1 text-2xl mb-1">{p.avatar} {role.emoji}</div>
+                  <div className="font-black text-white text-sm truncate">{p.name}</div>
+                  <div className={`text-xs font-bold ${role.color}`}>{role.label}</div>
+                  {!p.isAlive && <div className="text-xs text-red-600 mt-0.5">💀</div>}
+                </div>
+              );
+            })}
+          </div>
+        </div>
 
-        window.showRandomQuestion = () => {
-            const qText = document.getElementById('random-question-text');
-            if(!qText) return;
-            qText.style.opacity = 0;
-            setTimeout(() => {
-                const randomIndex = Math.floor(Math.random() * interrogationQuestions.length);
-                qText.innerText = `"${interrogationQuestions[randomIndex]}"`;
-                qText.style.opacity = 1;
-            }, 500);
-        };
+        {/* Tekrar oyna */}
+        <button onClick={() => window.location.reload()}
+          className="w-full py-4 bg-gradient-to-r from-red-800 to-red-950 hover:from-red-700 text-white font-black text-xl rounded-2xl shadow-xl transition-all hover:-translate-y-1">
+          🌙 Yeniden Oyna
+        </button>
+      </div>
+    </div>
+  );
+};
 
-        // --- SES FONKSİYONLARI ---
-        function initAudio() {
-            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            if (audioCtx.state === 'suspended') audioCtx.resume();
+// ─── ANA UYGULAMA ─────────────────────────────────────────────────────────────
+export default function App() {
+  const [user, setUser] = useState(null);
+  const [room, setRoom] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [screen, setScreen] = useState('setup'); // setup | lobby | role_reveal | game | over
+  const [readyForGame, setReadyForGame] = useState(false);
+
+  if (!IS_AUTHORIZED) return <BlockedScreen/>;
+
+  // Auth
+  useEffect(() => {
+    const init = async () => { try { await signInAnonymously(auth); } catch(e) { console.error(e); } };
+    init();
+    return onAuthStateChanged(auth, u => { setUser(u); setLoading(false); });
+  }, []);
+
+  // Room listener
+  useEffect(() => {
+    if (!user || !room?.id) return;
+    const ref = doc(db, 'artifacts', APP_ID, 'public', 'data', 'rooms', room.id);
+    return onSnapshot(ref, snap => {
+      if (snap.exists()) {
+        const data = snap.data();
+        setRoom(data);
+        // Ekran geçişleri
+        if (data.status === 'lobby') setScreen('lobby');
+        else if (data.status === 'role_reveal') setScreen('role_reveal');
+        else if (['night','day','vote'].includes(data.status)) setScreen('game');
+        else if (data.status === 'game_over') setScreen('over');
+      } else {
+        setRoom(null);
+        setScreen('setup');
+        alert("Oda kapatıldı.");
+      }
+    });
+  }, [user, room?.id]);
+
+  // ── HELPERS ────────────────────────────────────────────────────────────────
+  const roomRef = useCallback(() =>
+    room?.id ? doc(db, 'artifacts', APP_ID, 'public', 'data', 'rooms', room.id) : null,
+  [room?.id]);
+
+  const processNightActions = useCallback(async (data) => {
+    const { vampireTarget, doctorSave } = data.nightActions || {};
+    const { updatedPlayers, events } = processNight(data.players, { vampireTarget, doctorSave });
+
+    // Dedektif sonucu
+    const detectiveTarget = data.nightActions?.detectiveTarget;
+    const detectiveResults = { ...(data.nightActions?.detectiveResults || {}) };
+    if (detectiveTarget && updatedPlayers[detectiveTarget]) {
+      detectiveResults[detectiveTarget] = updatedPlayers[detectiveTarget].role === 'vampire';
+    }
+
+    const winner = checkWin(updatedPlayers);
+    const ref = roomRef();
+    if (!ref) return;
+
+    if (winner) {
+      await updateDoc(ref, {
+        players: updatedPlayers,
+        status: 'game_over',
+        winner,
+        currentEvents: events,
+        [`nightActions.detectiveResults`]: detectiveResults,
+      });
+    } else {
+      await updateDoc(ref, {
+        players: updatedPlayers,
+        status: 'day',
+        currentEvents: events,
+        dayVotes: {},
+        [`nightActions.detectiveResults`]: detectiveResults,
+      });
+    }
+  }, [roomRef]);
+
+  // Gece tamamlandı mı? (host kontrol eder)
+  useEffect(() => {
+    if (!room || !user || room.hostId !== user.uid) return;
+    if (room.status !== 'night') return;
+
+    const alivePlayers = Object.values(room.players || {}).filter(p => p.isAlive);
+    const submitted = Object.keys(room.nightActions?.submitted || {});
+    const allSubmitted = alivePlayers.every(p => submitted.includes(p.id));
+
+    if (allSubmitted) {
+      processNightActions(room);
+    }
+  }, [room?.nightActions?.submitted, room?.status]);
+
+  // Oylama tamamlandı mı? (host kontrol eder)
+  useEffect(() => {
+    if (!room || !user || room.hostId !== user.uid) return;
+    if (room.status !== 'vote') return;
+
+    const alivePlayers = Object.values(room.players || {}).filter(p => p.isAlive);
+    const votes = Object.keys(room.dayVotes || {});
+    const allVoted = alivePlayers.every(p => votes.includes(p.id));
+
+    if (!allVoted) return;
+
+    // En çok oy alanı bul
+    const voteCounts = Object.values(room.dayVotes).reduce((acc, v) => {
+      acc[v] = (acc[v] || 0) + 1; return acc;
+    }, {});
+    const eliminated = Object.entries(voteCounts).sort((a,b)=>b[1]-a[1])[0]?.[0];
+
+    const ref = roomRef();
+    if (!ref || !eliminated) return;
+
+    (async () => {
+      const updatedPlayers = { ...room.players };
+      updatedPlayers[eliminated] = { ...updatedPlayers[eliminated], isAlive: false };
+
+      const winner = checkWin(updatedPlayers);
+      const eliminatedName = room.players[eliminated]?.name || '?';
+      const eliminatedRole = room.players[eliminated]?.role || 'villager';
+      const events = [{
+        type: 'eliminated',
+        text: `${eliminatedName} oylanarak kasabadan kovuldu! ${ROLES[eliminatedRole]?.emoji} ${ROLES[eliminatedRole]?.label} çıktı.`
+      }];
+
+      if (winner) {
+        await updateDoc(ref, { players: updatedPlayers, status: 'game_over', winner, currentEvents: events });
+      } else {
+        // Yeni gece
+        await updateDoc(ref, {
+          players: updatedPlayers,
+          status: 'night',
+          phase: (room.phase || 1) + 1,
+          currentEvents: events,
+          nightActions: { submitted: {}, vampireVotes: {}, vampireTarget: null, doctorSave: null, detectiveTarget: null },
+          dayVotes: {},
+        });
+      }
+    })();
+  }, [room?.dayVotes, room?.status]);
+
+  // ── AKSIYONLAR ─────────────────────────────────────────────────────────────
+
+  const handleCreate = async ({ name, avatar, playerCount }) => {
+    if (!user) return;
+    const code = Math.random().toString(36).substring(2,6).toUpperCase();
+    const newRoom = {
+      id: code, hostId: user.uid, status: 'lobby',
+      phase: 1, winner: null, currentEvents: [], dayVotes: {},
+      nightActions: { submitted:{}, vampireVotes:{}, vampireTarget:null, doctorSave:null, detectiveTarget:null },
+      settings: { playerCount },
+      players: {
+        [user.uid]: { id:user.uid, name, avatar, role:null, isAlive:true, isBot:false }
+      },
+    };
+    await setDoc(doc(db, 'artifacts', APP_ID, 'public', 'data', 'rooms', code), newRoom);
+    setRoom(newRoom);
+  };
+
+  const handleJoin = async (code, { name, avatar }) => {
+    if (!user) return;
+    const ref = doc(db, 'artifacts', APP_ID, 'public', 'data', 'rooms', code);
+    const snap = await getDoc(ref);
+    if (!snap.exists()) { alert("Oda bulunamadı!"); return; }
+    const data = snap.data();
+    if (data.status !== 'lobby') { alert("Oyun başlamış!"); return; }
+    if (Object.keys(data.players||{}).length >= 10) { alert("Oda dolu!"); return; }
+    await updateDoc(ref, {
+      [`players.${user.uid}`]: { id:user.uid, name, avatar, role:null, isAlive:true, isBot:false }
+    });
+    setRoom({ id: code });
+  };
+
+  const handleAddBot = async () => {
+    if (!room || !user || room.hostId !== user.uid) return;
+    const ref = roomRef();
+    if (!ref) return;
+    const botId = 'bot_' + Date.now();
+    const botNames = ["Kara Murat","Gece Hanım","Dracula Jr","Nosferatu","Bela Lugosi","Van Helsing","Renfield","Mina"];
+    await updateDoc(ref, {
+      [`players.${botId}`]: { id:botId, name:rand(botNames), avatar:rand(AVATARS), role:null, isAlive:true, isBot:true }
+    });
+  };
+
+  const handleStart = async () => {
+    if (!room || !user || room.hostId !== user.uid) return;
+    const ref = roomRef();
+    if (!ref) return;
+
+    const roles = assignRoles(room.players);
+    const updatedPlayers = {};
+    Object.entries(room.players).forEach(([uid, p]) => {
+      updatedPlayers[uid] = { ...p, role: roles[uid] };
+    });
+
+    await updateDoc(ref, { status: 'role_reveal', players: updatedPlayers });
+  };
+
+  const handleReady = async () => {
+    if (!room || !user) return;
+    setReadyForGame(true);
+    const ref = roomRef();
+    if (!ref) return;
+
+    const snap = await getDoc(ref);
+    if (!snap.exists()) return;
+    const data = snap.data();
+
+    // Tüm gerçek oyuncular hazır olduğunda geceye geç
+    if (room.hostId === user.uid) {
+      // Hemen geçiş yap (basit implementasyon)
+      await updateDoc(ref, {
+        status: 'night',
+        phase: 1,
+        nightActions: { submitted:{}, vampireVotes:{}, vampireTarget:null, doctorSave:null, detectiveTarget:null },
+        currentEvents: [],
+        dayVotes: {},
+      });
+    }
+  };
+
+  const handleNightAction = async (targetId) => {
+    if (!room || !user) return;
+    const ref = roomRef();
+    if (!ref) return;
+    const myRole = room.players?.[user.uid]?.role;
+    const snap = await getDoc(ref);
+    if (!snap.exists()) return;
+    const data = snap.data();
+
+    const updates = { [`nightActions.submitted.${user.uid}`]: true };
+
+    if (myRole === 'vampire' && targetId) {
+      updates[`nightActions.vampireVotes.${user.uid}`] = targetId;
+      // Tüm vampirlerin oyunu hesapla
+      const newVampVotes = { ...(data.nightActions?.vampireVotes || {}), [user.uid]: targetId };
+      const vampires = Object.values(data.players).filter(p => p.isAlive && p.role === 'vampire');
+      if (vampires.every(v => newVampVotes[v.id])) {
+        const topVote = Object.entries(Object.values(newVampVotes).reduce((a,v)=>{a[v]=(a[v]||0)+1;return a;},{})).sort((a,b)=>b[1]-a[1])[0]?.[0];
+        if (topVote) updates[`nightActions.vampireTarget`] = topVote;
+      }
+    } else if (myRole === 'doctor' && targetId) {
+      updates[`nightActions.doctorSave`] = targetId;
+    } else if (myRole === 'detective' && targetId) {
+      updates[`nightActions.detectiveTarget`] = targetId;
+    }
+
+    // Bot aksiyonları (host)
+    if (data.hostId === user.uid) {
+      const bots = Object.values(data.players).filter(p => p.isAlive && p.isBot);
+      const alivePlayers = Object.values(data.players).filter(p => p.isAlive);
+      const nonVampires = alivePlayers.filter(p => p.role !== 'vampire');
+
+      for (const bot of bots) {
+        if (data.nightActions?.submitted?.[bot.id]) continue;
+        updates[`nightActions.submitted.${bot.id}`] = true;
+        const botRole = bot.role;
+        if (botRole === 'vampire' && nonVampires.length > 0) {
+          const target = rand(nonVampires).id;
+          updates[`nightActions.vampireVotes.${bot.id}`] = target;
+          updates[`nightActions.vampireTarget`] = target;
+        } else if (botRole === 'doctor' && alivePlayers.length > 0) {
+          updates[`nightActions.doctorSave`] = rand(alivePlayers).id;
+        } else if (botRole === 'detective' && alivePlayers.length > 0) {
+          updates[`nightActions.detectiveTarget`] = rand(alivePlayers.filter(p=>p.id!==bot.id)).id;
         }
-        function playSound(type) {
-            if (isMuted || !audioCtx) return;
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-            osc.connect(gain); gain.connect(audioCtx.destination);
-            const now = audioCtx.currentTime;
-            if (type === 'click') {
-                osc.type = 'triangle'; osc.frequency.setValueAtTime(400, now);
-                gain.gain.setValueAtTime(0.1, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
-                osc.start(now); osc.stop(now + 0.1);
-            } else if (type === 'doom') {
-                osc.type = 'sawtooth'; osc.frequency.setValueAtTime(80, now);
-                gain.gain.setValueAtTime(0.3, now); gain.gain.exponentialRampToValueAtTime(0.001, now + 2);
-                osc.start(now); osc.stop(now + 2);
-            } else if (type === 'win') {
-                osc.type = 'sine'; osc.frequency.setValueAtTime(440, now);
-                osc.frequency.setValueAtTime(554, now + 0.3); osc.frequency.setValueAtTime(659, now + 0.6);
-                gain.gain.setValueAtTime(0.2, now); gain.gain.linearRampToValueAtTime(0, now + 2);
-                osc.start(now); osc.stop(now + 2);
-            }
-        }
-        window.toggleSound = () => {
-            const btn = document.getElementById('soundBtn');
-            isMuted = !isMuted;
-            if(!isMuted) { initAudio(); btn.innerText = "🔊"; playSound('click'); } 
-            else { btn.innerText = "🔇"; }
-        };
-        window.toggleFullScreen = () => {
-            if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(e=>console.log(e));
-            else if (document.exitFullscreen) document.exitFullscreen();
-        };
+      }
+    }
 
-        // --- OYUN KURULUMU ---
-        window.selectMode = (mode) => {
-            document.querySelectorAll('.mode-option').forEach(el => el.classList.remove('active'));
-            document.getElementById('mode-' + mode).classList.add('active');
-            playSound('click');
-        };
+    await updateDoc(ref, updates);
+  };
 
-        window.createGame = async () => {
-            playSound('click');
-            const username = document.getElementById('username').value.trim();
-            const mode = document.querySelector('.mode-option.active').id === 'mode-story' ? 'story' : 'normal';
-            if (!username) return alert("Adınızı girmelisiniz!");
+  const handleVote = async (targetId) => {
+    if (!room || !user || !targetId) return;
+    const ref = roomRef();
+    if (!ref) return;
 
-            const roomCode = Math.floor(1000 + Math.random() * 9000).toString();
-            try {
-                const userCred = await signInAnonymously(auth);
-                myUserId = userCred.user.uid;
+    const updates = { [`dayVotes.${user.uid}`]: targetId };
 
-                await setDoc(doc(db, "rooms", roomCode), {
-                    hostId: myUserId, status: 'LOBBY', mode: mode, vampireCount: 2,
-                    createdAt: serverTimestamp(), story: null, townName: "Karanlık Vadi",
-                    phaseEndTime: 0, lastEliminatedName: null, lastEliminatedRole: null
-                });
+    // Bot oyları (host)
+    if (room.hostId === user.uid) {
+      const alivePlayers = Object.values(room.players || {}).filter(p => p.isAlive);
+      const bots = alivePlayers.filter(p => p.isBot);
+      const snap = await getDoc(ref);
+      const data = snap.data();
 
-                await setDoc(doc(db, "rooms", roomCode, "players", myUserId), {
-                    name: username, isHost: true, role: null, isAlive: true, joinedAt: serverTimestamp(), votedFor: null
-                });
+      for (const bot of bots) {
+        if (data.dayVotes?.[bot.id]) continue;
+        const targets = alivePlayers.filter(p => p.id !== bot.id);
+        if (targets.length > 0) updates[`dayVotes.${bot.id}`] = rand(targets).id;
+      }
+    }
 
-                myRoomId = roomCode;
-                listenToRoom(roomCode);
-            } catch (error) { alert("Hata: " + error.message); }
-        };
+    await updateDoc(ref, updates);
+  };
 
-        window.joinGame = async () => {
-            playSound('click');
-            const username = document.getElementById('username').value.trim();
-            const roomCode = document.getElementById('roomCodeInput').value.trim();
-            if (!username || !roomCode) return alert("Bilgiler eksik!");
+  const handleNextPhase = async () => {
+    if (!room || !user || room.hostId !== user.uid) return;
+    const ref = roomRef();
+    if (!ref) return;
+    await updateDoc(ref, { status: 'vote' });
+  };
 
-            try {
-                const roomSnap = await getDoc(doc(db, "rooms", roomCode));
-                if (!roomSnap.exists()) return alert("Kasaba bulunamadı!");
-                
-                const userCred = await signInAnonymously(auth);
-                myUserId = userCred.user.uid;
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <div className="text-6xl animate-pulse">🧛</div>
+      </div>
+    );
+  }
 
-                await setDoc(doc(db, "rooms", roomCode, "players", myUserId), {
-                    name: username, isHost: false, role: null, isAlive: true, joinedAt: serverTimestamp(), votedFor: null
-                });
+  const myPlayer = room?.players?.[user?.uid];
 
-                myRoomId = roomCode;
-                listenToRoom(roomCode);
-            } catch (error) { alert("Bağlantı Hatası: " + error.message); }
-        };
+  if (screen === 'setup') return <SetupScreen onCreate={handleCreate} onJoin={handleJoin}/>;
+  if (screen === 'lobby') return <LobbyScreen room={room} user={user} onStart={handleStart} onAddBot={handleAddBot}/>;
+  if (screen === 'role_reveal' && myPlayer) return <RoleRevealScreen myPlayer={myPlayer} room={room} onReady={handleReady}/>;
+  if (screen === 'game') {
+    if (room.status === 'night') return <NightScreen room={room} user={user} onAction={handleNightAction}/>;
+    if (room.status === 'day' || room.status === 'vote') return <DayScreen room={room} user={user} onVote={handleVote} onNextPhase={handleNextPhase}/>;
+  }
+  if (screen === 'over') return <GameOverScreen room={room} user={user}/>;
 
-        // --- ODA DİNLEME VE UI ---
-        function listenToRoom(roomId) {
-            onSnapshot(doc(db, "rooms", roomId), (docSnap) => {
-                if (!docSnap.exists()) return alert("Kasaba dağıldı.");
-                currentRoomData = docSnap.data();
-                if(myData) updateUI(currentRoomData);
-                updateTimer(); 
-            });
-
-            onSnapshot(collection(db, "rooms", roomId, "players"), (snapshot) => {
-                const list = document.getElementById('lobby-list');
-                const voteList = document.getElementById('vote-list');
-                if(list) list.innerHTML = "";
-                if(voteList) voteList.innerHTML = "";
-                
-                allPlayers = []; 
-                const voteCounts = {};
-                
-                snapshot.forEach(d => {
-                    const p = d.data(); p.id = d.id;
-                    allPlayers.push(p); 
-                    if (p.id === myUserId) myData = p;
-                    if (p.isAlive && p.votedFor) {
-                        voteCounts[p.votedFor] = (voteCounts[p.votedFor] || 0) + 1;
-                    }
-                });
-
-                // Lobi Render
-                allPlayers.forEach(p => {
-                    if(list) {
-                        const li = document.createElement('li');
-                        li.className = 'player-item';
-                        if (!p.isAlive) {
-                            li.classList.add('player-dead');
-                            li.innerHTML = `<span>${p.name}</span> <span>💀</span>`;
-                        } else {
-                            li.innerHTML = `<span>${p.name}</span> <span>${p.isHost ? '👑' : ''}</span>`;
-                        }
-                        if (p.id === myUserId) li.style.borderColor = 'var(--gold)';
-                        list.appendChild(li);
-                    }
-                });
-
-                if(currentRoomData) updateUI(currentRoomData);
-
-                // Oylama Render
-                if(voteList) {
-                    const alivePlayers = allPlayers.filter(p => p.isAlive); 
-                    if(alivePlayers.length === 0) {
-                        voteList.innerHTML = "<p style='text-align:center; color:#666;'>Kimse kalmadı...</p>";
-                    } else {
-                        alivePlayers.forEach(p => {
-                            const li = document.createElement('li');
-                            li.className = 'player-item vote-item';
-                            li.id = "vote-item-" + p.id;
-                            
-                            const vCount = voteCounts[p.id] || 0;
-                            const voteText = vCount > 0 ? `<span style="color:var(--blood-red); font-family:'Cinzel'; font-weight:bold; font-size:1.4rem;">${vCount} OY</span>` : `<span style="color:#555; font-family:'Cinzel'; font-size:1rem;">0 OY</span>`;
-                            
-                            if (p.id === myUserId) {
-                                li.innerHTML = `<span>${p.name} <span style="font-size:0.9rem; color:#888; font-style:italic;">(Sen)</span></span> ${voteText}`;
-                                li.style.cursor = "not-allowed";
-                            } else {
-                                li.innerHTML = `<span>${p.name}</span> ${voteText}`;
-                                li.onclick = () => selectVote(li, p.id);
-                            }
-
-                            if (myData && myData.votedFor === p.id) {
-                                li.classList.add('my-vote');
-                                li.innerHTML = `<span>${p.name} <span style="color:var(--gold); font-size:0.9rem; font-style:italic;">(Kararın)</span></span> ${voteText}`;
-                            }
-
-                            if (selectedVoteId === p.id && p.id !== myUserId) {
-                                li.classList.add('selected');
-                            }
-                            
-                            voteList.appendChild(li);
-                        });
-                    }
-                }
-            });
-        }
-
-        function updateTimer() {
-            if (!currentRoomData || !currentRoomData.phaseEndTime) return;
-            if (timerInterval) clearInterval(timerInterval);
-            
-            timerInterval = setInterval(() => {
-                const now = Date.now();
-                const diff = currentRoomData.phaseEndTime - now;
-
-                if (diff <= 0) {
-                    document.getElementById('timer-discuss').innerText = "00:00";
-                    document.getElementById('timer-vote').innerText = "00:00";
-                    clearInterval(timerInterval);
-                    return;
-                }
-
-                const m = Math.floor(diff / 60000);
-                const s = Math.floor((diff % 60000) / 1000);
-                const text = `${m < 10 ? '0'+m : m}:${s < 10 ? '0'+s : s}`;
-
-                const timerEl1 = document.getElementById('timer-discuss');
-                const timerEl2 = document.getElementById('timer-vote');
-                
-                if(timerEl1) timerEl1.innerText = text;
-                if(timerEl2) timerEl2.innerText = text;
-
-                if (diff < 30000) { 
-                    if(timerEl1) timerEl1.classList.add('timer-urgent');
-                    if(timerEl2) timerEl2.classList.add('timer-urgent');
-                } else {
-                    if(timerEl1) timerEl1.classList.remove('timer-urgent');
-                    if(timerEl2) timerEl2.classList.remove('timer-urgent');
-                }
-            }, 1000);
-        }
-
-        function updateUI(room) {
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            
-            const isHost = myData && myData.isHost;
-            document.querySelectorAll('.admin-only').forEach(btn => {
-                btn.style.display = isHost ? 'block' : 'none';
-            });
-            document.querySelectorAll('.waiting-msg').forEach(msg => {
-                msg.style.display = isHost ? 'none' : 'block';
-            });
-
-            if (room.status === 'LOBBY') {
-                document.getElementById('screen-lobby').classList.add('active');
-                document.getElementById('display-room-code').innerText = myRoomId;
-                document.getElementById('lobby-mode-display').innerText = room.mode === 'story' ? 'HİKAYE (ZOR)' : 'KLASİK';
-                if(isHost) document.getElementById('vamp-count-display').innerText = room.vampireCount || 2;
-            }
-            else if (room.status === 'STORY_INTRO') {
-                document.getElementById('screen-story-intro').classList.add('active');
-                if(room.story) {
-                    document.getElementById('story-heading').innerText = room.story.title;
-                    document.getElementById('story-body').innerHTML = room.story.text;
-                }
-            }
-            else if (room.status === 'ROLE_REVEAL') {
-                document.getElementById('screen-card').classList.add('active');
-                setupMyCard(room);
-            }
-            else if (room.status === 'DISCUSSION') {
-                document.getElementById('screen-discuss').classList.add('active');
-                document.getElementById('discussion-town-name').innerText = room.townName || "KASABA MEYDANI";
-                
-                window.showRandomQuestion();
-                if(questionInterval) clearInterval(questionInterval);
-                questionInterval = setInterval(window.showRandomQuestion, 12000);
-            }
-            else if (room.status === 'VOTING' || room.status === 'DEFENSE') {
-                document.getElementById('screen-vote').classList.add('active');
-                
-                if(questionInterval) clearInterval(questionInterval);
-                
-                if (room.status === 'DEFENSE') {
-                    document.getElementById('vote-title').innerText = "SAVUNMA SÜRESİ";
-                    document.getElementById('vote-subtitle').innerText = "KARARINIZI DEĞİŞTİREBİLİRSİNİZ";
-                    document.getElementById('vote-subtitle').style.color = "var(--gold)";
-                    if(isHost) {
-                        document.getElementById('btn-start-defense').style.display = 'none';
-                        document.getElementById('vote-end-btn').style.display = 'block';
-                    }
-                } else {
-                    document.getElementById('vote-title').innerText = "İNFAZ";
-                    document.getElementById('vote-subtitle').innerText = "KİMİ SUÇLUYORSUN?";
-                    document.getElementById('vote-subtitle').style.color = "var(--blood-red)";
-                    if(isHost) {
-                        document.getElementById('btn-start-defense').style.display = 'block';
-                        document.getElementById('vote-end-btn').style.display = 'none'; 
-                    }
-                }
-
-                if (myData && !myData.isAlive) {
-                    document.getElementById('vote-submit-btn').style.display = 'none';
-                    document.getElementById('dead-msg').style.display = 'block';
-                } else {
-                    document.getElementById('vote-submit-btn').style.display = 'block';
-                    document.getElementById('dead-msg').style.display = 'none';
-                }
-            }
-            else if (room.status === 'RESULT') {
-                document.getElementById('screen-result').classList.add('active');
-                document.getElementById('eliminated-name').innerText = room.lastEliminatedName || "KİMSE";
-                
-                if (room.lastEliminatedRole === "EŞİTLİK") {
-                    document.getElementById('result-icon').innerText = "⚖️";
-                    document.getElementById('eliminated-name').style.color = "var(--parchment)";
-                    document.getElementById('eliminated-role').innerHTML = `Kimse asılmadı.`;
-                } else {
-                    document.getElementById('result-icon').innerText = "💀";
-                    document.getElementById('eliminated-name').style.color = "var(--blood-red)";
-                    const roleText = room.lastEliminatedRole === 'vampire' ? "VAMPİR" : (room.lastEliminatedRole ? "KÖYLÜ" : "BİLİNMİYOR");
-                    const roleColor = room.lastEliminatedRole === 'vampire' ? "var(--blood-red)" : "var(--gold)";
-                    document.getElementById('eliminated-role').innerHTML = `Gerçek Kimliği: <span style="color:${roleColor}; font-weight:bold; font-family:'Cinzel';">${roleText}</span>`;
-                }
-            }
-            else if (room.status === 'GAME_OVER_VILLAGERS') {
-                document.getElementById('screen-gameover').classList.add('active');
-                playSound('win');
-                document.getElementById('winner-title').innerText = "KÖYLÜLER KAZANDI";
-                document.getElementById('winner-title').style.color = "var(--gold)";
-                document.getElementById('winner-desc').innerText = "Kasabadaki tüm vampirler avlandı. Güneş yeniden doğuyor.";
-            }
-            else if (room.status === 'GAME_OVER_VAMPIRES') {
-                document.getElementById('screen-gameover').classList.add('active');
-                playSound('doom');
-                document.getElementById('winner-title').innerText = "VAMPİRLER KAZANDI";
-                document.getElementById('winner-title').style.color = "var(--blood-red)";
-                document.getElementById('winner-title').style.fontFamily = "Creepster";
-                document.getElementById('winner-desc').innerText = "Karanlık galip geldi. Kasaba kana bulandı...";
-            }
-        }
-
-        // --- ADMİN AKSİYONLARI ---
-        window.changeVampCount = async (delta) => {
-            if (!myData.isHost) return;
-            let count = (currentRoomData.vampireCount || 2) + delta;
-            if (count < 1) count = 1; if (count > 4) count = 4;
-            document.getElementById('vamp-count-display').innerText = count; 
-            await updateDoc(doc(db, "rooms", myRoomId), { vampireCount: count });
-        };
-
-        window.launchGameSequence = async () => {
-            if (!myData.isHost) return;
-            playSound('click');
-            
-            const playersSnap = await getDocs(collection(db, "rooms", myRoomId, "players"));
-            let ids = [];
-            playersSnap.forEach(d => ids.push(d.id));
-            if (ids.length < 3) return alert("Oyunu başlatmak için en az 3 kişi gereklidir!");
-
-            let vampCount = currentRoomData.vampireCount || 2;
-            if (vampCount >= ids.length) vampCount = ids.length - 1;
-            
-            for (let i = ids.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [ids[i], ids[j]] = [ids[j], ids[i]]; }
-
-            const batchPromises = [];
-            for (let i = 0; i < ids.length; i++) {
-                const role = i < vampCount ? 'vampire' : 'villager';
-                batchPromises.push(updateDoc(doc(db, "rooms", myRoomId, "players", ids[i]), { role: role, isAlive: true, votedFor: null }));
-            }
-            await Promise.all(batchPromises);
-
-            let updates = { status: 'ROLE_REVEAL' };
-            if (currentRoomData.mode === 'story') {
-                const story = generateStory(vampCount);
-                updates = { status: 'STORY_INTRO', story: story, townName: story.townName };
-            }
-            await updateDoc(doc(db, "rooms", myRoomId), updates);
-        };
-
-        window.proceedToCards = async () => { if(myData.isHost) await updateDoc(doc(db, "rooms", myRoomId), { status: 'ROLE_REVEAL' }); };
-        
-        window.goToDiscussion = async () => { 
-            if(myData.isHost) {
-                const batchPromises = [];
-                allPlayers.forEach(p => { batchPromises.push(updateDoc(doc(db, "rooms", myRoomId, "players", p.id), { votedFor: null })); });
-                const endTime = Date.now() + (10 * 60 * 1000); 
-                batchPromises.push(updateDoc(doc(db, "rooms", myRoomId), { status: 'DISCUSSION', phaseEndTime: endTime }));
-                await Promise.all(batchPromises);
-            }
-        };
-        
-        window.startNextRound = async () => {
-            if(myData.isHost) {
-                const batchPromises = [];
-                allPlayers.forEach(p => { batchPromises.push(updateDoc(doc(db, "rooms", myRoomId, "players", p.id), { votedFor: null })); });
-                const endTime = Date.now() + (10 * 60 * 1000); 
-                batchPromises.push(updateDoc(doc(db, "rooms", myRoomId), { status: 'DISCUSSION', phaseEndTime: endTime }));
-                await Promise.all(batchPromises);
-            }
-        };
-
-        window.skipTimer = async () => { 
-            if(myData.isHost) {
-                const endTime = Date.now() + (5 * 60 * 1000);
-                await updateDoc(doc(db, "rooms", myRoomId), { status: 'VOTING', phaseEndTime: endTime }); 
-            }
-        };
-
-        window.startDefense = async () => {
-            if(myData.isHost) {
-                playSound('click');
-                const endTime = Date.now() + (2 * 60 * 1000); 
-                await updateDoc(doc(db, "rooms", myRoomId), { status: 'DEFENSE', phaseEndTime: endTime }); 
-            }
-        };
-
-        // --- KART VE OYLAMA ---
-        window.flipCard = () => { 
-            document.getElementById('role-card').classList.toggle('flipped');
-            playSound('click');
-        };
-
-        function setupMyCard(room) {
-            const cardBack = document.getElementById('card-back-content');
-            cardBack.className = "card-face card-back";
-            if (!myData || !myData.role) return;
-            
-            const isVampire = myData.role === 'vampire';
-            let partnerText = "";
-            if (isVampire) {
-                const partners = allPlayers.filter(p => p.role === 'vampire' && p.id !== myUserId).map(p => p.name).join(", ");
-                if (partners.length > 0) partnerText = `<div style="margin-top:15px; border-top:1px solid #444; padding-top:10px; width:80%; text-align:center;">DİĞER VAMPİRLER: <br><span style="color:var(--blood-red); font-weight:bold; font-family:'Cinzel'; font-size:1.3rem;">${partners}</span></div>`;
-                else partnerText = `<div style="margin-top:15px; color:#888; font-style:italic;">Yalnız avlanıyorsun.</div>`;
-            }
-
-            if(isVampire) {
-                cardBack.classList.add('role-vampire');
-                cardBack.innerHTML = `<div style="font-size:4rem; margin-bottom:10px; color:var(--blood-red);">🧛‍♂️</div><h3 style="color:var(--blood-red); margin:0; font-family:'Cinzel'; font-size:2.5rem;">VAMPİR</h3><p style="color:#ccc; text-align:center; font-size:1.1rem;">Gecenin efendisi sensin.</p>${partnerText}`;
-            } else {
-                cardBack.classList.add('role-villager');
-                cardBack.innerHTML = `<div style="font-size:4rem; margin-bottom:10px;">🧑‍🌾</div><h3 style="color:var(--gold); margin:0; font-family:'Cinzel'; font-size:2.5rem;">KÖYLÜ</h3><p style="color:#ccc; text-align:center; font-size:1.1rem; padding: 0 10px;">Kasabayı korumak için vampirleri bulmalısın.</p>`;
-            }
-        }
-
-        window.selectVote = (el, id) => {
-            playSound('click');
-            document.querySelectorAll('.vote-item').forEach(e => { e.classList.remove('selected'); });
-            el.classList.add('selected');
-            selectedVoteId = id;
-        };
-
-        window.submitVote = async () => {
-            if (!selectedVoteId) return alert("Listeden bir hedef seçmelisiniz.");
-            if (myData && !myData.isAlive) return alert("Ölüler konuşamaz.");
-            playSound('click');
-            await updateDoc(doc(db, "rooms", myRoomId, "players", myUserId), { votedFor: selectedVoteId });
-        };
-
-        // --- İNFAZ VE KAZANMA MANTIĞI ---
-        window.endVoting = async () => {
-            if (!myData.isHost) return;
-            
-            const voteCounts = {};
-            allPlayers.forEach(p => {
-                if (p.isAlive && p.votedFor) {
-                    voteCounts[p.votedFor] = (voteCounts[p.votedFor] || 0) + 1;
-                }
-            });
-
-            let maxVotes = 0;
-            let eliminatedId = null;
-            let isTie = false;
-
-            for (const [uid, count] of Object.entries(voteCounts)) {
-                if (count > maxVotes) { maxVotes = count; eliminatedId = uid; isTie = false; } 
-                else if (count === maxVotes) { isTie = true; }
-            }
-
-            if (maxVotes === 0) return alert("Kimse oy kullanmadı!");
-
-            // EŞİTLİK DURUMU
-            if (isTie) {
-                playSound('click');
-                await updateDoc(doc(db, "rooms", myRoomId), { 
-                    status: 'RESULT', 
-                    lastEliminatedName: "HALK KARARSIZ KALDI",
-                    lastEliminatedRole: "EŞİTLİK" 
-                });
-                return;
-            }
-
-            // BİRİSİ ELENDİ
-            playSound('doom');
-            const victim = allPlayers.find(p => p.id === eliminatedId);
-
-            await updateDoc(doc(db, "rooms", myRoomId, "players", eliminatedId), { isAlive: false });
-            
-            // OYUN BİTTİ Mİ KONTROLÜ
-            const updatedPlayersSnap = await getDocs(collection(db, "rooms", myRoomId, "players"));
-            let aliveVamps = 0;
-            let aliveVills = 0;
-            
-            updatedPlayersSnap.forEach(d => {
-                const p = d.data();
-                if (p.isAlive) {
-                    if (p.role === 'vampire') aliveVamps++;
-                    else if (p.role === 'villager') aliveVills++;
-                }
-            });
-
-            let nextStatus = 'RESULT'; // Oyun devam eder
-            if (aliveVamps === 0) {
-                nextStatus = 'GAME_OVER_VILLAGERS'; // Vampir kalmadı
-            } else if (aliveVamps >= aliveVills) {
-                nextStatus = 'GAME_OVER_VAMPIRES'; // Vampirler çoğunlukta veya eşit
-            }
-
-            await updateDoc(doc(db, "rooms", myRoomId), { 
-                status: nextStatus, 
-                lastEliminatedName: victim.name,
-                lastEliminatedRole: victim.role 
-            });
-        };
-
-        window.resetGame = async () => { if(myData.isHost) await updateDoc(doc(db, "rooms", myRoomId), { status: 'LOBBY', phaseEndTime: 0 }); };
-
-        function generateStory(vampCount) {
-            const t = ["Kuzgun Vadisi", "Sislitaş", "Ölügöl", "Kanlı Dere"][Math.floor(Math.random()*4)];
-            return { townName: t, title: t + " GÜNLÜKLERİ", text: `Dün gece ${t} meydanında tüyler ürpertici bir çığlık duyuldu. Kasabanın koruyucusu ölü bulundu, boynunda derin iki delik vardı... Efsaneler gerçekmiş. Aramızda gizlenen ${vampCount} kana susamış canavar var. Güneş batmadan onları bulmalısınız, yoksa sıra size gelecek.` };
-        }
-    </script>
-</body>
-</html>
+  return <div className="min-h-screen bg-black flex items-center justify-center text-white">Yükleniyor...</div>;
+}
