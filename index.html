@@ -4,11 +4,11 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
 <title>Vampir Köylü Online — Forge&Play</title>
-<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Creepster&family=Cormorant+Garamond:wght@400;600;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Creepster&family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet"/>
 <style>
 :root{--blood:#8a0303;--dark-red:#3e0000;--gold:#c5a059;--parchment:#e8dcc4;--bg:#080504;--card:#100806;--border:#3a2010;}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
-body{background:var(--bg);color:var(--parchment);font-family:'Cormorant Garamond',serif;min-height:100dvh;overflow-x:hidden;user-select:none;}
+body{background:var(--bg);color:var(--parchment);font-family:'Inter',system-ui,sans-serif;min-height:100dvh;overflow-x:hidden;user-select:none;-webkit-font-smoothing:antialiased;}
 /* ─── SCREENS ─── */
 .screen{display:none;min-height:100dvh;flex-direction:column;align-items:center;justify-content:center;padding:20px;animation:fadeIn .6s ease;}
 .screen.active{display:flex;}
@@ -17,13 +17,13 @@ body{background:var(--bg);color:var(--parchment);font-family:'Cormorant Garamond
 .font-cinzel{font-family:'Cinzel',serif;}
 .font-creep{font-family:'Creepster',cursive;}
 /* ─── CARDS ─── */
-.card{background:rgba(10,4,2,.9);border:2px solid var(--border);border-radius:12px;padding:24px;width:100%;max-width:480px;box-shadow:0 20px 60px rgba(0,0,0,.9);}
+.card{background:rgba(10,4,2,.9);border:2px solid var(--border);border-radius:12px;padding:20px;width:100%;max-width:480px;box-shadow:0 20px 60px rgba(0,0,0,.9);overflow:hidden;}
 /* ─── INPUTS ─── */
-input,select{background:rgba(0,0,0,.7);border:2px solid var(--border);color:var(--parchment);padding:14px 16px;border-radius:8px;width:100%;font-size:1.1rem;font-family:'Cormorant Garamond',serif;outline:none;transition:.3s;}
+input,select{background:rgba(0,0,0,.7);border:2px solid var(--border);color:var(--parchment);padding:14px 16px;border-radius:8px;width:100%;font-size:1rem;font-family:'Inter',system-ui,sans-serif;font-weight:600;outline:none;transition:.3s;}
 input:focus,select:focus{border-color:var(--gold);}
 input::placeholder{color:#5a3a2a;}
 /* ─── BUTTONS ─── */
-.btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:14px 20px;border:none;border-radius:10px;font-family:'Cinzel',serif;font-weight:700;font-size:1rem;cursor:pointer;transition:all .2s;letter-spacing:.5px;}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:14px 20px;border:none;border-radius:10px;font-family:'Cinzel',serif;font-weight:700;font-size:.95rem;cursor:pointer;transition:all .2s;letter-spacing:.8px;}
 .btn:active{transform:scale(.97);}
 .btn-primary{background:linear-gradient(135deg,#b31010,var(--blood));color:var(--parchment);border:1px solid #ff5555;box-shadow:0 4px 20px rgba(138,3,3,.4);}
 .btn-primary:hover{background:linear-gradient(135deg,#cc1414,#a00);box-shadow:0 6px 25px rgba(138,3,3,.6);transform:translateY(-2px);}
@@ -36,13 +36,13 @@ input::placeholder{color:#5a3a2a;}
 .btn-sm{padding:10px 14px;font-size:.85rem;}
 .btn:disabled{opacity:.4;cursor:not-allowed;transform:none!important;}
 /* ─── AVATAR GRID ─── */
-.avatar-grid{display:grid;grid-template-columns:repeat(10,1fr);gap:6px;background:rgba(0,0,0,.3);padding:12px;border-radius:10px;border:1px solid var(--border);}
-.avatar-btn{background:rgba(30,10,5,.6);border:2px solid transparent;border-radius:8px;padding:6px;font-size:1.3rem;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;}
+.avatar-grid{display:grid;grid-template-columns:repeat(10,1fr);gap:4px;background:rgba(0,0,0,.3);padding:10px;border-radius:10px;border:1px solid var(--border);overflow:hidden;width:100%;}
+.avatar-btn{background:rgba(30,10,5,.6);border:2px solid transparent;border-radius:6px;padding:0;font-size:1.1rem;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;width:100%;aspect-ratio:1;min-width:0;overflow:hidden;}
 .avatar-btn.selected{background:var(--blood);border-color:#ff5555;transform:scale(1.1);box-shadow:0 0 12px rgba(138,3,3,.5);}
 .avatar-btn:hover:not(.selected){border-color:#5a3a2a;transform:scale(1.05);}
 /* ─── PLAYER LIST ─── */
 .player-list{display:flex;flex-direction:column;gap:6px;width:100%;max-height:40vh;overflow-y:auto;}
-.player-item{display:flex;align-items:center;gap:12px;background:rgba(0,0,0,.4);border:1px solid var(--border);border-left:3px solid var(--border);border-radius:8px;padding:12px 14px;transition:.2s;font-size:1.1rem;}
+.player-item{display:flex;align-items:center;gap:12px;background:rgba(0,0,0,.4);border:1px solid var(--border);border-left:3px solid var(--border);border-radius:8px;padding:12px 14px;transition:.2s;font-size:.95rem;font-weight:600;}
 .player-item.me{border-left-color:var(--gold);}
 .player-item.dead{opacity:.35;text-decoration:line-through;pointer-events:none;}
 .player-item.vote-target:hover{border-left-color:var(--blood);background:rgba(138,3,3,.15);cursor:pointer;}
@@ -153,7 +153,7 @@ body:not(.is-host) .wait-msg{display:block;}
 
 <!-- ─── 1. GİRİŞ EKRANI ─── -->
 <div id="screen-setup" class="screen active">
-  <div style="position:relative;z-index:2;width:100%;max-width:460px;">
+  <div style="position:relative;z-index:2;width:100%;max-width:460px;padding:0 16px;box-sizing:border-box;">
 
     <!-- Logo -->
     <div class="text-center" style="margin-bottom:28px">
