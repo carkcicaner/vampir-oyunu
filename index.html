@@ -537,12 +537,6 @@ if(!ok){document.getElementById('err').style.display='flex';throw new Error('Una
 const fb=initializeApp({apiKey:"AIzaSyAu-9xnaZRgcYj58gX3Yrfbj4NqvPI4B5Q",authDomain:"vampirkoyluv3.firebaseapp.com",projectId:"vampirkoyluv3",storageBucket:"vampirkoyluv3.firebasestorage.app",messagingSenderId:"114861911533",appId:"1:114861911533:web:bb012b575860684c764be4"});
 const auth=getAuth(fb),db=getFirestore(fb);
 
-// Even-segment Firestore paths
-const rRef=()=>doc(db,'vk4_rooms',myRoomId);
-const pRef=u=>doc(db,'vk4_rooms',myRoomId,'players',u);
-const pCol=()=>collection(db,'vk4_rooms',myRoomId,'players');
-const chatCol=()=>collection(db,'vk4_rooms',myRoomId,'chat');
-
 // I18N
 const L={tr:{
   toggle:'🌐 EN',title:'Vampir Köylü',sub:'Online Sosyal Dedüksiyon',
@@ -1036,10 +1030,21 @@ function buildVoteList(){
   const list=$('vote-list');if(!list)return;list.innerHTML='';
   const alive=Object.values(pData).filter(p=>p.isAlive&&p.id!==myUid);
   const myVote=roomData?.votes?.[myUid];
+  // Count total votes per person (anonymous - just counts)
+  const counts={};
+  Object.values(roomData?.votes||{}).forEach(v=>{counts[v]=(counts[v]||0)+1;});
+  const maxVotes=Math.max(0,...Object.values(counts));
   alive.forEach(p=>{
+    const vc=counts[p.id]||0;
     const div=document.createElement('div');
     div.className='vote-item'+(myVote===p.id?' submitted':'')+(window.selVote===p.id&&!myVote?' on':'');
-    div.innerHTML=`<span style="font-size:1.2rem">${p.avatar}</span><span style="flex:1;font-weight:700;font-size:.84rem">${p.name}</span>${myVote===p.id?'<span class="ck">✓</span>':''}`;
+    div.style.position='relative';div.style.overflow='hidden';
+    // Vote bar (shows count visually)
+    const barPct=maxVotes>0?(vc/maxVotes)*100:0;
+    const bar=document.createElement('div');
+    bar.style.cssText=`position:absolute;left:0;top:0;bottom:0;width:${barPct}%;background:rgba(138,3,3,.13);pointer-events:none;transition:width .4s;`;
+    div.appendChild(bar);
+    div.innerHTML+=`<span style="font-size:1.2rem;position:relative">${p.avatar}</span><span style="flex:1;font-weight:700;font-size:.84rem;position:relative">${p.name}</span>${vc>0?`<span style="font-family:'Cinzel',serif;font-size:.82rem;color:var(--blood2);font-weight:700;position:relative">${vc} oy</span>`:''}${myVote===p.id?'<span class="ck" style="position:relative">✓</span>':''}`;
     if(!myVote)div.onclick=()=>{window.selVote=p.id;buildVoteList();};
     list.appendChild(div);
   });
@@ -1080,10 +1085,21 @@ function buildEveList(){
   const list=$('eve-vote-list');if(!list)return;list.innerHTML='';
   const alive=Object.values(pData).filter(p=>p.isAlive&&p.id!==myUid);
   const myEveVote=roomData?.eveVotes?.[myUid];
+  // Combined votes: day votes overridden by eve votes
+  const combined={...(roomData?.votes||{}),...(roomData?.eveVotes||{})};
+  const counts={};
+  Object.values(combined).forEach(v=>{counts[v]=(counts[v]||0)+1;});
+  const maxVotes=Math.max(0,...Object.values(counts));
   alive.forEach(p=>{
+    const vc=counts[p.id]||0;
     const div=document.createElement('div');
     div.className='vote-item'+(myEveVote===p.id?' submitted':'')+(window.selEveVote===p.id&&!myEveVote?' on':'');
-    div.innerHTML=`<span style="font-size:1.2rem">${p.avatar}</span><span style="flex:1;font-weight:700;font-size:.84rem">${p.name}</span>${myEveVote===p.id?'<span class="ck">✓</span>':''}`;
+    div.style.position='relative';div.style.overflow='hidden';
+    const barPct=maxVotes>0?(vc/maxVotes)*100:0;
+    const bar=document.createElement('div');
+    bar.style.cssText=`position:absolute;left:0;top:0;bottom:0;width:${barPct}%;background:rgba(138,3,3,.13);pointer-events:none;transition:width .4s;`;
+    div.appendChild(bar);
+    div.innerHTML+=`<span style="font-size:1.2rem;position:relative">${p.avatar}</span><span style="flex:1;font-weight:700;font-size:.84rem;position:relative">${p.name}</span>${vc>0?`<span style="font-family:'Cinzel',serif;font-size:.82rem;color:#ee8888;font-weight:700;position:relative">${vc} oy</span>`:''}${myEveVote===p.id?'<span class="ck" style="position:relative">✓</span>':''}`;
     if(!myEveVote)div.onclick=()=>{window.selEveVote=p.id;buildEveList();};
     list.appendChild(div);
   });
@@ -1285,6 +1301,26 @@ function genCode(){const c='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';let r='';for(let i
 // ═══ INIT ═══
 buildAv();buildCountBtns();applyLang();
 $('inp-name').addEventListener('keydown',e=>{if(e.key==='Enter')$('inp-name').blur();});
+
+// Expose buildAv globally so pre-declare script can call it too
+window.buildAv=buildAv;
 </script>
-</body>
-</html>
+
+<!-- Run avatar grid immediately so it shows even if module is still loading -->
+<script>
+document.addEventListener('DOMContentLoaded',()=>{
+  // Fallback: if module hasn't built the grid yet, build it now with inline code
+  setTimeout(()=>{
+    const g=document.getElementById('av-grid');
+    if(g&&g.children.length===0){
+      const avs=['🧛','👻','🕷️','🦇','💀','🌙','⚰️','🔮','🕯️','🌑','🧟','🎭','🗡️','🩸','🌹','👁️','🐺','🦉','🕸️','⚡'];
+      avs.forEach((a,i)=>{
+        const b=document.createElement('button');b.type='button';
+        b.className='av-btn'+(i===0?' sel':'');b.textContent=a;
+        b.onclick=()=>{window.selAv=a;g.querySelectorAll('.av-btn').forEach(x=>x.classList.remove('sel'));b.classList.add('sel');};
+        g.appendChild(b);
+      });
+    }
+  },800);
+});
+</script>
