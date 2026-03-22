@@ -5,571 +5,519 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
-<meta name="theme-color" content="#060302"/>
-<meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+<meta name="theme-color" content="#040201"/>
 <title>Vampir Köylü — Forge&Play</title>
-<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Cinzel:wght@400;600;700;900&family=Nunito:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Cinzel:wght@400;600;700;900&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet"/>
 <style>
-/* ═══════════════════════════════════════
-   DESIGN TOKENS
-═══════════════════════════════════════ */
 :root{
-  --blood:#8a0303;--blood2:#c41c1c;--dark:#2e0000;
+  --blood:#8a0303;--blood2:#c41c1c;--dark:#1e0000;
   --gold:#c5a059;--gold2:#e8c87a;
-  --parchment:#e8dcc4;--parchment2:#f5ede0;
-  --bg:#05030100;--card:#0d0603;--card2:#160a05;
+  --parchment:#e5d9c1;
+  --bg:#040201;--card:#0d0603;--card2:#170a05;
   --border:#3a1a08;--border2:#5a2a10;
   --muted:#6a3a1a;--muted2:#9a5a30;
-  --purple:#6030c0;--blue:#2050a0;
+  --purple:#5a28b8;--night-color:#7755cc;
+  --day-color:#c59020;--eve-color:#c04040;
   --r:12px;
-  --shadow:0 20px 60px rgba(0,0,0,.95);
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
-html{height:100%;overflow:hidden;}
+html,body{height:100%;overflow:hidden;}
 body{
   background:var(--bg);
-  background:radial-gradient(ellipse at 50% -10%,#220a0a 0%,#080302 50%,#030101 100%);
+  background:radial-gradient(ellipse at 50% 0%,#1f0606 0%,#060201 60%,#020101 100%);
   color:var(--parchment);
   font-family:'Nunito',system-ui,sans-serif;
   height:100dvh;overflow:hidden;
   -webkit-font-smoothing:antialiased;
-  -moz-osx-font-smoothing:grayscale;
 }
-/* ═══ PARTICLES BG ═══ */
-#bg-canvas{position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.4;}
-/* ═══ LAYOUT ═══ */
-#app{
-  position:relative;z-index:1;
-  height:100dvh;display:flex;flex-direction:column;
-  overflow:hidden;max-width:520px;margin:0 auto;
-}
-/* ═══ SCREENS ═══ */
-.scr{
-  display:none;flex-direction:column;
-  height:100%;overflow-y:auto;overflow-x:hidden;
-  padding:16px 14px;
-  animation:fadeUp .35s ease;
-}
-.scr.on{display:flex;}
-@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
-/* ═══ SCROLLBAR ═══ */
-.scr::-webkit-scrollbar,.plist::-webkit-scrollbar,.chat-msgs::-webkit-scrollbar{width:3px;}
-.scr::-webkit-scrollbar-thumb,.plist::-webkit-scrollbar-thumb,.chat-msgs::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px;}
-/* ═══ TOP BAR ═══ */
+/* PARTICLES */
+#particles{position:fixed;inset:0;pointer-events:none;z-index:0;}
+.particle{position:absolute;border-radius:50%;animation:pfloat linear infinite;opacity:0;}
+@keyframes pfloat{0%{transform:translateY(100vh) scale(0);opacity:0}10%{opacity:.6}90%{opacity:.3}100%{transform:translateY(-10vh) scale(1.2);opacity:0}}
+/* LAYOUT */
+#app{position:relative;z-index:1;height:100dvh;display:flex;flex-direction:column;overflow:hidden;max-width:500px;margin:0 auto;}
+/* TOP BAR */
 #topbar{
-  position:fixed;top:0;left:50%;transform:translateX(-50%);
-  width:100%;max-width:520px;z-index:100;
   display:flex;align-items:center;justify-content:space-between;
-  padding:10px 14px 8px;
-  background:linear-gradient(to bottom,rgba(5,2,1,.95) 60%,transparent);
-  backdrop-filter:blur(4px);
+  padding:10px 14px 8px;flex-shrink:0;
+  background:linear-gradient(to bottom,rgba(4,2,1,.98) 70%,transparent);
+  border-bottom:1px solid rgba(58,26,8,.4);
 }
-#topbar-title{font-family:'Cinzel Decorative',serif;font-size:.85rem;color:var(--gold);letter-spacing:.05em;}
-#topbar-phase{font-size:.72rem;color:var(--muted2);font-weight:700;font-family:'Cinzel',serif;text-transform:uppercase;letter-spacing:.1em;}
-#topbar-lang{
-  background:rgba(0,0,0,.5);border:1px solid var(--border2);
-  color:var(--gold);padding:5px 11px;border-radius:20px;
-  font-family:'Cinzel',serif;font-size:.7rem;font-weight:700;cursor:pointer;
-}
-/* ═══ TYPOGRAPHY ═══ */
-.t-title{font-family:'Cinzel Decorative',serif;}
-.t-head{font-family:'Cinzel',serif;}
-/* ═══ CARD ═══ */
-.card{
-  background:rgba(10,5,2,.9);border:1px solid var(--border);
-  border-radius:var(--r);overflow:hidden;
-  box-shadow:var(--shadow),inset 0 1px 0 rgba(255,255,255,.03);
-}
-/* ═══ INPUTS ═══ */
-input,textarea{
-  background:rgba(0,0,0,.65);border:2px solid var(--border);
-  color:var(--parchment);padding:12px 14px;border-radius:9px;width:100%;
+.tb-left{display:flex;flex-direction:column;gap:2px;}
+#tb-title{font-family:'Cinzel Decorative',serif;font-size:.82rem;color:var(--gold);}
+#tb-phase{font-size:.68rem;color:var(--muted2);font-family:'Cinzel',serif;text-transform:uppercase;letter-spacing:.08em;}
+/* SCREENS */
+.scr{display:none;flex-direction:column;flex:1;overflow-y:auto;overflow-x:hidden;padding:12px 14px 16px;}
+.scr.on{display:flex;animation:sUp .3s ease;}
+@keyframes sUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.scr::-webkit-scrollbar{width:2px;}
+.scr::-webkit-scrollbar-thumb{background:var(--border2);}
+/* CARDS */
+.card{background:rgba(10,5,2,.88);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;box-shadow:0 16px 50px rgba(0,0,0,.9),inset 0 1px 0 rgba(255,255,255,.025);}
+/* INPUTS */
+input{
+  background:rgba(0,0,0,.6);border:2px solid var(--border);
+  color:var(--parchment);padding:11px 14px;border-radius:9px;width:100%;
   font-size:.95rem;font-family:'Nunito',sans-serif;font-weight:700;
-  outline:none;transition:.25s;resize:none;
-  -webkit-appearance:none;
+  outline:none;transition:.22s;-webkit-appearance:none;
 }
-input:focus,textarea:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(197,160,89,.1);}
-input::placeholder,textarea::placeholder{color:var(--muted);font-weight:600;}
-/* ═══ BUTTONS ═══ */
+input:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(197,160,89,.1);}
+input::placeholder{color:var(--muted);font-weight:600;}
+/* BUTTONS */
 .btn{
   display:inline-flex;align-items:center;justify-content:center;gap:7px;
-  padding:12px 18px;border:none;border-radius:9px;width:100%;
-  font-family:'Cinzel',serif;font-weight:700;font-size:.85rem;
-  cursor:pointer;transition:all .2s;letter-spacing:.05em;
-  -webkit-appearance:none;-moz-appearance:none;
-  touch-action:manipulation;
+  padding:12px 16px;border:none;border-radius:9px;width:100%;
+  font-family:'Cinzel',serif;font-weight:700;font-size:.84rem;
+  cursor:pointer;transition:all .18s;letter-spacing:.04em;
+  -webkit-appearance:none;touch-action:manipulation;
 }
 .btn:active{transform:scale(.96)!important;}
-.btn:disabled{opacity:.35;cursor:not-allowed;transform:none!important;}
-.btn-r{background:linear-gradient(135deg,var(--blood2),var(--blood));color:#fff;border:1px solid rgba(255,80,80,.25);box-shadow:0 4px 18px rgba(138,3,3,.4);}
-.btn-r:hover:not(:disabled){background:linear-gradient(135deg,#d42020,#aa0000);box-shadow:0 6px 24px rgba(138,3,3,.55);transform:translateY(-2px);}
+.btn:disabled{opacity:.35;cursor:not-allowed;transform:none!important;pointer-events:none;}
+.btn-r{background:linear-gradient(135deg,#c41c1c,#7a0000);color:#fff;border:1px solid rgba(255,70,70,.2);box-shadow:0 4px 16px rgba(138,3,3,.35);}
+.btn-r:hover:not(:disabled){background:linear-gradient(135deg,#d42020,#950000);box-shadow:0 6px 22px rgba(138,3,3,.5);transform:translateY(-1px);}
 .btn-g{background:rgba(0,0,0,.45);color:#aaa;border:1px solid var(--border2);}
 .btn-g:hover:not(:disabled){border-color:var(--gold);color:var(--gold);}
-.btn-gold{background:rgba(197,160,89,.14);color:var(--gold);border:1px solid rgba(197,160,89,.4);}
-.btn-gold:hover:not(:disabled){background:rgba(197,160,89,.25);transform:translateY(-1px);}
-.btn-purple{background:rgba(90,40,160,.2);color:#c4a0ff;border:1px solid rgba(140,70,255,.35);}
-.btn-blue{background:rgba(30,70,180,.2);color:#80b0ff;border:1px solid rgba(70,120,255,.35);}
-.btn-sm{padding:8px 14px;font-size:.78rem;}
-/* ═══ AVATAR GRID ═══ */
-.av-grid{
-  display:grid;grid-template-columns:repeat(10,1fr);gap:4px;
-  background:rgba(0,0,0,.3);padding:9px;border-radius:10px;
-  border:1px solid var(--border);overflow:hidden;
-}
-.av-btn{
-  background:rgba(30,10,5,.6);border:2px solid transparent;border-radius:7px;
-  font-size:1rem;cursor:pointer;transition:all .18s;
-  display:flex;align-items:center;justify-content:center;
-  width:100%;aspect-ratio:1;min-width:0;padding:0;
-  touch-action:manipulation;
-}
-.av-btn.sel{background:var(--blood);border-color:rgba(220,80,80,.8);transform:scale(1.06);}
-.av-btn:active{transform:scale(.93)!important;}
-/* ═══ TABS ═══ */
-.tabs{display:flex;background:rgba(0,0,0,.6);border:1px solid var(--border);border-radius:9px;overflow:hidden;}
-.tab{flex:1;padding:10px 6px;text-align:center;cursor:pointer;
-  font-family:'Cinzel',serif;font-size:.75rem;font-weight:700;color:var(--muted2);transition:.25s;}
+.btn-gold{background:rgba(197,160,89,.12);color:var(--gold);border:1px solid rgba(197,160,89,.35);}
+.btn-gold:hover:not(:disabled){background:rgba(197,160,89,.22);transform:translateY(-1px);}
+.btn-night{background:rgba(80,50,180,.2);color:#9988ee;border:1px solid rgba(120,80,220,.35);}
+.btn-night:hover:not(:disabled){background:rgba(80,50,180,.32);}
+.btn-eve{background:rgba(160,40,40,.18);color:#ee8888;border:1px solid rgba(200,60,60,.35);}
+.btn-sm{padding:9px 13px;font-size:.78rem;}
+/* AVATARS */
+.av-grid{display:grid;grid-template-columns:repeat(10,1fr);gap:4px;background:rgba(0,0,0,.3);padding:9px;border-radius:10px;border:1px solid var(--border);overflow:hidden;}
+.av-btn{background:rgba(30,10,5,.6);border:2px solid transparent;border-radius:6px;font-size:.95rem;cursor:pointer;transition:all .16s;display:flex;align-items:center;justify-content:center;width:100%;aspect-ratio:1;min-width:0;padding:0;touch-action:manipulation;}
+.av-btn.sel{background:var(--blood);border-color:rgba(220,80,80,.8);transform:scale(1.07);}
+/* TABS */
+.tabs{display:flex;background:rgba(0,0,0,.55);border:1px solid var(--border);border-radius:9px;overflow:hidden;}
+.tab{flex:1;padding:10px 6px;text-align:center;cursor:pointer;font-family:'Cinzel',serif;font-size:.73rem;font-weight:700;color:var(--muted2);transition:.2s;}
 .tab.on{background:var(--blood);color:#fff;}
-/* ═══ PLAYER LIST ═══ */
-.plist{display:flex;flex-direction:column;gap:5px;overflow-y:auto;max-height:36vh;}
+/* PLAYER ROWS */
 .pi{
-  display:flex;align-items:center;gap:11px;
-  background:rgba(0,0,0,.38);border:1px solid var(--border);
+  display:flex;align-items:center;gap:10px;
+  background:rgba(0,0,0,.36);border:1px solid var(--border);
   border-left:3px solid var(--border2);border-radius:9px;
-  padding:10px 12px;font-size:.88rem;font-weight:700;transition:.18s;
+  padding:9px 12px;font-size:.86rem;font-weight:700;transition:.16s;
   position:relative;overflow:hidden;
 }
 .pi.me{border-left-color:var(--gold);}
-.pi.dead{opacity:.3;text-decoration:line-through;pointer-events:none;}
-.pi.votable{cursor:pointer;}
-.pi.votable:hover{border-left-color:var(--blood);background:rgba(138,3,3,.1);}
-.pi.my-vote{border-left-color:var(--blood);background:rgba(138,3,3,.09);}
-.pi.sel-v{border-left-color:var(--gold2);border-left-width:4px;}
-.vbar{position:absolute;left:0;top:0;bottom:0;background:rgba(138,3,3,.16);pointer-events:none;transition:width .5s;}
-/* ═══ ROLE CARD FLIP ═══ */
-.rcard-w{perspective:1000px;width:190px;height:295px;cursor:pointer;margin:10px auto;}
-.rcard-inner{width:100%;height:100%;transform-style:preserve-3d;transition:transform .7s cubic-bezier(.4,0,.2,1);}
+.pi.dead{opacity:.28;text-decoration:line-through;pointer-events:none;}
+.pi.voted{border-left-color:var(--blood2);}
+/* ROLE CARD FLIP */
+.rcard-w{perspective:900px;width:175px;height:270px;cursor:pointer;margin:10px auto;}
+.rcard-inner{width:100%;height:100%;transform-style:preserve-3d;transition:transform .65s cubic-bezier(.4,0,.2,1);}
 .rcard-w.flip .rcard-inner{transform:rotateY(180deg);}
-.rface{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;border:2px solid var(--border);padding:14px;text-align:center;}
-.rf-front{background:linear-gradient(160deg,#120805,#060302);}
+.rface{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:11px;display:flex;flex-direction:column;align-items:center;justify-content:center;border:2px solid var(--border);padding:14px;text-align:center;}
+.rf-front{background:linear-gradient(155deg,#130805,#060302);}
 .rf-back{transform:rotateY(180deg);}
-/* ═══ TIMER ═══ */
-.timer{
-  font-family:'Cinzel Decorative',serif;font-size:2.8rem;font-weight:700;
-  color:var(--gold);text-shadow:0 0 20px rgba(197,160,89,.3);
-  line-height:1;min-width:3ch;text-align:center;
-}
-.timer.urg{color:var(--blood2);text-shadow:0 0 20px rgba(220,28,28,.5);animation:tpulse 1s infinite;}
-@keyframes tpulse{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
-/* ═══ PHASE BANNER ═══ */
-.phase-banner{
+/* PHASE BANNER */
+.ph-banner{
   display:flex;align-items:center;gap:10px;
-  background:rgba(0,0,0,.55);border:1px solid var(--border2);
-  border-radius:10px;padding:10px 14px;margin-bottom:12px;
+  border-radius:10px;padding:10px 13px;margin-bottom:10px;border:1px solid;
+  flex-shrink:0;
 }
-/* ═══ EVENT BOX ═══ */
-.evbox{
-  background:rgba(0,0,0,.5);border:1px dashed rgba(138,3,3,.45);
-  border-radius:10px;padding:12px 14px;margin-bottom:10px;
-  font-weight:600;font-size:.88rem;line-height:1.6;
+.ph-night{background:rgba(60,30,120,.18);border-color:rgba(100,70,200,.3);}
+.ph-day{background:rgba(160,100,0,.16);border-color:rgba(200,140,0,.3);}
+.ph-eve{background:rgba(150,20,20,.18);border-color:rgba(200,50,50,.3);}
+/* TIMER */
+.timer{font-family:'Cinzel Decorative',serif;font-size:2.6rem;font-weight:700;line-height:1;min-width:3.5ch;text-align:right;}
+.t-night{color:#9988ee;text-shadow:0 0 18px rgba(150,120,240,.4);}
+.t-day{color:var(--gold);text-shadow:0 0 18px rgba(197,160,89,.35);}
+.t-eve{color:#ee8888;text-shadow:0 0 18px rgba(220,80,80,.4);}
+.timer.urg{animation:tpulse 1s infinite;}
+@keyframes tpulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+/* CHAT */
+.chat-wrap{display:flex;flex-direction:column;flex:1;min-height:0;border:1px solid var(--border);border-radius:10px;overflow:hidden;background:rgba(0,0,0,.28);}
+.chat-msgs{flex:1;overflow-y:auto;padding:9px;display:flex;flex-direction:column;gap:5px;min-height:0;}
+.chat-msgs::-webkit-scrollbar{width:2px;}
+.chat-msgs::-webkit-scrollbar-thumb{background:var(--border2);}
+.c-row{display:flex;gap:7px;align-items:flex-start;}
+.c-row.mine{flex-direction:row-reverse;}
+.c-bub{background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:6px 10px;max-width:80%;font-size:.8rem;line-height:1.4;font-weight:600;}
+.c-row.mine .c-bub{background:rgba(138,3,3,.22);border-color:rgba(138,3,3,.38);}
+.c-name{font-size:.62rem;color:var(--muted2);font-family:'Cinzel',serif;font-weight:700;margin-bottom:2px;}
+.c-sys{text-align:center;font-size:.7rem;color:var(--muted2);font-style:italic;padding:2px 0;font-weight:600;}
+.c-av{font-size:1.1rem;flex-shrink:0;margin-top:2px;}
+.chat-inp-row{display:flex;gap:6px;padding:7px 8px;border-top:1px solid var(--border);background:rgba(0,0,0,.38);}
+.chat-inp-row input{flex:1;padding:8px 11px;font-size:.84rem;border-radius:8px;}
+.csend{background:var(--blood);color:#fff;border:none;border-radius:8px;padding:8px 13px;font-family:'Cinzel',serif;font-size:.75rem;font-weight:700;cursor:pointer;flex-shrink:0;touch-action:manipulation;}
+.csend:active{transform:scale(.94);}
+/* VOTE LIST */
+.vote-item{
+  display:flex;align-items:center;gap:10px;
+  background:rgba(0,0,0,.36);border:2px solid var(--border);
+  border-radius:9px;padding:10px 13px;cursor:pointer;transition:.18s;
+  font-weight:700;font-size:.86rem;touch-action:manipulation;
 }
-/* ═══ CHAT ═══ */
-.chat-wrap{display:flex;flex-direction:column;flex:1;min-height:0;border:1px solid var(--border);border-radius:10px;overflow:hidden;background:rgba(0,0,0,.3);}
-.chat-msgs{flex:1;overflow-y:auto;padding:10px;display:flex;flex-direction:column;gap:6px;min-height:0;}
-.chat-input-row{display:flex;gap:7px;padding:8px;border-top:1px solid var(--border);background:rgba(0,0,0,.4);}
-.chat-input-row input{flex:1;padding:9px 12px;font-size:.85rem;border-radius:8px;}
-.chat-send{background:var(--blood);color:#fff;border:none;border-radius:8px;padding:9px 14px;font-family:'Cinzel',serif;font-size:.78rem;font-weight:700;cursor:pointer;flex-shrink:0;touch-action:manipulation;}
-.chat-send:active{transform:scale(.95);}
-.chat-msg{display:flex;gap:7px;align-items:flex-start;}
-.chat-msg.mine{flex-direction:row-reverse;}
-.chat-bubble{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:7px 10px;max-width:78%;font-size:.82rem;line-height:1.4;font-weight:600;}
-.chat-msg.mine .chat-bubble{background:rgba(138,3,3,.25);border-color:rgba(138,3,3,.4);}
-.chat-name{font-size:.65rem;color:var(--muted2);font-family:'Cinzel',serif;font-weight:700;margin-bottom:2px;}
-.chat-msg.mine .chat-name{text-align:right;}
-.chat-system{text-align:center;font-size:.72rem;color:var(--muted2);font-style:italic;padding:3px 0;font-weight:600;}
-.chat-av{font-size:1.2rem;flex-shrink:0;margin-top:2px;}
-/* ═══ NIGHT CHOICE ═══ */
-.nchoice{
-  display:flex;align-items:center;gap:11px;
-  background:rgba(0,0,0,.4);border:2px solid var(--border);
-  border-radius:10px;padding:10px 13px;cursor:pointer;
-  transition:.18s;margin-bottom:5px;font-weight:700;font-size:.88rem;
-  touch-action:manipulation;
-}
-.nchoice:active{transform:scale(.97);}
-.nchoice:hover{border-color:var(--border2);background:rgba(138,3,3,.09);}
-.nchoice.on{border-color:var(--blood2);background:rgba(138,3,3,.18);}
-/* ═══ MODAL ═══ */
-.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:200;display:flex;align-items:flex-end;justify-content:center;padding:0;backdrop-filter:blur(8px);animation:fadeUp .25s ease;}
-.modal-box{background:var(--card2);border:1px solid var(--border2);border-radius:16px 16px 0 0;width:100%;max-width:520px;max-height:88dvh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 -20px 60px rgba(0,0,0,.9);}
-.modal-head{padding:15px 17px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
-.modal-body{padding:16px 17px;overflow-y:auto;flex:1;}
-.modal-foot{padding:12px 17px;border-top:1px solid var(--border);flex-shrink:0;}
-.modal-close{width:30px;height:30px;background:rgba(0,0,0,.4);border:1px solid var(--border);border-radius:8px;color:var(--gold);font-size:.9rem;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-/* ═══ HOW TO DOTS ═══ */
-.dots{display:flex;justify-content:center;gap:5px;margin-bottom:10px;}
-.dot{height:4px;border-radius:3px;cursor:pointer;transition:all .3s;}
+.vote-item:active{transform:scale(.97);}
+.vote-item:hover{border-color:var(--border2);background:rgba(138,3,3,.08);}
+.vote-item.on{border-color:var(--blood2);background:rgba(138,3,3,.16);}
+.vote-item.submitted{border-color:var(--gold);background:rgba(197,160,89,.07);cursor:default;}
+.vote-item .ck{margin-left:auto;font-size:1rem;}
+/* HOST/WAIT */
+.honly{display:none;}.wmsg{display:none;color:var(--muted);font-style:italic;text-align:center;font-size:.8rem;font-weight:600;margin-top:10px;}
+body.is-host .honly{display:flex;}
+body.is-host .wmsg{display:none;}
+body:not(.is-host) .honly{display:none!important;}
+body:not(.is-host) .wmsg{display:block;}
+/* MODAL */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.86);z-index:200;display:flex;align-items:flex-end;justify-content:center;padding:0;backdrop-filter:blur(7px);animation:sUp .22s ease;}
+.modal-box{background:var(--card2);border:1px solid var(--border2);border-radius:16px 16px 0 0;width:100%;max-width:500px;max-height:90dvh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 -20px 50px rgba(0,0,0,.9);}
+.mhead{padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.mbody{padding:15px 16px;overflow-y:auto;flex:1;}
+.mfoot{padding:11px 16px;border-top:1px solid var(--border);flex-shrink:0;}
+.mcls{width:30px;height:30px;background:rgba(0,0,0,.4);border:1px solid var(--border);border-radius:8px;color:var(--gold);font-size:.88rem;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+/* DOTS */
+.dots{display:flex;justify-content:center;gap:5px;margin-bottom:9px;}
+.dot{height:4px;border-radius:3px;cursor:pointer;transition:all .25s;}
 .dot.on{width:18px;background:var(--blood2);}
-.dot:not(.on){width:4px;background:rgba(138,3,3,.25);}
-/* ═══ ROLE BADGE ═══ */
-.rbadge{
-  display:inline-flex;align-items:center;gap:5px;
-  padding:3px 9px;border-radius:20px;font-family:'Cinzel',serif;
-  font-size:.72rem;font-weight:700;border:1px solid;
-}
-/* ═══ STARS ═══ */
+.dot:not(.on){width:4px;background:rgba(138,3,3,.22);}
+/* TOAST */
+.toast{position:fixed;top:56px;left:50%;transform:translateX(-50%);background:rgba(12,5,2,.96);border:1px solid var(--border2);color:var(--parchment);padding:9px 17px;border-radius:24px;font-family:'Cinzel',serif;font-size:.78rem;font-weight:700;z-index:300;white-space:nowrap;box-shadow:0 8px 24px rgba(0,0,0,.7);animation:sUp .25s ease;}
+/* STARS */
 .star{position:fixed;pointer-events:none;z-index:300;animation:sfall linear infinite;}
 @keyframes sfall{0%{opacity:1;transform:translateY(-10px) rotate(0)}100%{opacity:0;transform:translateY(105vh) rotate(540deg)}}
-/* ═══ NOTIFICATION TOAST ═══ */
-.toast{
-  position:fixed;top:60px;left:50%;transform:translateX(-50%);
-  background:rgba(15,6,3,.96);border:1px solid var(--border2);
-  color:var(--parchment);padding:10px 18px;border-radius:30px;
-  font-family:'Cinzel',serif;font-size:.8rem;font-weight:700;
-  z-index:300;animation:toastIn .3s ease;white-space:nowrap;
-  box-shadow:0 8px 24px rgba(0,0,0,.7);
+/* EVENT BOX */
+.evbox{background:rgba(0,0,0,.48);border:1px dashed rgba(138,3,3,.4);border-radius:9px;padding:11px 13px;margin-bottom:9px;font-weight:600;font-size:.84rem;line-height:1.6;flex-shrink:0;}
+/* SECTION LABEL */
+.slbl{font-family:'Cinzel',serif;font-size:.66rem;color:var(--muted2);text-transform:uppercase;letter-spacing:.18em;display:block;margin-bottom:6px;}
+/* EVE BADGE */
+.eve-badge{background:rgba(180,40,40,.15);border:1px solid rgba(200,60,60,.3);border-radius:8px;padding:8px 12px;text-align:center;font-size:.78rem;color:#ee9999;font-weight:700;margin-bottom:9px;font-family:'Cinzel',serif;}
+/* STEP FLOW (bottom) */
+#step-flow{
+  display:flex;flex-shrink:0;align-items:center;
+  background:rgba(4,2,1,.95);border-top:1px solid var(--border);
+  padding:8px 14px;gap:6px;overflow-x:auto;
 }
-@keyframes toastIn{from{opacity:0;transform:translateX(-50%) translateY(-8px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
-/* ═══ SPECTATOR BADGE ═══ */
-.spectator-badge{
-  background:rgba(100,100,100,.15);border:1px dashed rgba(150,150,150,.3);
-  border-radius:8px;padding:8px 12px;text-align:center;
-  font-size:.78rem;color:#666;font-weight:700;margin-bottom:10px;
-}
-/* ═══ PULSE RING ═══ */
-.pulse-ring{
-  display:inline-block;width:8px;height:8px;border-radius:50%;
-  animation:pring 2s infinite;
-}
-@keyframes pring{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.3);opacity:.7}}
-/* ═══ SLABEL ═══ */
-.slabel{font-family:'Cinzel',serif;font-size:.67rem;color:var(--muted2);text-transform:uppercase;letter-spacing:.18em;display:block;margin-bottom:6px;}
-/* ═══ ROLE PREVIEW GRID ═══ */
-.rl-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:10px;}
-.rl-card{border-radius:9px;padding:10px 8px;text-align:center;border:1px solid;}
-/* ═══ UTILITY ═══ */
+.sf-step{display:flex;flex-direction:column;align-items:center;gap:2px;flex-shrink:0;min-width:48px;}
+.sf-dot{width:8px;height:8px;border-radius:50%;border:2px solid var(--border2);background:transparent;transition:.2s;}
+.sf-dot.cur{background:var(--gold);border-color:var(--gold);}
+.sf-dot.done{background:var(--muted);border-color:var(--muted);}
+.sf-lbl{font-size:.55rem;color:var(--muted);font-family:'Cinzel',serif;text-align:center;font-weight:700;}
+.sf-lbl.cur{color:var(--gold2);}
+.sf-sep{width:20px;height:1px;background:var(--border);flex-shrink:0;margin-bottom:10px;}
+/* UTIL */
 .row{display:flex;gap:8px;}.col{display:flex;flex-direction:column;}
-.tc{text-align:center;}.mt1{margin-top:6px;}.mt2{margin-top:12px;}.mt3{margin-top:18px;}
-.mb1{margin-bottom:6px;}.mb2{margin-bottom:12px;}
-.flex1{flex:1;}.hidden{display:none!important;}
-/* ═══ HOST/WAIT ═══ */
-.host-btn{display:none;}.wait-msg{display:none;color:var(--muted);font-style:italic;text-align:center;font-size:.82rem;font-weight:600;margin-top:12px;}
-body.is-host .host-btn{display:flex;}
-body.is-host .wait-msg{display:none;}
-body:not(.is-host) .host-btn{display:none!important;}
-body:not(.is-host) .wait-msg{display:block;}
-/* ═══ ERROR ═══ */
-#err-screen{display:none;position:fixed;inset:0;background:rgba(0,0,0,.97);z-index:999;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px;}
+.tc{text-align:center;}.flex1{flex:1;min-height:0;}
+.mt1{margin-top:6px;}.mt2{margin-top:11px;}.mt3{margin-top:17px;}
+.mb1{margin-bottom:6px;}.mb2{margin-bottom:11px;}
+.hidden{display:none!important;}
+/* ERROR */
+#err{display:none;position:fixed;inset:0;background:rgba(0,0,0,.97);z-index:999;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px;}
 </style>
 </head>
 <body>
 
-<canvas id="bg-canvas"></canvas>
+<div id="particles"></div>
 
-<div id="err-screen">
-  <div style="font-size:4rem;margin-bottom:14px">🔒</div>
-  <h2 class="t-head" style="font-size:1.5rem;color:var(--blood2);margin-bottom:8px">Erişim Kısıtlı</h2>
-  <p style="color:#888;font-size:.9rem;margin-bottom:20px">Bu oyuna yalnızca <strong style="color:var(--gold)">Forge&Play</strong> üzerinden erişilebilir.</p>
-  <a href="https://www.forgeandplay.com" style="display:inline-block;background:var(--blood);color:#fff;padding:12px 26px;border-radius:10px;font-family:'Cinzel',serif;font-weight:700;text-decoration:none;font-size:.9rem;">forgeandplay.com'a Git</a>
+<div id="err">
+  <div style="font-size:4rem;margin-bottom:12px">🔒</div>
+  <h2 style="font-family:'Cinzel',serif;font-size:1.4rem;color:var(--blood2);margin-bottom:8px">Erişim Kısıtlı</h2>
+  <p style="color:#888;font-size:.88rem;margin-bottom:18px">Yalnızca <strong style="color:var(--gold)">Forge&Play</strong> üzerinden erişilebilir.</p>
+  <a href="https://www.forgeandplay.com" style="display:inline-block;background:var(--blood);color:#fff;padding:11px 24px;border-radius:9px;font-family:'Cinzel',serif;font-weight:700;text-decoration:none;font-size:.86rem;">forgeandplay.com'a Git</a>
 </div>
 
+<div id="app">
 <!-- TOP BAR -->
 <div id="topbar">
-  <div class="col" style="gap:2px">
-    <div id="topbar-title">🧛 Vampir Köylü</div>
-    <div id="topbar-phase"></div>
+  <div class="tb-left">
+    <div id="tb-title">🧛 Vampir Köylü</div>
+    <div id="tb-phase"></div>
   </div>
-  <button id="topbar-lang" onclick="toggleLang()">🌐 EN</button>
+  <div style="display:flex;align-items:center;gap:8px">
+    <div id="tb-timer" class="timer t-night" style="font-size:1.5rem;display:none">0:00</div>
+    <button style="background:rgba(0,0,0,.5);border:1px solid var(--border2);color:var(--gold);padding:5px 11px;border-radius:18px;font-family:'Cinzel',serif;font-size:.68rem;font-weight:700;cursor:pointer;" onclick="toggleLang()" id="lang-btn">🌐 EN</button>
+  </div>
 </div>
 
-<!-- APP CONTAINER -->
-<div id="app" style="padding-top:52px">
+<!-- STEP FLOW BAR -->
+<div id="step-flow" style="display:none">
+  <div class="sf-step"><div class="sf-dot" id="sf-0"></div><div class="sf-lbl" id="sfl-0">Gece</div></div>
+  <div class="sf-sep"></div>
+  <div class="sf-step"><div class="sf-dot" id="sf-1"></div><div class="sf-lbl" id="sfl-1">Oylama</div></div>
+  <div class="sf-sep"></div>
+  <div class="sf-step"><div class="sf-dot" id="sf-2"></div><div class="sf-lbl" id="sfl-2">Akşam</div></div>
+  <div class="sf-sep"></div>
+  <div class="sf-step"><div class="sf-dot" id="sf-3"></div><div class="sf-lbl" id="sfl-3">Sonuç</div></div>
+</div>
 
-<!-- ════════ 1. SETUP ════════ -->
+<!-- ══ 1. SETUP ══ -->
 <div id="s-setup" class="scr on">
-  <!-- Logo -->
-  <div class="tc" style="margin-bottom:18px;margin-top:4px">
-    <div style="font-size:62px;filter:drop-shadow(0 0 28px rgba(138,3,3,.8));animation:tpulse 3s infinite">🧛</div>
+  <div class="tc" style="margin-bottom:16px;margin-top:4px">
+    <div style="font-size:58px;filter:drop-shadow(0 0 26px rgba(138,3,3,.8));animation:tpulse 3s infinite">🧛</div>
     <div style="display:flex;justify-content:center;gap:3px;margin:5px 0 3px">
-      <span style="display:inline-block;width:3px;height:10px;background:var(--blood);border-radius:0 0 2px 2px;animation:tpulse 2s infinite"></span>
-      <span style="display:inline-block;width:3px;height:14px;background:var(--blood);border-radius:0 0 2px 2px;animation:tpulse 2s .3s infinite"></span>
-      <span style="display:inline-block;width:3px;height:10px;background:var(--blood);border-radius:0 0 2px 2px;animation:tpulse 2s .6s infinite"></span>
+      <span style="display:inline-block;width:3px;height:9px;background:var(--blood);border-radius:0 0 2px 2px;animation:tpulse 2s infinite"></span>
+      <span style="display:inline-block;width:3px;height:13px;background:var(--blood);border-radius:0 0 2px 2px;animation:tpulse 2s .3s infinite"></span>
+      <span style="display:inline-block;width:3px;height:9px;background:var(--blood);border-radius:0 0 2px 2px;animation:tpulse 2s .6s infinite"></span>
     </div>
-    <h1 id="s-main-title" class="t-title" style="font-size:2.5rem;color:var(--blood2);text-shadow:0 0 40px rgba(138,3,3,.7),0 2px 0 #000;line-height:1.1">Vampir Köylü</h1>
-    <p id="s-main-sub" class="t-head" style="font-size:.65rem;color:var(--muted2);letter-spacing:.35em;text-transform:uppercase;margin-top:4px">Online Sosyal Dedüksiyon</p>
+    <h1 style="font-family:'Cinzel Decorative',serif;font-size:2.3rem;color:var(--blood2);text-shadow:0 0 35px rgba(138,3,3,.7),0 2px 0 #000;line-height:1.1" id="main-title">Vampir Köylü</h1>
+    <p style="font-family:'Cinzel',serif;font-size:.64rem;color:var(--muted2);letter-spacing:.32em;text-transform:uppercase;margin-top:4px" id="main-sub">Online Sosyal Dedüksiyon</p>
   </div>
 
-  <div class="card" style="padding:18px">
-    <!-- Tabs -->
+  <div class="card" style="padding:16px">
     <div class="tabs mb2" id="setup-tabs">
-      <div class="tab on" id="tab-home" onclick="sTab('home')">🏠 Ana Menü</div>
+      <div class="tab on" id="tab-home" onclick="sTab('home')" id="tab-home">🏠 Ana Menü</div>
       <div class="tab" id="tab-create" onclick="sTab('create')">⚰️ Oda Kur</div>
       <div class="tab" id="tab-join" onclick="sTab('join')">🗡️ Katıl</div>
     </div>
 
-    <!-- Profile (shared) -->
     <div id="profile-sec">
-      <label class="slabel" id="lbl-name">Oyuncu Adın</label>
+      <label class="slbl" id="lbl-name">Oyuncu Adın</label>
       <input id="inp-name" type="text" maxlength="18" autocomplete="off"/>
-      <label class="slabel mt2" id="lbl-avatar">Maskeni Seç</label>
+      <label class="slbl mt2" id="lbl-avatar">Maskeni Seç</label>
       <div class="av-grid" id="av-grid"></div>
     </div>
 
-    <!-- HOME panel -->
+    <!-- HOME -->
     <div id="pan-home" class="col mt2" style="gap:8px">
-      <button class="btn btn-r" id="btn-to-create" onclick="sTab('create')" disabled>⚰️ <span id="lbl-btn-create">Yeni Oda Kur</span></button>
-      <button class="btn btn-g" id="btn-to-join" onclick="sTab('join')" disabled>🗡️ <span id="lbl-btn-join">Odaya Katıl</span></button>
-      <button class="btn btn-purple" onclick="openHowto()">📖 <span id="lbl-btn-howto">Nasıl Oynanır?</span></button>
-
-      <!-- Role preview -->
-      <div class="rl-grid mt1">
-        <div class="rl-card" style="background:rgba(138,3,3,.1);border-color:rgba(138,3,3,.25)">
-          <div style="font-size:1.5rem">🧛</div>
-          <div class="t-head" style="font-size:.7rem;color:#ff6b6b;margin-top:4px" id="rl-vamp-lbl">VAMPİR</div>
-          <div style="font-size:.62rem;color:var(--muted);margin-top:2px" id="rl-vamp-sub">Gizlice öldür</div>
+      <button class="btn btn-r" id="btn-to-create" onclick="sTab('create')" disabled>⚰️ <span id="t-create">Yeni Oda Kur</span></button>
+      <button class="btn btn-g" id="btn-to-join" onclick="sTab('join')" disabled>🗡️ <span id="t-join">Odaya Katıl</span></button>
+      <button class="btn btn-night" onclick="openHowto()">📖 <span id="t-howto">Nasıl Oynanır?</span></button>
+      <!-- Role cards -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:4px">
+        <div style="background:rgba(138,3,3,.1);border:1px solid rgba(138,3,3,.25);border-radius:9px;padding:10px;text-align:center">
+          <div style="font-size:1.4rem">🧛</div>
+          <div style="font-family:'Cinzel',serif;font-size:.68rem;color:#ff6b6b;margin-top:3px" id="rl-vamp">VAMPİR</div>
+          <div style="font-size:.62rem;color:var(--muted);margin-top:2px" id="rl-vamp-s">Gizlice öldür</div>
         </div>
-        <div class="rl-card" style="background:rgba(0,100,0,.08);border-color:rgba(0,150,0,.2)">
-          <div style="font-size:1.5rem">🏘️</div>
-          <div class="t-head" style="font-size:.7rem;color:#90ee90;margin-top:4px" id="rl-vill-lbl">KÖYLÜ</div>
-          <div style="font-size:.62rem;color:var(--muted);margin-top:2px" id="rl-vill-sub">Vampirleri bul</div>
+        <div style="background:rgba(0,100,0,.08);border:1px solid rgba(0,150,0,.2);border-radius:9px;padding:10px;text-align:center">
+          <div style="font-size:1.4rem">🏘️</div>
+          <div style="font-family:'Cinzel',serif;font-size:.68rem;color:#90ee90;margin-top:3px" id="rl-vill">KÖYLÜ</div>
+          <div style="font-size:.62rem;color:var(--muted);margin-top:2px" id="rl-vill-s">Vampirleri bul</div>
         </div>
-        <div class="rl-card" style="background:rgba(0,50,180,.08);border-color:rgba(50,100,255,.2)">
-          <div style="font-size:1.5rem">💉</div>
-          <div class="t-head" style="font-size:.7rem;color:#6ab3ff;margin-top:4px" id="rl-doc-lbl">DOKTOR</div>
-          <div style="font-size:.62rem;color:var(--muted);margin-top:2px" id="rl-doc-sub">Birini koru</div>
-        </div>
-        <div class="rl-card" style="background:rgba(130,100,0,.08);border-color:rgba(200,160,0,.2)">
-          <div style="font-size:1.5rem">🔍</div>
-          <div class="t-head" style="font-size:.7rem;color:#ffd700;margin-top:4px" id="rl-det-lbl">DEDEKTİF</div>
-          <div style="font-size:.62rem;color:var(--muted);margin-top:2px" id="rl-det-sub">Rolü öğren</div>
+      </div>
+      <!-- Phase guide -->
+      <div style="background:rgba(0,0,0,.3);border:1px solid var(--border);border-radius:9px;padding:11px;margin-top:2px">
+        <div style="font-family:'Cinzel',serif;font-size:.65rem;color:var(--muted2);text-transform:uppercase;letter-spacing:.15em;margin-bottom:8px" id="t-phases-lbl">Oyun Döngüsü</div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <div style="display:flex;align-items:center;gap:8px"><span style="font-size:1rem">🌙</span><div><div style="font-size:.72rem;font-weight:700;color:#9988ee;font-family:'Cinzel',serif" id="t-p-night">GECE — 10 dk</div><div style="font-size:.66rem;color:var(--muted)" id="t-p-night-d">Tartış, şüphelileri belirle</div></div></div>
+          <div style="display:flex;align-items:center;gap:8px"><span style="font-size:1rem">⚖️</span><div><div style="font-size:.72rem;font-weight:700;color:var(--gold);font-family:'Cinzel',serif" id="t-p-day">OYLAMA — 5 dk</div><div style="font-size:.66rem;color:var(--muted)" id="t-p-day-d">Gizli oyla, birini kov</div></div></div>
+          <div style="display:flex;align-items:center;gap:8px"><span style="font-size:1rem">🌆</span><div><div style="font-size:.72rem;font-weight:700;color:#ee8888;font-family:'Cinzel',serif" id="t-p-eve">AKŞAM — 2 dk (2x hak)</div><div style="font-size:.66rem;color:var(--muted)" id="t-p-eve-d">Oyunu değiştirme şansı</div></div></div>
         </div>
       </div>
     </div>
 
-    <!-- CREATE panel -->
-    <div id="pan-create" class="hidden mt1">
-      <label class="slabel" id="lbl-player-count">Beklenen Oyuncu Sayısı</label>
+    <!-- CREATE -->
+    <div id="pan-create" class="hidden mt2">
+      <label class="slbl" id="lbl-max-p">Maksimum Oyuncu</label>
       <div style="display:flex;gap:5px;flex-wrap:wrap" id="count-btns"></div>
-      <div id="role-preview" style="background:rgba(0,0,0,.3);border:1px solid var(--border);border-radius:8px;padding:9px;text-align:center;font-size:.82rem;color:var(--muted2);margin-top:8px;font-weight:700;font-family:'Cinzel',serif"></div>
-      <button class="btn btn-r mt2" id="btn-create" onclick="doCreate()" disabled>🌙 <span id="lbl-create-go">Karanlığı Başlat!</span></button>
+      <div id="role-preview" style="background:rgba(0,0,0,.3);border:1px solid var(--border);border-radius:8px;padding:8px;text-align:center;font-size:.8rem;color:var(--muted2);margin-top:8px;font-weight:700;font-family:'Cinzel',serif;letter-spacing:.05em"></div>
+      <button class="btn btn-r mt2" id="btn-create" onclick="doCreate()" disabled>🌙 <span id="t-create-go">Karanlığı Başlat!</span></button>
     </div>
 
-    <!-- JOIN panel -->
-    <div id="pan-join" class="hidden mt1">
-      <label class="slabel" id="lbl-code">Oda Kodu</label>
-      <input id="inp-code" type="text" maxlength="4" autocomplete="off" style="text-align:center;font-size:2.2rem;letter-spacing:.6em;text-transform:uppercase;font-family:'Cinzel Decorative',serif;"/>
-      <button class="btn btn-g mt2" id="btn-join" onclick="doJoin()" disabled>🗡️ <span id="lbl-join-go">Kasabaya Gir</span></button>
+    <!-- JOIN -->
+    <div id="pan-join" class="hidden mt2">
+      <label class="slbl" id="lbl-code">Oda Kodu</label>
+      <input id="inp-code" type="text" maxlength="4" autocomplete="off" style="text-align:center;font-size:2rem;letter-spacing:.55em;text-transform:uppercase;font-family:'Cinzel Decorative',serif"/>
+      <button class="btn btn-g mt2" id="btn-join" onclick="doJoin()" disabled>🗡️ <span id="t-join-go">Kasabaya Gir</span></button>
     </div>
   </div>
-  <p class="t-head tc" style="font-size:.6rem;color:#2a0e06;margin-top:10px;letter-spacing:.1em">FORGE&PLAY</p>
+  <p style="font-family:'Cinzel',serif;font-size:.58rem;color:#200a04;text-align:center;margin-top:9px;letter-spacing:.1em">FORGE&PLAY</p>
 </div>
 
-<!-- ════════ 2. LOBBY ════════ -->
+<!-- ══ 2. LOBBY ══ -->
 <div id="s-lobby" class="scr">
   <div class="tc mb2">
-    <div style="font-size:2rem;margin-bottom:4px">🌙</div>
-    <h2 class="t-title" id="lbl-lobby-title" style="font-size:1.4rem;color:var(--gold)">Bekleme Odası</h2>
-    <div style="margin:8px 0;display:inline-flex;align-items:center;gap:8px;background:rgba(0,0,0,.55);border:1px solid var(--border2);padding:6px 18px;border-radius:20px">
-      <span class="t-head" style="font-size:.65rem;color:var(--muted2)" id="lbl-code-disp">KOD:</span>
-      <span class="t-title" id="lobby-code-disp" style="font-size:1.5rem;color:var(--gold);letter-spacing:.28em"></span>
+    <div style="font-size:1.8rem;margin-bottom:5px">🌙</div>
+    <h2 style="font-family:'Cinzel Decorative',serif;font-size:1.3rem;color:var(--gold);margin-bottom:7px" id="t-lobby">Bekleme Odası</h2>
+    <div style="display:inline-flex;align-items:center;gap:8px;background:rgba(0,0,0,.55);border:1px solid var(--border2);padding:6px 18px;border-radius:19px">
+      <span style="font-family:'Cinzel',serif;font-size:.62rem;color:var(--muted2)" id="t-code-lbl">KOD:</span>
+      <span style="font-family:'Cinzel Decorative',serif;font-size:1.4rem;color:var(--gold);letter-spacing:.28em" id="lobby-code"></span>
     </div>
-    <p id="lbl-lobby-min" style="font-size:.8rem;color:var(--muted);font-weight:600">En az 4 oyuncu gerekli</p>
+    <p style="font-size:.78rem;color:var(--muted);font-weight:600;margin-top:6px" id="t-lobby-min">En az 4 oyuncu gerekli</p>
   </div>
-  <ul class="plist mb2" id="lobby-list"></ul>
-  <div class="row host-btn" style="gap:8px">
-    <button class="btn btn-g btn-sm" id="btn-bot" onclick="addBot()" style="flex:1">🤖 <span id="lbl-bot">Bot Ekle</span></button>
-    <button class="btn btn-r" id="btn-start" onclick="startGame()" disabled style="flex:2">🧛 <span id="lbl-start">Oyunu Başlat!</span></button>
+  <div id="lobby-list" class="col mb2" style="gap:5px"></div>
+  <div class="row honly" style="gap:7px">
+    <button class="btn btn-g btn-sm" onclick="addBot()" style="flex:1">🤖 <span id="t-bot">Bot Ekle</span></button>
+    <button class="btn btn-r" id="btn-start" onclick="startGame()" disabled style="flex:2">🧛 <span id="t-start">Rolleri Dağıt!</span></button>
   </div>
-  <p class="wait-msg" id="lbl-lobby-wait">Kurucu oyunu başlatmayı bekliyor...</p>
-  <div class="mt2 tc" style="font-size:.72rem;color:var(--muted);font-weight:600" id="lobby-info"></div>
+  <p class="wmsg" id="t-lobby-wait">Kurucu oyunu başlatmayı bekliyor...</p>
+  <div style="font-size:.7rem;color:var(--muted);font-weight:600;text-align:center;margin-top:8px" id="lobby-info"></div>
 </div>
 
-<!-- ════════ 3. ROLE REVEAL ════════ -->
+<!-- ══ 3. ROLE REVEAL ══ -->
 <div id="s-role" class="scr">
   <div class="tc" style="margin-top:4px">
-    <div class="slabel tc mb1" id="lbl-role-title">Senin Rolün</div>
-    <p style="color:var(--muted);font-size:.8rem;font-weight:600;margin-bottom:4px" id="lbl-role-tap">Karta dokunarak öğren</p>
+    <div class="slbl tc mb1" id="t-your-role">Senin Rolün</div>
+    <p style="color:var(--muted);font-size:.78rem;font-weight:600;margin-bottom:4px" id="t-tap">Karta dokunarak öğren</p>
     <div class="rcard-w" id="rcard" onclick="flipCard()">
       <div class="rcard-inner">
         <div class="rface rf-front">
-          <div style="font-size:3rem;opacity:.12;color:var(--border2)">?</div>
-          <p class="t-head" style="color:var(--border2);font-size:.65rem;margin-top:8px;letter-spacing:.15em" id="lbl-front-tap">DOKUN</p>
+          <div style="font-size:2.8rem;opacity:.12;color:var(--border2)">?</div>
+          <p style="font-family:'Cinzel',serif;color:var(--border2);font-size:.62rem;margin-top:8px;letter-spacing:.14em" id="t-touch">DOKUN</p>
         </div>
         <div class="rface rf-back" id="rface-back"></div>
       </div>
     </div>
-    <div id="team-box" class="hidden" style="background:rgba(138,3,3,.09);border:1px solid rgba(138,3,3,.25);border-radius:10px;padding:12px;margin-top:8px">
-      <p class="t-head" id="lbl-team" style="font-size:.65rem;color:var(--blood2);letter-spacing:.18em;text-transform:uppercase;margin-bottom:8px">🩸 VAMPİR KARDEŞLERİN</p>
+    <!-- Teammate box -->
+    <div id="team-box" class="hidden mt2" style="background:rgba(138,3,3,.09);border:1px solid rgba(138,3,3,.24);border-radius:10px;padding:12px">
+      <p style="font-family:'Cinzel',serif;font-size:.64rem;color:var(--blood2);letter-spacing:.18em;text-transform:uppercase;margin-bottom:8px" id="t-teammates">🩸 VAMPİR KARDEŞLERİN</p>
       <div id="team-list" style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap"></div>
     </div>
-    <div class="mt2">
-      <div id="role-timer-wrap" class="tc" style="margin-bottom:10px">
-        <div style="font-size:.72rem;color:var(--muted);font-weight:600;margin-bottom:4px" id="lbl-role-auto">Otomatik devam ediyor</div>
-        <div class="timer" id="timer-role" style="font-size:2rem">30</div>
-      </div>
-      <button class="btn btn-gold" id="btn-ready" onclick="markReady()">✓ <span id="lbl-im-ready">Hazırım!</span></button>
+    <!-- Ready status -->
+    <div class="mt2" style="background:rgba(0,0,0,.35);border:1px solid var(--border);border-radius:9px;padding:11px">
+      <div style="font-size:.72rem;color:var(--muted);font-weight:600;margin-bottom:6px" id="t-ready-status">Herkes hazır olunca gece başlar</div>
+      <div id="ready-list" style="display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-bottom:8px"></div>
+      <button class="btn btn-gold btn-sm" id="btn-ready" onclick="markReady()">✓ <span id="t-im-ready">Hazırım!</span></button>
     </div>
+    <!-- Host starts night -->
+    <button class="btn btn-night mt2 honly" id="btn-begin-night" onclick="beginNight()">🌙 <span id="t-begin-night">Geceyi Başlat</span></button>
+    <p class="wmsg" id="t-role-wait">Kurucu geceyi başlatmayı bekliyor...</p>
   </div>
 </div>
 
-<!-- ════════ 4. NIGHT ════════ -->
-<div id="s-night" class="scr">
-  <!-- Phase banner -->
-  <div class="phase-banner">
-    <div style="font-size:1.8rem">🌙</div>
+<!-- ══ 4. NIGHT (discussion) ══ -->
+<div id="s-night" class="scr" style="min-height:0">
+  <div class="ph-banner ph-night">
+    <div style="font-size:1.6rem">🌙</div>
     <div class="col flex1" style="gap:2px">
-      <div class="t-title" id="night-phase-label" style="font-size:1rem;color:#9060ff"></div>
-      <div id="lbl-night-sub" style="font-size:.72rem;color:var(--muted);font-weight:600"></div>
+      <div style="font-family:'Cinzel Decorative',serif;font-size:.95rem;color:#9988ee" id="night-title">Gece 1</div>
+      <div style="font-size:.7rem;color:var(--muted);font-weight:600" id="t-night-sub">Tartış — vampirleri bul</div>
     </div>
-    <div class="timer" id="timer-night">120</div>
+    <div class="timer t-night" id="timer-night">10:00</div>
   </div>
-  <!-- Role action panel -->
-  <div id="night-panel" class="flex1"></div>
-  <!-- Progress -->
-  <div id="night-progress" style="margin-top:10px;text-align:center;font-size:.78rem;color:var(--muted);font-weight:600"></div>
+  <div id="night-events" class="evbox hidden"></div>
+  <div id="my-role-reminder" style="background:rgba(0,0,0,.3);border:1px solid var(--border);border-radius:9px;padding:9px 12px;margin-bottom:9px;display:flex;align-items:center;gap:10px;flex-shrink:0">
+    <span id="role-emoji" style="font-size:1.5rem">?</span>
+    <div><div style="font-family:'Cinzel',serif;font-size:.72rem;font-weight:700" id="role-name-reminder"></div><div id="partner-reminder" style="font-size:.68rem;color:var(--muted);font-weight:600;margin-top:2px"></div></div>
+  </div>
+  <div class="chat-wrap flex1" style="min-height:0">
+    <div class="chat-msgs" id="night-chat-msgs"></div>
+    <div class="chat-inp-row" id="night-chat-area">
+      <input id="night-inp" type="text" maxlength="120" placeholder="Mesajını yaz..." autocomplete="off"/>
+      <button class="csend" onclick="sendNightChat()">→</button>
+    </div>
+  </div>
+  <button class="btn btn-day mt2 honly btn-gold" id="btn-goto-vote" onclick="goToVote()">⚖️ <span id="t-goto-vote">Oylamayı Başlat (Gündüz)</span></button>
+  <p class="wmsg" id="t-night-wait">Kurucu oylamayı başlatacak...</p>
 </div>
 
-<!-- ════════ 5. DAY / DISCUSSION ════════ -->
-<div id="s-day" class="scr" style="min-height:0">
-  <div class="phase-banner">
-    <div style="font-size:1.8rem">☀️</div>
-    <div class="col flex1" style="gap:2px">
-      <div class="t-title" id="day-phase-label" style="font-size:1rem;color:var(--gold)"></div>
-      <div id="lbl-day-sub" style="font-size:.72rem;color:var(--muted);font-weight:600"></div>
-    </div>
-    <div class="timer" id="timer-day">300</div>
-  </div>
-  <!-- Events -->
-  <div id="day-events" class="evbox hidden"></div>
-  <!-- Spectator badge -->
-  <div id="day-spectator" class="spectator-badge hidden">👁️ <span id="lbl-spectator">Ölü olarak izliyorsun — sohbet edemezsin</span></div>
-  <!-- CHAT -->
-  <div class="chat-wrap flex1" style="min-height:0;margin-bottom:10px">
-    <div class="chat-msgs" id="chat-msgs"></div>
-    <div class="chat-input-row" id="chat-input-area">
-      <input id="chat-inp" type="text" maxlength="120" placeholder="Mesajını yaz..." autocomplete="off"/>
-      <button class="chat-send" onclick="sendChat()" id="btn-chat-send">→</button>
-    </div>
-  </div>
-  <!-- Living players -->
-  <div style="font-size:.7rem;color:var(--muted2);font-family:'Cinzel',serif;text-transform:uppercase;letter-spacing:.15em;margin-bottom:6px" id="lbl-alive-players"></div>
-  <ul class="plist" id="day-list"></ul>
-  <button class="btn btn-gold mt2 host-btn" id="btn-start-vote" onclick="startVoting()">⚖️ <span id="lbl-start-vote">Oylamayı Başlat</span></button>
-  <p class="wait-msg" id="lbl-day-wait">Konuşun — kurucu oylamayı başlatacak</p>
-</div>
-
-<!-- ════════ 6. VOTE ════════ -->
+<!-- ══ 5. VOTE (day) ══ -->
 <div id="s-vote" class="scr">
-  <div class="phase-banner">
-    <div style="font-size:1.8rem">⚖️</div>
+  <div class="ph-banner ph-day">
+    <div style="font-size:1.6rem">⚖️</div>
     <div class="col flex1" style="gap:2px">
-      <div class="t-title" id="vote-phase-label" style="font-size:1rem;color:var(--blood2)"></div>
-      <div id="lbl-vote-sub" style="font-size:.72rem;color:var(--muted);font-weight:600"></div>
+      <div style="font-family:'Cinzel Decorative',serif;font-size:.95rem;color:var(--gold)" id="vote-title">Oylama</div>
+      <div style="font-size:.7rem;color:var(--muted);font-weight:600" id="t-vote-sub">Kimi kasabadan kovuyorsunuz?</div>
     </div>
-    <div class="timer" id="timer-vote">90</div>
+    <div class="timer t-day" id="timer-vote">5:00</div>
   </div>
-  <!-- Last words chat -->
-  <div class="chat-wrap" style="height:100px;min-height:0;margin-bottom:10px">
-    <div class="chat-msgs" id="vote-chat-msgs"></div>
-    <div class="chat-input-row" id="vote-chat-area">
-      <input id="vote-chat-inp" type="text" maxlength="80" placeholder="Son sözlerini söyle..." autocomplete="off"/>
-      <button class="chat-send" onclick="sendVoteChat()" id="btn-vote-chat">→</button>
-    </div>
+  <div id="vote-info-box" style="background:rgba(0,0,0,.35);border:1px solid var(--border);border-radius:9px;padding:9px 12px;margin-bottom:9px;font-size:.78rem;color:var(--muted2);font-weight:600;text-align:center;flex-shrink:0" id="t-vote-anon">
+    🔒 Oylar gizlidir — kimin kime oy verdiği görünmez
   </div>
-  <!-- Vote list -->
-  <div style="font-size:.7rem;color:var(--muted2);font-family:'Cinzel',serif;text-transform:uppercase;letter-spacing:.15em;margin-bottom:6px" id="lbl-vote-choose"></div>
-  <ul class="plist mb2" id="vote-list"></ul>
-  <button class="btn btn-r" id="btn-confirm-vote" onclick="submitVote()">✔ <span id="lbl-confirm-vote">Oyumu Onayla</span></button>
-  <p id="lbl-dead-vote" class="hidden tc mt1" style="color:var(--muted);font-style:italic;font-size:.8rem;font-weight:600"></p>
-  <button class="btn btn-gold mt2 host-btn" id="btn-end-vote" onclick="endVoting()">⚖️ <span id="lbl-end-vote">Kararı Ver ve İnfaz Et</span></button>
-  <p class="wait-msg" id="lbl-vote-wait"></p>
+  <div id="vote-list" class="col mb2" style="gap:6px"></div>
+  <button class="btn btn-r" id="btn-submit-vote" onclick="submitVote()">✔ <span id="t-cast-vote">Oyumu Ver</span></button>
+  <div id="vote-submitted-msg" class="hidden tc mt2" style="color:#90ee90;font-family:'Cinzel',serif;font-size:.8rem;font-weight:700">✓ <span id="t-voted">Oy verildi! Sonucu bekliyorsunuz...</span></div>
+  <p id="t-dead-vote" class="hidden tc mt1" style="color:var(--muted);font-style:italic;font-size:.78rem;font-weight:600">💀 Ölüler oy kullanamaz</p>
+  <!-- Host controls -->
+  <div class="honly mt2 col" style="gap:7px">
+    <button class="btn btn-eve btn-sm" id="btn-goto-eve" onclick="goToEvening()" id="btn-goto-eve">🌆 <span id="t-goto-eve">Akşam Aşamasına Geç</span></button>
+    <button class="btn btn-gold btn-sm" onclick="endVoteAndReveal()">⚖️ <span id="t-end-vote">Oylamayı Bitir — Sonucu Göster</span></button>
+  </div>
+  <p class="wmsg" id="t-vote-wait">Kurucu oylama sonucunu açıklayacak...</p>
 </div>
 
-<!-- ════════ 7. RESULT ════════ -->
+<!-- ══ 6. EVENING (revote) ══ -->
+<div id="s-eve" class="scr">
+  <div class="ph-banner ph-eve">
+    <div style="font-size:1.6rem">🌆</div>
+    <div class="col flex1" style="gap:2px">
+      <div style="font-family:'Cinzel Decorative',serif;font-size:.95rem;color:#ee8888" id="t-eve-title">Akşam</div>
+      <div style="font-size:.7rem;color:var(--muted);font-weight:600" id="t-eve-sub">Oyunu değiştir ya da onayla</div>
+    </div>
+    <div class="timer t-eve" id="timer-eve">2:00</div>
+  </div>
+  <div class="eve-badge" id="eve-uses-left"></div>
+  <p style="font-size:.82rem;color:var(--muted2);font-weight:600;text-align:center;margin-bottom:10px" id="t-eve-desc">Bu aşamada oyunuzu değiştirebilirsiniz</p>
+  <div id="eve-vote-list" class="col mb2" style="gap:6px"></div>
+  <button class="btn btn-eve" id="btn-submit-eve" onclick="submitEveVote()">🌆 <span id="t-cast-eve">Akşam Oyunu Ver</span></button>
+  <div id="eve-submitted-msg" class="hidden tc mt2" style="color:#ee8888;font-family:'Cinzel',serif;font-size:.8rem;font-weight:700">✓ <span id="t-eve-voted">Akşam oyu verildi!</span></div>
+  <div class="honly mt2 col" style="gap:7px">
+    <button class="btn btn-gold btn-sm" onclick="endEveAndReveal()">⚖️ <span id="t-end-eve">Akşam Oylamasını Bitir</span></button>
+  </div>
+  <p class="wmsg" id="t-eve-wait">Kurucu akşam oylamasını bitirecek...</p>
+</div>
+
+<!-- ══ 7. RESULT ══ -->
 <div id="s-result" class="scr">
   <div class="tc">
-    <div id="res-icon" style="font-size:4rem;margin-bottom:10px"></div>
-    <h2 class="t-title" id="res-title" style="font-size:1.6rem;margin-bottom:12px"></h2>
-    <div style="background:rgba(0,0,0,.5);border:2px solid var(--border2);border-radius:12px;padding:20px;margin-bottom:18px">
-      <p class="t-title" id="res-name" style="font-size:1.7rem;margin-bottom:10px"></p>
-      <div style="width:40px;height:1px;background:var(--gold);margin:0 auto 10px"></div>
-      <p id="res-role-reveal" style="font-size:.9rem;color:#bbb;font-weight:600;font-style:italic"></p>
+    <div id="res-icon" style="font-size:3.8rem;margin-bottom:10px"></div>
+    <h2 style="font-family:'Cinzel Decorative',serif;font-size:1.5rem;margin-bottom:12px" id="res-title"></h2>
+    <div style="background:rgba(0,0,0,.5);border:2px solid var(--border2);border-radius:11px;padding:18px;margin-bottom:16px">
+      <p style="font-family:'Cinzel Decorative',serif;font-size:1.6rem;margin-bottom:9px" id="res-name"></p>
+      <div style="width:36px;height:1px;background:var(--gold);margin:0 auto 9px"></div>
+      <p style="font-size:.86rem;color:#bbb;font-weight:600;font-style:italic" id="res-role-reveal"></p>
     </div>
-    <button class="btn btn-gold host-btn" id="btn-next-round" onclick="nextRound()">☀️ <span id="lbl-next-round">Yeni Güne Uyan</span></button>
-    <p class="wait-msg" id="lbl-res-wait"></p>
+    <!-- Remaining players -->
+    <div id="res-alive" style="margin-bottom:14px"></div>
+    <button class="btn btn-night honly" id="btn-next-night" onclick="nextRound()">🌙 <span id="t-next-night">Sonraki Geceye</span></button>
+    <p class="wmsg" id="t-res-wait">Kurucu bekleniyor...</p>
   </div>
 </div>
 
-<!-- ════════ 8. GAME OVER ════════ -->
+<!-- ══ 8. GAME OVER ══ -->
 <div id="s-over" class="scr">
-  <div id="stars-container"></div>
+  <div id="stars-c"></div>
   <div class="tc">
-    <div id="over-icon" style="font-size:5rem;margin-bottom:14px"></div>
-    <h1 class="t-title" id="over-title" style="font-size:2rem;line-height:1.2;margin-bottom:8px"></h1>
-    <p id="over-desc" style="font-size:.9rem;color:#aaa;margin-bottom:20px;font-weight:600;font-style:italic"></p>
-    <div id="over-roles" style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:18px"></div>
+    <div id="over-icon" style="font-size:4.5rem;margin-bottom:12px"></div>
+    <h1 style="font-family:'Cinzel Decorative',serif;font-size:1.8rem;line-height:1.2;margin-bottom:7px" id="over-title"></h1>
+    <p style="font-size:.88rem;color:#aaa;margin-bottom:18px;font-weight:600;font-style:italic" id="over-desc"></p>
+    <div id="over-roles" style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:16px"></div>
     <div class="row" style="gap:8px">
-      <button class="btn btn-g" onclick="location.reload()" id="btn-replay" style="flex:1">🔄 <span id="lbl-replay">Yeniden</span></button>
-      <button class="btn btn-r host-btn" onclick="resetGame()" id="btn-newgame" style="flex:1">🏚️ <span id="lbl-newgame">Yeni Oyun</span></button>
+      <button class="btn btn-g" onclick="location.reload()" style="flex:1">🔄 <span id="t-replay">Yeniden</span></button>
+      <button class="btn btn-r honly" onclick="resetLobby()" style="flex:1">🏚️ <span id="t-newgame">Yeni Oyun</span></button>
     </div>
-    <p class="wait-msg" id="lbl-over-wait"></p>
+    <p class="wmsg" id="t-over-wait">Kurucu yeni oyun başlatacak...</p>
   </div>
 </div>
 
 </div><!-- /app -->
 
-<!-- ════════ HOWTO MODAL ════════ -->
+<!-- ══ HOWTO MODAL ══ -->
 <div id="modal-howto" class="modal-bg hidden">
   <div class="modal-box">
-    <div class="modal-head" id="howto-head">
+    <div class="mhead" id="howto-head">
       <div style="display:flex;align-items:center;gap:10px">
-        <div id="howto-icon" style="width:38px;height:38px;background:rgba(0,0,0,.5);border:1px solid var(--border2);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0"></div>
+        <div id="ht-icon" style="width:36px;height:36px;background:rgba(0,0,0,.45);border:1px solid var(--border2);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0"></div>
         <div>
-          <div class="t-head" style="font-size:.62rem;color:var(--muted2);letter-spacing:.2em;text-transform:uppercase" id="howto-sec-lbl"></div>
-          <div class="t-head" id="howto-title" style="font-size:1rem;color:var(--parchment);font-weight:700;margin-top:1px"></div>
+          <div style="font-family:'Cinzel',serif;font-size:.6rem;color:var(--muted2);letter-spacing:.2em;text-transform:uppercase" id="ht-sec">Nasıl Oynanır</div>
+          <div style="font-family:'Cinzel',serif;font-size:.98rem;color:var(--parchment);font-weight:700;margin-top:1px" id="ht-title"></div>
         </div>
       </div>
-      <button class="modal-close" onclick="closeHowto()">✕</button>
+      <button class="mcls" onclick="closeHowto()">✕</button>
     </div>
-    <div class="modal-body" id="howto-body"></div>
-    <div class="modal-foot">
-      <div class="dots" id="howto-dots"></div>
+    <div class="mbody" id="ht-body"></div>
+    <div class="mfoot">
+      <div class="dots" id="ht-dots"></div>
       <div class="row" style="gap:7px">
-        <button class="btn btn-g btn-sm" id="howto-prev" onclick="howtoNav(-1)" style="flex:1"><span id="lbl-prev">← Önceki</span></button>
-        <button class="btn btn-r btn-sm" id="howto-next" onclick="howtoNav(1)" style="flex:1"></button>
+        <button class="btn btn-g btn-sm" id="ht-prev" onclick="howtoNav(-1)" style="flex:1">← <span id="t-prev">Önceki</span></button>
+        <button class="btn btn-r btn-sm" id="ht-next" onclick="howtoNav(1)" style="flex:1" id="ht-next"></button>
       </div>
     </div>
   </div>
 </div>
 
-<!-- PRE-DECLARE GLOBALS (fix async module timing) -->
 <script>
-['sTab','doCreate','doJoin','addBot','startGame','flipCard','markReady','goToNight',
- 'selectNight','submitNightAction','sendChat','sendVoteChat','startVoting',
- 'submitVote','endVoting','nextRound','resetGame','openHowto','closeHowto',
- 'howtoNav','toggleLang'].forEach(fn=>window[fn]=()=>console.warn(fn,'⏳ loading'));
-window.lang='tr'; window.selAv='🧛'; window.selCount=6; window.htStep=0;
-window.selectedNight=null; window.selectedVote=null; window.myVoteSubmitted=false;
-window.nightActionDone=false;
-// Particle bg
+// Pre-declare globals
+['sTab','doCreate','doJoin','addBot','startGame','flipCard','markReady','beginNight',
+ 'sendNightChat','goToVote','submitVote','goToEvening','submitEveVote',
+ 'endVoteAndReveal','endEveAndReveal','nextRound','resetLobby',
+ 'openHowto','closeHowto','howtoNav','toggleLang'
+].forEach(fn=>window[fn]=()=>console.warn(fn,'loading...'));
+window.lang='tr'; window.selAv='🧛'; window.selMax=8; window.htStep=0;
+window.selVote=null; window.selEveVote=null; window.nightActionDone=false;
+window.voteSubmitted=false; window.eveSubmitted=false;
+
+// Particles
 (()=>{
-  const c=document.getElementById('bg-canvas');
-  const ctx=c.getContext('2d');
-  let W,H,pts=[];
-  const resize=()=>{W=c.width=window.innerWidth;H=c.height=window.innerHeight;};
-  resize();window.addEventListener('resize',resize);
-  const N=30;
-  for(let i=0;i<N;i++)pts.push({x:Math.random()*9999,y:Math.random()*9999,vy:Math.random()*.3+.1,alpha:Math.random()*.5+.1,r:Math.random()*1.5+.5,hue:Math.random()>0.7?'rgba(138,3,3,':'rgba(197,160,89,'});
-  const draw=()=>{
-    ctx.clearRect(0,0,W,H);
-    pts.forEach(p=>{
-      p.y+=p.vy;if(p.y>H)p.y=-10;
-      ctx.beginPath();ctx.arc(p.x%W,p.y,p.r,0,Math.PI*2);
-      ctx.fillStyle=p.hue+p.alpha+')';ctx.fill();
-    });
-    requestAnimationFrame(draw);
-  };
-  draw();
+  const c=document.getElementById('particles');
+  const cols=['rgba(138,3,3,','rgba(197,160,89,','rgba(80,50,160,'];
+  for(let i=0;i<25;i++){
+    const el=document.createElement('div');
+    el.className='particle';
+    const col=cols[Math.floor(Math.random()*cols.length)];
+    el.style.cssText=`left:${Math.random()*100}%;width:${2+Math.random()*3}px;height:${2+Math.random()*3}px;background:${col}.5);animation-duration:${8+Math.random()*12}s;animation-delay:${-Math.random()*15}s;`;
+    c.appendChild(el);
+  }
 })();
 </script>
 
@@ -578,1007 +526,765 @@ window.nightActionDone=false;
 <script type="module">
 import{initializeApp}from"firebase/app";
 import{getAuth,signInAnonymously}from"firebase/auth";
-import{getFirestore,doc,setDoc,getDoc,updateDoc,onSnapshot,collection,addDoc,query,orderBy,limit,serverTimestamp,getDocs}from"firebase/firestore";
+import{getFirestore,doc,setDoc,getDoc,updateDoc,onSnapshot,collection,addDoc,query,orderBy,limit,serverTimestamp}from"firebase/firestore";
 
-// ════ SECURITY ════
+// Security
 const hn=location.hostname;
-const allowed=hn==='localhost'||hn==='127.0.0.1'||hn==='forgeandplay.com'||hn==='www.forgeandplay.com'||(hn.includes('vercel.app')&&(hn.includes('vampir')||hn.includes('vk')));
-if(!allowed){document.getElementById('err-screen').style.display='flex';throw new Error('Unauthorized');}
+const ok=hn==='localhost'||hn==='127.0.0.1'||hn==='forgeandplay.com'||hn==='www.forgeandplay.com'||(hn.includes('vercel.app'));
+if(!ok){document.getElementById('err').style.display='flex';throw new Error('Unauthorized');}
 
-// ════ FIREBASE ════
-const fb=initializeApp({
-  apiKey:"AIzaSyAu-9xnaZRgcYj58gX3Yrfbj4NqvPI4B5Q",
-  authDomain:"vampirkoyluv3.firebaseapp.com",
-  projectId:"vampirkoyluv3",
-  storageBucket:"vampirkoyluv3.firebasestorage.app",
-  messagingSenderId:"114861911533",
-  appId:"1:114861911533:web:bb012b575860684c764be4"
-});
+// Firebase
+const fb=initializeApp({apiKey:"AIzaSyAu-9xnaZRgcYj58gX3Yrfbj4NqvPI4B5Q",authDomain:"vampirkoyluv3.firebaseapp.com",projectId:"vampirkoyluv3",storageBucket:"vampirkoyluv3.firebasestorage.app",messagingSenderId:"114861911533",appId:"1:114861911533:web:bb012b575860684c764be4"});
 const auth=getAuth(fb),db=getFirestore(fb);
 
-// Firestore paths (all even segments)
-const rRef=()=>doc(db,'vk_rooms',myRoomId);
-const pRef=uid=>doc(db,'vk_rooms',myRoomId,'players',uid);
-const pCol=()=>collection(db,'vk_rooms',myRoomId,'players');
-const chatCol=()=>collection(db,'vk_rooms',myRoomId,'chat');
-const vchatCol=()=>collection(db,'vk_rooms',myRoomId,'vchat');
+// Even-segment Firestore paths
+const rRef=()=>doc(db,'vk4_rooms',myRoomId);
+const pRef=u=>doc(db,'vk4_rooms',myRoomId,'players',u);
+const pCol=()=>collection(db,'vk4_rooms',myRoomId,'players');
+const chatCol=()=>collection(db,'vk4_rooms',myRoomId,'chat');
 
-// ════ I18N ════
-const L={
-  tr:{
-    lang_toggle:'🌐 EN',
-    title:'Vampir Köylü',sub:'Online Sosyal Dedüksiyon',
-    tab_home:'🏠 Ana Menü',tab_create:'⚰️ Oda Kur',tab_join:'🗡️ Katıl',
-    lbl_name:'Oyuncu Adın',lbl_avatar:'Maskeni Seç',
-    btn_create:'Yeni Oda Kur',btn_join:'Odaya Katıl',btn_howto:'Nasıl Oynanır?',
-    lbl_player_count:'Beklenen Oyuncu Sayısı',
-    create_go:'Karanlığı Başlat!',join_go:'Kasabaya Gir',
-    lbl_code:'Oda Kodu',code_disp:'KOD:',
-    lobby_title:'🌙 Bekleme Odası',lobby_min:'En az 4 oyuncu gerekli',
-    bot:'Bot Ekle',start:'Oyunu Başlat!',
-    lobby_wait:'Kurucu oyunu başlatmayı bekliyor...',
-    role_title:'Senin Rolün',role_tap:'Karta dokunarak öğren',
-    front_tap:'DOKUN',team_lbl:'🩸 VAMPİR KARDEŞLERİN',
-    role_auto:'Otomatik devam ediyor',im_ready:'Hazırım!',
-    // Roles
-    r_vampire:'Vampir',r_villager:'Köylü',r_doctor:'Doktor',r_detective:'Dedektif',
-    r_vampire_desc:'Her gece bir köylüyü öldür. Vampir kardeşlerini tanırsın. Köylülere karış, yakalanma!',
-    r_villager_desc:'Gündüz tartış, şüphelileri oyla ve vampirleri kasabadan kovun!',
-    r_doctor_desc:'Her gece birini vampirlerden koru. Kendini de koruyabilirsin!',
-    r_detective_desc:'Her gece birinin vampir olup olmadığını öğren. Bu bilgiyi akıllıca kullan!',
-    rl_vamp:'VAMPİR',rl_vamp_s:'Gizlice öldür',
-    rl_vill:'KÖYLÜ',rl_vill_s:'Vampirleri bul',
-    rl_doc:'DOKTOR',rl_doc_s:'Birini koru',
-    rl_det:'DEDEKTİF',rl_det_s:'Rolü öğren',
-    // Night
-    night_phase:'Gece',night_sub:'Karanlık çöktü... Gözler kapandı.',
-    v_hint:'Kurbanını seç',doc_hint:'Kimi koruyacaksın?',det_hint:'Kimi sorguluyorsun?',
-    vill_night:'Köylüler uyuyor...',dead_night:'Ölüler gece hareket edemez.',
-    confirm_action:'✓ Eylemi Onayla',night_done:'Sabah bekleniyor...',
-    // Day
-    day_phase:'Gündüz',day_sub:'Güneş doğdu. Kimin gözlerinde korku var?',
-    chat_ph:'Mesajını yaz...',send:'→',
-    alive_players:'Yaşayan Oyuncular',
-    start_vote:'Oylamayı Başlat',day_wait:'Konuşun — kurucu oylamayı başlatacak',
-    spectator:'👁️ Ölü olarak izliyorsun — sohbet edemezsin',
-    // Vote
-    vote_phase:'İnfaz Oylaması',vote_sub:'Kim kovulsun? Herkes için 90 saniye.',
-    vote_choose:'Oy vermek istediğin kişi:',
-    last_words_ph:'Son sözlerini söyle...',
-    confirm_vote:'✔ Oyumu Onayla',dead_vote:'💀 Ölüler oy kullanamaz',
-    end_vote:'⚖️ Kararı Ver — İnfaz Et',vote_wait:'Kurucu kararı verecek...',
-    vote_lbl:'oy',
-    // Result
-    executed:'İnfaz Edildi!',tie:'Eşitlik — Kimse Kovulmadı',
-    nobody:'Kimse kovulmadı',tie_msg:'Halk kararsız kaldı.',
-    true_role:'Gerçek Kimliği:',
-    next_round:'☀️ Yeni Güne Uyan',res_wait:'Kurucu bekleniyor...',
-    // Game over
-    vamp_win:'🧛 Vampirler Kazandı!',vill_win:'🏘️ Köylüler Kazandı!',
-    vamp_desc:'Karanlık galip geldi. Kasaba kana bulandı...',
-    vill_desc:'Tüm vampirler avlandı! Güneş yeniden doğuyor.',
-    replay:'🔄 Yeniden',newgame:'🏚️ Yeni Oyun',over_wait:'Kurucu bekleniyor...',
-    you:'(Sen)',bot_lbl:'Bot',host_lbl:'Kurucu',
-    // Events
-    ev_saved:'🛡️ Doktor birini vampirlerden kurtardı!',
-    ev_safe:'🌙 Bu gece herkes hayatta kaldı...',
-    ev_killed:'🩸 {name} gece vampirlerin kurbanı oldu!',
-    ev_elim:'⚖️ {name} oylama sonucu kasabadan kovuldu! {role}',
-    ev_detect_vamp:'🔍 Sorgulama sonucu: {name} bir VAMPİR!',
-    ev_detect_clean:'🔍 Sorgulama sonucu: {name} masum görünüyor.',
-    // How to play
-    howto_lbl:'Nasıl Oynanır',
-    prev:'← Önceki',next:'Sonraki →',ready:'🧛 Oynamaya Hazırım!',
-    ht:[
-      {i:'🏘️',t:'Amaç',c:'rgba(197,160,89,.1)',b:`
-        <p style="font-size:.88rem;color:#ccc;line-height:1.55;margin-bottom:12px">Kasabada gizlice yaşayan <b style="color:#ff6b6b">Vampirler</b> her gece bir köylüyü öldürür. <b style="color:#90ee90">Köylüler</b> gündüz tartışarak ve oylayarak onları bulmak zorundadır.</p>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px">
-          <div style="background:rgba(138,3,3,.1);border:1px solid rgba(138,3,3,.25);border-radius:9px;padding:11px;text-align:center"><div style="font-size:1.6rem">🧛</div><div class="t-head" style="font-size:.68rem;color:#ff6b6b;margin-top:4px">Vampirler Kazanır</div><div style="font-size:.65rem;color:#555;margin-top:3px">Sayıları köylülere eşit/fazla olunca</div></div>
-          <div style="background:rgba(0,80,0,.08);border:1px solid rgba(0,150,0,.2);border-radius:9px;padding:11px;text-align:center"><div style="font-size:1.6rem">🏘️</div><div class="t-head" style="font-size:.68rem;color:#90ee90;margin-top:4px">Köylüler Kazanır</div><div style="font-size:.65rem;color:#555;margin-top:3px">Tüm vampirler elenince</div></div>
-        </div>`},
-      {i:'🌙',t:'Gece Fazı (2 dk)',c:'rgba(80,40,180,.1)',b:`
-        <p style="font-size:.86rem;color:#aaa;margin-bottom:10px">Gece herkes gözlerini kapar. Roller aktive olur:</p>
-        ${[['🧛','VAMPİR','#ff5555','rgba(138,3,3,.08)','rgba(138,3,3,.22)','Bir köylü seçer ve öldürür. Birden fazla vampir varsa aynı hedefi seçmeleri gerekir.'],['💉','DOKTOR','#6ab3ff','rgba(0,50,130,.06)','rgba(50,100,255,.18)','Gece bir oyuncuyu vampirlerden korur. Kendini de koruyabilir. Aynı kişiyi üst üste 2 gece koruyamaz.'],['🔍','DEDEKTİF','#ffd700','rgba(130,100,0,.06)','rgba(200,160,0,.18)','Bir oyuncuyu sorgular ve vampir olup olmadığını öğrenir. Gece yarısı sonucu gösterir.'],['🏘️','KÖYLÜ','#90ee90','rgba(0,80,0,.05)','rgba(0,150,0,.13)','Gece uyur. Gündüz konuşarak ve gözlemleyerek vampirleri bulmaya çalışır.']].map(([e,r,c,bg,b,d])=>`<div style="display:flex;gap:9px;background:${bg};border:1px solid ${b};border-radius:9px;padding:9px;margin-bottom:5px"><span style="font-size:1.2rem;flex-shrink:0">${e}</span><div><div class="t-head" style="font-size:.68rem;color:${c};margin-bottom:2px">${r}</div><div style="font-size:.76rem;color:#888;line-height:1.4">${d}</div></div></div>`).join('')}`},
-      {i:'☀️',t:'Gündüz & Sohbet (5 dk)',c:'rgba(197,160,89,.08)',b:`
-        <p style="font-size:.86rem;color:#aaa;margin-bottom:10px">Gece olayları açıklanır. Herkes <b style="color:var(--gold)">canlı sohbet</b> ile konuşur.</p>
-        ${[['🗣️','Tartışın','Kim vampire benziyor? Her söz, her tepki ipucu!'],['🤫','Güvenmek Tehlikeli','Vampirler rol yapabilir. Doktor ve Dedektif bilgilerini dikkatli paylaşsın.'],['⚖️','Oylama','Kurucu oylamayı başlatır. 90 saniye, en çok oy alan kovulur.'],['💀','İnfaz','Kovulan oyuncunun rolü açıklanır. Vampire mi çarptınız?']].map(([e,t,d])=>`<div style="display:flex;gap:9px;background:rgba(197,160,89,.05);border:1px solid rgba(197,160,89,.1);border-radius:9px;padding:9px;margin-bottom:5px"><span style="font-size:1.1rem;flex-shrink:0">${e}</span><div><div class="t-head" style="font-size:.68rem;color:var(--gold);margin-bottom:2px">${t}</div><div style="font-size:.76rem;color:#888">${d}</div></div></div>`).join('')}`},
-      {i:'⚔️',t:'Strateji',c:'rgba(100,40,180,.1)',b:`
-        ${[['👁️','Sessizlere dikkat','Vampirler genellikle az konuşur — bırakır birbirini yesin.'],['🎭','Rol yapmak','Bir vampir, köylü veya hatta dedektif gibi davranabilir.'],['🤝','İttifaklar','Kim kimi her zaman savunuyor? Takım arkadaşları olabilir.'],['💡','Dedektif bilgisi','Herkese açıklarsa vampirler onu hedef alır. Dikkatli kullan!'],['🩺','Doktor taktikleri','Kendini korumak cazip ama bu sefer kimse korunmuyor.'],['🎯','Oylama psikolojisi','Panik yapan, hemen başkasını suçlayan — neden bu kadar gergin?']].map(([e,t,d])=>`<div style="display:flex;gap:8px;background:rgba(100,40,180,.06);border:1px solid rgba(100,40,180,.15);border-radius:9px;padding:8px;margin-bottom:4px"><span style="font-size:1rem;flex-shrink:0">${e}</span><div><div style="font-size:.76rem;font-weight:700;color:#c4a0ff;margin-bottom:1px">${t}</div><div style="font-size:.72rem;color:#777">${d}</div></div></div>`).join('')}`},
-      {i:'🎮',t:'Başlangıç',c:'rgba(138,3,3,.1)',b:`
-        ${[[1,'⚰️','Oda Kur','Admin "Oda Kur" sekmesinden oda oluşturur ve kodu arkadaşlarla paylaşır.'],[2,'🗡️','Katıl','Diğerleri kodu girerek katılır. Minimum 4, ideal 6-9 oyuncu.'],[3,'🌙','Başlat','Admin oyunu başlatır. Roller gizlice dağıtılır — kimseye söyleme!'],[4,'🔄','Döngü','Gece (2dk) → Sabah duyurusu → Gündüz tartışma (5dk) → Oylama (90sn) → tekrar'],[5,'🏆','Kazan','Vampirleri bul ve as — ya da köylüleri kandırarak galip gel!']].map(([n,e,t,d])=>`<div style="display:flex;gap:9px;margin-bottom:9px"><div style="width:26px;height:26px;background:rgba(138,3,3,.22);border:1px solid rgba(138,3,3,.38);border-radius:7px;display:flex;align-items:center;justify-content:center;font-family:'Cinzel',serif;font-size:.78rem;color:#ff8888;flex-shrink:0;font-weight:700">${n}</div><div style="background:rgba(138,3,3,.06);border:1px solid rgba(138,3,3,.15);border-radius:9px;padding:9px;flex:1"><div style="display:flex;gap:5px;margin-bottom:2px"><span>${e}</span><span class="t-head" style="font-size:.76rem;color:var(--parchment);font-weight:700">${t}</span></div><div style="font-size:.72rem;color:#777;line-height:1.35">${d}</div></div></div>`).join('')}
-        <div style="background:rgba(138,3,3,.07);border:1px solid rgba(138,3,3,.18);border-radius:9px;padding:9px;text-align:center;font-family:'Cinzel',serif;font-size:.7rem;color:rgba(197,160,89,.6)">🩸 Min 4 · İdeal 6-9 · Max 12 oyuncu</div>`},
-    ],
-    // Questions for discussion
-    questions:["Gözlerime bakıp 'Ben vampir değilim' diyebilir misin?","Neden konuşmayı sürekli başka yöne çekiyorsun?","En çok kime güveniyorsun ve neden?","Sessiz kalanlar ne saklıyor olabilir?","Hangi ikili hep birbirini savunuyor?","Eğer vampir olsaydın bu masada ilk kimi hedef alırdın?","Birinin savunması sana ezberlenmiş gibi mi geldi?","Gerilim yükseldikçe kim en çok değişiyor?","Neden tam cevap verecekken durakladın?","Kim en hızlı konuşmayı değiştirdi?","Bu masada en rahat görünen kim?","Sence vampirler şu an çok mu konuşuyor yoksa sessiz mi?"],
-  },
-  en:{
-    lang_toggle:'🌐 TR',
-    title:'Vampire Village',sub:'Online Social Deduction',
-    tab_home:'🏠 Home',tab_create:'⚰️ Create',tab_join:'🗡️ Join',
-    lbl_name:'Your Name',lbl_avatar:'Choose Mask',
-    btn_create:'Create Room',btn_join:'Join Room',btn_howto:'How to Play?',
-    lbl_player_count:'Expected Players',
-    create_go:'Start the Darkness!',join_go:'Enter the Village',
-    lbl_code:'Room Code',code_disp:'CODE:',
-    lobby_title:'🌙 Waiting Room',lobby_min:'Need at least 4 players',
-    bot:'Add Bot',start:'Start Game!',
-    lobby_wait:'Waiting for host to start...',
-    role_title:'Your Role',role_tap:'Tap the card to reveal',
-    front_tap:'TAP',team_lbl:'🩸 YOUR VAMPIRE BROTHERS',
-    role_auto:'Auto-continuing',im_ready:"I'm Ready!",
-    r_vampire:'Vampire',r_villager:'Villager',r_doctor:'Doctor',r_detective:'Detective',
-    r_vampire_desc:'Kill a villager each night. You know your vampire teammates. Blend in!',
-    r_villager_desc:'Discuss during the day and vote out the vampires!',
-    r_doctor_desc:'Protect someone from vampires each night. You can protect yourself!',
-    r_detective_desc:'Learn if someone is a vampire each night. Use the info wisely!',
-    rl_vamp:'VAMPIRE',rl_vamp_s:'Kill in secret',
-    rl_vill:'VILLAGER',rl_vill_s:'Find vampires',
-    rl_doc:'DOCTOR',rl_doc_s:'Protect someone',
-    rl_det:'DETECTIVE',rl_det_s:'Learn the role',
-    night_phase:'Night',night_sub:'Darkness falls... Eyes close.',
-    v_hint:'Choose your victim',doc_hint:'Who will you protect?',det_hint:'Who will you investigate?',
-    vill_night:'Villagers are sleeping...',dead_night:'The dead cannot act at night.',
-    confirm_action:'✓ Confirm Action',night_done:'Waiting for morning...',
-    day_phase:'Daytime',day_sub:'Sun rises. Who has fear in their eyes?',
-    chat_ph:'Type your message...',send:'→',
-    alive_players:'Living Players',
-    start_vote:'Begin Voting',day_wait:'Discuss — host will start voting',
-    spectator:"👁️ You're dead — you can only watch",
-    vote_phase:'Execution Vote',vote_sub:'Who gets expelled? 90 seconds.',
-    vote_choose:'Choose who to vote for:',
-    last_words_ph:'Say your last words...',
-    confirm_vote:'✔ Confirm Vote',dead_vote:'💀 The dead cannot vote',
-    end_vote:'⚖️ Deliver the Verdict',vote_wait:'Host will deliver the verdict...',
-    vote_lbl:'votes',
-    executed:'Executed!',tie:'Tie — Nobody Expelled',
-    nobody:'Nobody was expelled',tie_msg:'The town was undecided.',
-    true_role:'True Identity:',
-    next_round:'☀️ Wake to New Day',res_wait:'Waiting for host...',
-    vamp_win:'🧛 Vampires Win!',vill_win:'🏘️ Villagers Win!',
-    vamp_desc:'Darkness prevails. The village is bathed in blood...',
-    vill_desc:'All vampires hunted! The sun rises again.',
-    replay:'🔄 Again',newgame:'🏚️ New Game',over_wait:'Host will start new game...',
-    you:'(You)',bot_lbl:'Bot',host_lbl:'Host',
-    ev_saved:'🛡️ The Doctor saved someone from the vampires!',
-    ev_safe:'🌙 Everyone survived the night...',
-    ev_killed:'🩸 {name} was killed by the vampires tonight!',
-    ev_elim:'⚖️ {name} was voted out! {role}',
-    ev_detect_vamp:'🔍 Investigation result: {name} is a VAMPIRE!',
-    ev_detect_clean:'🔍 Investigation result: {name} appears innocent.',
-    howto_lbl:'How to Play',
-    prev:'← Prev',next:'Next →',ready:'🧛 Ready to Play!',
-    ht:[
-      {i:'🏘️',t:'Objective',c:'rgba(197,160,89,.1)',b:`<p style="font-size:.88rem;color:#ccc;line-height:1.55;margin-bottom:12px">Hidden <b style="color:#ff6b6b">Vampires</b> kill a villager every night. <b style="color:#90ee90">Villagers</b> must discuss and vote them out!</p><div style="display:grid;grid-template-columns:1fr 1fr;gap:7px"><div style="background:rgba(138,3,3,.1);border:1px solid rgba(138,3,3,.25);border-radius:9px;padding:11px;text-align:center"><div style="font-size:1.6rem">🧛</div><div class="t-head" style="font-size:.68rem;color:#ff6b6b;margin-top:4px">Vampires Win</div><div style="font-size:.65rem;color:#555;margin-top:3px">When equal/outnumber villagers</div></div><div style="background:rgba(0,80,0,.08);border:1px solid rgba(0,150,0,.2);border-radius:9px;padding:11px;text-align:center"><div style="font-size:1.6rem">🏘️</div><div class="t-head" style="font-size:.68rem;color:#90ee90;margin-top:4px">Villagers Win</div><div style="font-size:.65rem;color:#555;margin-top:3px">All vampires eliminated</div></div></div>`},
-      {i:'🌙',t:'Night Phase (2 min)',c:'rgba(80,40,180,.1)',b:`<p style="font-size:.86rem;color:#aaa;margin-bottom:10px">Everyone closes their eyes. Roles activate:</p>${[['🧛','VAMPIRE','#ff5555','rgba(138,3,3,.08)','rgba(138,3,3,.22)','Chooses a villager to kill. If multiple vampires, they must agree on one target.'],['💉','DOCTOR','#6ab3ff','rgba(0,50,130,.06)','rgba(50,100,255,.18)','Protects one player from vampires. Can protect self. Cannot protect same person two nights in a row.'],['🔍','DETECTIVE','#ffd700','rgba(130,100,0,.06)','rgba(200,160,0,.18)','Investigates one player to learn if they are a vampire. Only they see the result.'],['🏘️','VILLAGER','#90ee90','rgba(0,80,0,.05)','rgba(0,150,0,.13)','Sleeps during the night. Must use discussion and logic to find vampires.']].map(([e,r,c,bg,b,d])=>`<div style="display:flex;gap:9px;background:${bg};border:1px solid ${b};border-radius:9px;padding:9px;margin-bottom:5px"><span style="font-size:1.2rem;flex-shrink:0">${e}</span><div><div class="t-head" style="font-size:.68rem;color:${c};margin-bottom:2px">${r}</div><div style="font-size:.76rem;color:#888;line-height:1.4">${d}</div></div></div>`).join('')}`},
-      {i:'☀️',t:'Day & Chat (5 min)',c:'rgba(197,160,89,.08)',b:`<p style="font-size:.86rem;color:#aaa;margin-bottom:10px">Night events announced. Everyone discusses via <b style="color:var(--gold)">live chat</b>.</p>${[['🗣️','Discuss','Who seems suspicious? Every word, every reaction is a clue!'],['🤫','Trust No One','Vampires can bluff. Doctor and Detective should share carefully.'],['⚖️','Vote','Host starts voting. 90 seconds — most votes gets expelled.'],['💀','Execution','Expelled player\'s role is revealed. Did you catch a vampire?']].map(([e,t,d])=>`<div style="display:flex;gap:9px;background:rgba(197,160,89,.05);border:1px solid rgba(197,160,89,.1);border-radius:9px;padding:9px;margin-bottom:5px"><span style="font-size:1.1rem;flex-shrink:0">${e}</span><div><div class="t-head" style="font-size:.68rem;color:var(--gold);margin-bottom:2px">${t}</div><div style="font-size:.76rem;color:#888">${d}</div></div></div>`).join('')}`},
-      {i:'⚔️',t:'Strategy',c:'rgba(100,40,180,.1)',b:`${[['👁️','Watch the quiet','Vampires often stay silent — let others do the work.'],['🎭','Role-playing','A vampire may pretend to be the Detective or Doctor.'],['🤝','Watch alliances','Who always defends who? They might be teammates.'],['💡','Detective info','Revealing publicly makes you a target. Use wisely!'],['🩺','Doctor tactics','Protecting yourself means nobody else is protected.'],['🎯','Vote psychology','Who panics and immediately accuses others? Why so nervous?']].map(([e,t,d])=>`<div style="display:flex;gap:8px;background:rgba(100,40,180,.06);border:1px solid rgba(100,40,180,.15);border-radius:9px;padding:8px;margin-bottom:4px"><span style="font-size:1rem;flex-shrink:0">${e}</span><div><div style="font-size:.76rem;font-weight:700;color:#c4a0ff;margin-bottom:1px">${t}</div><div style="font-size:.72rem;color:#777">${d}</div></div></div>`).join('')}`},
-      {i:'🎮',t:'Quick Start',c:'rgba(138,3,3,.1)',b:`${[[1,'⚰️','Create Room','Host creates a room and shares the code with friends.'],[2,'🗡️','Join','Others enter the code to join. Min 4, ideal 6-9.'],[3,'🌙','Start','Host starts the game. Roles assigned secretly — tell no one!'],[4,'🔄','Loop','Night (2min) → Morning announcement → Day chat (5min) → Vote (90s) → repeat'],[5,'🏆','Win','Find and expel the vampires — or fool the villagers!']].map(([n,e,t,d])=>`<div style="display:flex;gap:9px;margin-bottom:9px"><div style="width:26px;height:26px;background:rgba(138,3,3,.22);border:1px solid rgba(138,3,3,.38);border-radius:7px;display:flex;align-items:center;justify-content:center;font-family:'Cinzel',serif;font-size:.78rem;color:#ff8888;flex-shrink:0;font-weight:700">${n}</div><div style="background:rgba(138,3,3,.06);border:1px solid rgba(138,3,3,.15);border-radius:9px;padding:9px;flex:1"><div style="display:flex;gap:5px;margin-bottom:2px"><span>${e}</span><span class="t-head" style="font-size:.76rem;color:var(--parchment);font-weight:700">${t}</span></div><div style="font-size:.72rem;color:#777;line-height:1.35">${d}</div></div></div>`).join('')}
-        <div style="background:rgba(138,3,3,.07);border:1px solid rgba(138,3,3,.18);border-radius:9px;padding:9px;text-align:center;font-family:'Cinzel',serif;font-size:.7rem;color:rgba(197,160,89,.6)">🩸 Min 4 · Ideal 6-9 · Max 12 players</div>`},
-    ],
-    questions:["Can you look me in the eyes and say you're not a vampire?","Why do you keep changing the subject?","Who do you trust most and why?","What might the quiet ones be hiding?","Which pair always defends each other?","If you were a vampire, who would you target first?","Does anyone's defense sound rehearsed?","Who changes the most as tension rises?","Why did you pause when you were about to answer?","Who redirected the conversation the fastest?","Who looks the most comfortable right now?","Are the vampires being too talkative or too silent?"],
-  }
-};
+// I18N
+const L={tr:{
+  toggle:'🌐 EN',title:'Vampir Köylü',sub:'Online Sosyal Dedüksiyon',
+  h_home:'🏠 Ana Menü',h_create:'⚰️ Oda Kur',h_join:'🗡️ Katıl',
+  lbl_name:'Oyuncu Adın',lbl_av:'Maskeni Seç',
+  create:'Yeni Oda Kur',join:'Odaya Katıl',howto:'Nasıl Oynanır?',
+  lbl_max:'Maksimum Oyuncu',
+  create_go:'Karanlığı Başlat!',join_go:'Kasabaya Gir',
+  code_lbl:'KOD:',
+  lobby:'Bekleme Odası',lobby_min:'En az 4 oyuncu gerekli',
+  bot:'Bot Ekle',start:'Rolleri Dağıt!',lobby_wait:'Kurucu oyunu başlatmayı bekliyor...',
+  rl_vamp:'VAMPİR',rl_vamp_s:'Gizlice öldür',rl_vill:'KÖYLÜ',rl_vill_s:'Vampirleri bul',
+  phases:'Oyun Döngüsü',
+  p_night:'GECE — 10 dk',p_night_d:'Tartış, şüphelileri belirle',
+  p_day:'OYLAMA — 5 dk',p_day_d:'Gizli oyla, birini kov',
+  p_eve:'AKŞAM — 2 dk (2x hak)',p_eve_d:'Oyunu değiştirme şansı',
+  your_role:'Senin Rolün',tap:'Karta dokunarak öğren',touch:'DOKUN',
+  teammates:'🩸 VAMPİR KARDEŞLERİN',ready_status:'Herkes hazır olunca kurucu geceyi başlatır',
+  im_ready:'Hazırım!',begin_night:'🌙 Geceyi Başlat',role_wait:'Kurucu geceyi başlatmayı bekliyor...',
+  night_sub:'Tartış — vampirleri bul',night_wait:'Kurucu oylamayı başlatacak...',
+  goto_vote:'⚖️ Oylamayı Başlat',
+  vote_sub:'Kimi kasabadan kovuyorsunuz?',
+  anon:'🔒 Oylar gizlidir — kimin kime oy verdiği görünmez',
+  cast_vote:'Oyumu Ver',voted:'Oy verildi! Sonucu bekliyorsunuz...',
+  dead_vote:'💀 Ölüler oy kullanamaz',
+  goto_eve:'🌆 Akşam Aşamasına Geç',end_vote:'⚖️ Oylamayı Bitir — Sonucu Göster',vote_wait:'Kurucu oylama sonucunu açıklayacak...',
+  eve_title:'Akşam',eve_sub:'Oyunu değiştir ya da onayla',eve_desc:'Bu aşamada oyunuzu değiştirebilirsiniz',
+  cast_eve:'Akşam Oyumu Ver',eve_voted:'Akşam oyu verildi!',end_eve:'⚖️ Akşam Oylamasını Bitir',eve_wait:'Kurucu akşam oylamasını bitirecek...',
+  executed:'İnfaz Edildi!',tie:'Eşitlik — Kimse Kovulmadı',nobody:'Kimse kovulmadı',tie_msg:'Oylar eşit kaldı.',
+  true_role:'Gerçek Kimliği:',next_night:'🌙 Sonraki Geceye',res_wait:'Kurucu bekleniyor...',alive_remain:'Hayatta Kalanlar',
+  vamp_win:'🧛 Vampirler Kazandı!',vill_win:'🏘️ Köylüler Kazandı!',
+  vamp_desc:'Kasaba kana bulandı. Karanlık galip geldi...',vill_desc:'Tüm vampirler avlandı! Güneş yeniden doğuyor.',
+  replay:'🔄 Yeniden',newgame:'🏚️ Yeni Oyun',over_wait:'Kurucu bekleniyor...',
+  you:'(Sen)',bot_l:'Bot',host_l:'Kurucu',
+  r_vampire:'Vampir',r_villager:'Köylü',
+  r_vamp_desc:'Gece herkes tartışırken sessizce planını yap. Kim şüphe uyandırıyor? Kendini köylü gibi göster!',
+  r_vill_desc:'Vampirler aramızda gizleniyor. Konuşmaları takip et, savunmaları analiz et!',
+  sf_night:'Gece',sf_vote:'Oylama',sf_eve:'Akşam',sf_result:'Sonuç',
+  eve_uses:'Akşam hakkı:',ev_elim:'{name} oylama sonucu kasabadan kovuldu! Rolü: {role}',ev_tie:'Eşit oy — kimse kovulmadı.',
+  ht_howto:'Nasıl Oynanır',prev:'← Önceki',next:'Sonraki →',ready_btn:'🧛 Oynamaya Hazırım!',
+  chat_ph:'Mesajını yaz...',
+  ht:[
+    {i:'🏘️',t:'Amaç',c:'rgba(197,160,89,.1)',b:`<p style="font-size:.86rem;color:#ccc;line-height:1.5;margin-bottom:11px">Kasabada gizlice yaşayan <b style="color:#ff6b6b">Vampirler</b> her tur bir köylüyü eleme hedefler. <b style="color:#90ee90">Köylüler</b> tartışarak onları bulup oylama ile kovmalı!</p><div style="display:grid;grid-template-columns:1fr 1fr;gap:7px"><div style="background:rgba(138,3,3,.1);border:1px solid rgba(138,3,3,.25);border-radius:9px;padding:11px;text-align:center"><div style="font-size:1.5rem">🧛</div><div style="font-family:'Cinzel',serif;font-size:.66rem;color:#ff6b6b;margin-top:4px">Vampirler Kazanır</div><div style="font-size:.62rem;color:#555;margin-top:3px">Sayıları köylülere eşit veya fazla olunca</div></div><div style="background:rgba(0,80,0,.08);border:1px solid rgba(0,150,0,.2);border-radius:9px;padding:11px;text-align:center"><div style="font-size:1.5rem">🏘️</div><div style="font-family:'Cinzel',serif;font-size:.66rem;color:#90ee90;margin-top:4px">Köylüler Kazanır</div><div style="font-size:.62rem;color:#555;margin-top:3px">Tüm vampirler eleminince</div></div></div>`},
+    {i:'🌙',t:'Gece (10 dk) — Tartışma',c:'rgba(80,40,180,.1)',b:`<p style="font-size:.86rem;color:#aaa;margin-bottom:10px">Gece; tartışma, şüphelenme ve ipucu toplama zamanıdır!</p>${[['🗣️','Herkesle konuş','Vampirleri bulmak için mantıksal çıkarım yap.'],['🧛','Vampir rolü','Vampirler birbirini görür. Köylü gibi davranmak zorundalar.'],['🏘️','Köylü rolü','Vampirleri bul. Kimin savunması zayıf? Kimin hikayesi tutarsız?'],['⚠️','Dikkat!','Vampirler yalan söyler ve rol yapar. Güvenmek tehlikeli!']].map(([e,t,d])=>`<div style="display:flex;gap:9px;background:rgba(80,40,180,.06);border:1px solid rgba(80,40,180,.18);border-radius:9px;padding:9px;margin-bottom:5px"><span style="font-size:1.1rem;flex-shrink:0">${e}</span><div><div style="font-family:'Cinzel',serif;font-size:.68rem;color:#9988ee;margin-bottom:2px">${t}</div><div style="font-size:.75rem;color:#888;line-height:1.4">${d}</div></div></div>`).join('')}`},
+    {i:'⚖️',t:'Oylama (5 dk) — Gizli',c:'rgba(160,100,0,.1)',b:`<p style="font-size:.86rem;color:#aaa;margin-bottom:10px">Oylama aşamasında herkes gizlice oy verir.</p>${[['🔒','Oylar gizlidir','Kim kime oy verdi kimse görmez. Sadece toplam oy sayısı görünür.'],['⚖️','En çok oy alan','En çok oy alan kişi kasabadan kovulur ve rolü açıklanır.'],['🤝','Eşitlik','Oylar eşit ise kimse kovulmaz, tur biter.'],['🌆','Akşam hakkı','Kurucu akşam aşamasına geçebilir — oylar değiştirilir (2x hak)']].map(([e,t,d])=>`<div style="display:flex;gap:9px;background:rgba(160,100,0,.06);border:1px solid rgba(160,100,0,.18);border-radius:9px;padding:9px;margin-bottom:5px"><span style="font-size:1.1rem;flex-shrink:0">${e}</span><div><div style="font-family:'Cinzel',serif;font-size:.68rem;color:var(--gold);margin-bottom:2px">${t}</div><div style="font-size:.75rem;color:#888;line-height:1.4">${d}</div></div></div>`).join('')}`},
+    {i:'🌆',t:'Akşam (2 dk) — Yeniden Oy',c:'rgba(150,30,30,.1)',b:`<p style="font-size:.86rem;color:#aaa;margin-bottom:10px">Akşam aşaması oyun boyunca sadece <b style="color:#ee8888">2 kez</b> kullanılabilir!</p>${[['🔄','Oy değiştir','Gündüz verdiğin oyunu değiştirebilirsin.'],['⏱️','2 dakika','Sadece 2 dakika süresi var. Karar vermekte geç kalma!'],['♻️','2x hak','Oyun boyunca kurucu bu aşamayı yalnızca 2 kez kullanabilir.'],['💡','Strateji','Birisi çok ikna edici konuştuysa ve oy almak üzereyse baskı uygulayabilirsin.']].map(([e,t,d])=>`<div style="display:flex;gap:9px;background:rgba(150,30,30,.06);border:1px solid rgba(150,30,30,.18);border-radius:9px;padding:9px;margin-bottom:5px"><span style="font-size:1.1rem;flex-shrink:0">${e}</span><div><div style="font-family:'Cinzel',serif;font-size:.68rem;color:#ee8888;margin-bottom:2px">${t}</div><div style="font-size:.75rem;color:#888;line-height:1.4">${d}</div></div></div>`).join('')}`},
+    {i:'🎮',t:'Başlangıç',c:'rgba(138,3,3,.1)',b:`${[[1,'⚰️','Oda Kur','Admin oda oluşturur, kodu paylaşır.'],[2,'🗡️','Katıl','Diğerleri kodu girer. Min 4, ideal 5-9.'],[3,'🌙','Roller Dağıtılır','Admin "Rolleri Dağıt!" der. Roller rastgele verilir.'],[4,'🌙','Gece','10 dk tartışma. Vampirler birbirini görür.'],[5,'⚖️','Oylama','5 dk gizli oylama. Sonuç açıklanır.'],[6,'🔄','Tekrar','Tüm vampirler ya da köylüler elenene kadar döner.']].map(([n,e,t,d])=>`<div style="display:flex;gap:9px;margin-bottom:9px"><div style="width:25px;height:25px;background:rgba(138,3,3,.22);border:1px solid rgba(138,3,3,.38);border-radius:7px;display:flex;align-items:center;justify-content:center;font-family:'Cinzel',serif;font-size:.76rem;color:#ff8888;flex-shrink:0;font-weight:700">${n}</div><div style="background:rgba(138,3,3,.06);border:1px solid rgba(138,3,3,.15);border-radius:9px;padding:9px;flex:1"><div style="display:flex;gap:5px;margin-bottom:2px"><span>${e}</span><span style="font-family:'Cinzel',serif;font-size:.74rem;color:var(--parchment);font-weight:700">${t}</span></div><div style="font-size:.7rem;color:#777;line-height:1.35">${d}</div></div></div>`).join('')}<div style="background:rgba(138,3,3,.07);border:1px solid rgba(138,3,3,.18);border-radius:9px;padding:8px;text-align:center;font-family:'Cinzel',serif;font-size:.68rem;color:rgba(197,160,89,.6)">🩸 2v2 = Vampirler kazanır · Tüm vampirler ölürse Köylüler kazanır</div>`},
+  ],
+  questions:["Gözlerime bakıp 'Ben vampir değilim' diyebilir misin?","Neden konuşmayı sürekli başka yöne çekiyorsun?","En çok kime güveniyorsun ve neden?","Sessiz kalanlar ne saklıyor olabilir?","Hangi ikili hep birbirini savunuyor?","Kim en az konuştu?","Birinin savunması sana ezberlenmiş gibi mi geldi?","Gerilim yükseldikçe kim en çok değişiyor?","Sence vampirler şu an çok mu konuşuyor yoksa sessiz mi?"],
+},en:{
+  toggle:'🌐 TR',title:'Vampire Village',sub:'Online Social Deduction',
+  h_home:'🏠 Home',h_create:'⚰️ Create',h_join:'🗡️ Join',
+  lbl_name:'Your Name',lbl_av:'Choose Mask',
+  create:'Create Room',join:'Join Room',howto:'How to Play?',
+  lbl_max:'Max Players',create_go:'Start the Darkness!',join_go:'Enter Village',
+  code_lbl:'CODE:',lobby:'Waiting Room',lobby_min:'Need at least 4 players',
+  bot:'Add Bot',start:'Assign Roles!',lobby_wait:'Waiting for host to start...',
+  rl_vamp:'VAMPIRE',rl_vamp_s:'Kill in secret',rl_vill:'VILLAGER',rl_vill_s:'Find vampires',
+  phases:'Game Cycle',
+  p_night:'NIGHT — 10 min',p_night_d:'Discuss, identify suspects',
+  p_day:'VOTE — 5 min',p_day_d:'Secret vote, expel someone',
+  p_eve:'EVENING — 2 min (2x use)',p_eve_d:'Chance to change votes',
+  your_role:'Your Role',tap:'Tap the card to reveal',touch:'TAP',
+  teammates:'🩸 YOUR VAMPIRE BROTHERS',ready_status:'Host starts night when everyone is ready',
+  im_ready:"I'm Ready!",begin_night:'🌙 Begin Night',role_wait:'Waiting for host to begin night...',
+  night_sub:'Discuss — find the vampires',night_wait:'Host will start voting...',
+  goto_vote:'⚖️ Begin Voting',
+  vote_sub:'Who gets expelled from the village?',anon:'🔒 Votes are secret — nobody sees who voted for who',
+  cast_vote:'Cast Vote',voted:'Vote cast! Waiting for result...',dead_vote:'💀 Dead players cannot vote',
+  goto_eve:'🌆 Go to Evening Phase',end_vote:'⚖️ End Voting — Reveal Result',vote_wait:'Host will reveal the result...',
+  eve_title:'Evening',eve_sub:'Change your vote or confirm',eve_desc:'You may change your vote in this phase',
+  cast_eve:'Cast Evening Vote',eve_voted:'Evening vote cast!',end_eve:'⚖️ End Evening Vote',eve_wait:'Host will end evening voting...',
+  executed:'Executed!',tie:'Tie — Nobody Expelled',nobody:'Nobody expelled',tie_msg:'Votes were equal.',
+  true_role:'True Identity:',next_night:'🌙 Next Night',res_wait:'Waiting for host...',alive_remain:'Survivors',
+  vamp_win:'🧛 Vampires Win!',vill_win:'🏘️ Villagers Win!',
+  vamp_desc:'The village is bathed in blood. Darkness prevails...',vill_desc:'All vampires hunted! The sun rises again.',
+  replay:'🔄 Again',newgame:'🏚️ New Game',over_wait:'Host will start new game...',
+  you:'(You)',bot_l:'Bot',host_l:'Host',
+  r_vampire:'Vampire',r_villager:'Villager',
+  r_vamp_desc:'While everyone discusses, blend in silently. Act like a villager!',
+  r_vill_desc:"Vampires are hiding among us. Track conversations, analyze defenses!",
+  sf_night:'Night',sf_vote:'Vote',sf_eve:'Evening',sf_result:'Result',
+  eve_uses:'Evening uses:',ev_elim:'{name} was expelled! Role: {role}',ev_tie:'Tie — nobody expelled.',
+  ht_howto:'How to Play',prev:'← Prev',next:'Next →',ready_btn:'🧛 Ready to Play!',
+  chat_ph:'Type message...',
+  ht:[
+    {i:'🏘️',t:'Objective',c:'rgba(197,160,89,.1)',b:`<p style="font-size:.86rem;color:#ccc;line-height:1.5;margin-bottom:11px">Hidden <b style="color:#ff6b6b">Vampires</b> try to eliminate a villager each turn. <b style="color:#90ee90">Villagers</b> must discuss and vote them out!</p><div style="display:grid;grid-template-columns:1fr 1fr;gap:7px"><div style="background:rgba(138,3,3,.1);border:1px solid rgba(138,3,3,.25);border-radius:9px;padding:11px;text-align:center"><div style="font-size:1.5rem">🧛</div><div style="font-family:'Cinzel',serif;font-size:.66rem;color:#ff6b6b;margin-top:4px">Vampires Win</div><div style="font-size:.62rem;color:#555;margin-top:3px">When equal or outnumber villagers</div></div><div style="background:rgba(0,80,0,.08);border:1px solid rgba(0,150,0,.2);border-radius:9px;padding:11px;text-align:center"><div style="font-size:1.5rem">🏘️</div><div style="font-family:'Cinzel',serif;font-size:.66rem;color:#90ee90;margin-top:4px">Villagers Win</div><div style="font-size:.62rem;color:#555;margin-top:3px">All vampires eliminated</div></div></div>`},
+    {i:'🌙',t:'Night (10 min) — Discussion',c:'rgba(80,40,180,.1)',b:`<p style="font-size:.86rem;color:#aaa;margin-bottom:10px">Night is for discussion, suspicion, and gathering clues!</p>${[['🗣️','Talk to everyone','Make logical deductions to find vampires.'],['🧛','Vampire role','Vampires see each other. They must act like villagers.'],['🏘️','Villager role',"Find vampires. Whose defense is weak? Whose story doesn't add up?"],['⚠️','Warning!','Vampires lie and roleplay. Trusting is dangerous!']].map(([e,t,d])=>`<div style="display:flex;gap:9px;background:rgba(80,40,180,.06);border:1px solid rgba(80,40,180,.18);border-radius:9px;padding:9px;margin-bottom:5px"><span style="font-size:1.1rem;flex-shrink:0">${e}</span><div><div style="font-family:'Cinzel',serif;font-size:.68rem;color:#9988ee;margin-bottom:2px">${t}</div><div style="font-size:.75rem;color:#888;line-height:1.4">${d}</div></div></div>`).join('')}`},
+    {i:'⚖️',t:'Voting (5 min) — Secret',c:'rgba(160,100,0,.1)',b:`<p style="font-size:.86rem;color:#aaa;margin-bottom:10px">Everyone votes secretly in the voting phase.</p>${[['🔒','Votes are hidden','Nobody sees who voted for who. Only total counts.'],['⚖️','Most votes','The player with most votes is expelled and their role revealed.'],['🤝','Tie','If votes are equal, nobody is expelled.'],['🌆','Evening right','Host can go to evening — votes can be changed (2x use)']].map(([e,t,d])=>`<div style="display:flex;gap:9px;background:rgba(160,100,0,.06);border:1px solid rgba(160,100,0,.18);border-radius:9px;padding:9px;margin-bottom:5px"><span style="font-size:1.1rem;flex-shrink:0">${e}</span><div><div style="font-family:'Cinzel',serif;font-size:.68rem;color:var(--gold);margin-bottom:2px">${t}</div><div style="font-size:.75rem;color:#888;line-height:1.4">${d}</div></div></div>`).join('')}`},
+    {i:'🌆',t:'Evening (2 min) — Revote',c:'rgba(150,30,30,.1)',b:`<p style="font-size:.86rem;color:#aaa;margin-bottom:10px">Evening phase can only be used <b style="color:#ee8888">2 times</b> per game!</p>${[['🔄','Change vote','You can change your daytime vote.'],['⏱️','2 minutes','Only 2 minutes. Decide fast!'],['♻️','2x limit','Host can only use this phase twice per game.'],['💡','Strategy','If someone was very convincing and may be spared, use this to apply pressure.']].map(([e,t,d])=>`<div style="display:flex;gap:9px;background:rgba(150,30,30,.06);border:1px solid rgba(150,30,30,.18);border-radius:9px;padding:9px;margin-bottom:5px"><span style="font-size:1.1rem;flex-shrink:0">${e}</span><div><div style="font-family:'Cinzel',serif;font-size:.68rem;color:#ee8888;margin-bottom:2px">${t}</div><div style="font-size:.75rem;color:#888;line-height:1.4">${d}</div></div></div>`).join('')}`},
+    {i:'🎮',t:'Quick Start',c:'rgba(138,3,3,.1)',b:`${[[1,'⚰️','Create','Host creates room, shares code.'],[2,'🗡️','Join','Others enter the code. Min 4, ideal 5-9.'],[3,'🌙','Roles','Host clicks "Assign Roles!" — random distribution.'],[4,'🌙','Night','10 min discussion. Vampires see each other.'],[5,'⚖️','Vote','5 min secret vote. Result revealed.'],[6,'🔄','Repeat','Until all vampires or all villagers eliminated.']].map(([n,e,t,d])=>`<div style="display:flex;gap:9px;margin-bottom:9px"><div style="width:25px;height:25px;background:rgba(138,3,3,.22);border:1px solid rgba(138,3,3,.38);border-radius:7px;display:flex;align-items:center;justify-content:center;font-family:'Cinzel',serif;font-size:.76rem;color:#ff8888;flex-shrink:0;font-weight:700">${n}</div><div style="background:rgba(138,3,3,.06);border:1px solid rgba(138,3,3,.15);border-radius:9px;padding:9px;flex:1"><div style="display:flex;gap:5px;margin-bottom:2px"><span>${e}</span><span style="font-family:'Cinzel',serif;font-size:.74rem;color:var(--parchment);font-weight:700">${t}</span></div><div style="font-size:.7rem;color:#777;line-height:1.35">${d}</div></div></div>`).join('')}<div style="background:rgba(138,3,3,.07);border:1px solid rgba(138,3,3,.18);border-radius:9px;padding:8px;text-align:center;font-family:'Cinzel',serif;font-size:.68rem;color:rgba(197,160,89,.6)">🩸 2v2 = Vampires win · All vampires dead = Villagers win</div>`},
+  ],
+  questions:["Can you look me in the eyes and say you're not a vampire?","Why do you keep changing the subject?","Who do you trust most and why?","What might the quiet ones be hiding?","Which pair always defends each other?","Who spoke the least?","Does anyone's defense sound rehearsed?","Who changes most when tension rises?","Are vampires being too talkative or too silent right now?"],
+}};
 
 const t=k=>L[window.lang][k]??k;
 const $=id=>document.getElementById(id);
 const rand=a=>a[Math.floor(Math.random()*a.length)];
-const san=s=>(!s||typeof s!=='string')?'':s.replace(/[<>'"&]/g,'').trim().substring(0,24);
-const fmt=s=>s.replace(/\n/g,'<br>');
+const san=s=>(!s||typeof s!=='string')?'':s.replace(/[<>'"&]/g,'').trim().substring(0,22);
 const AVLIST=['🧛','👻','🕷️','🦇','💀','🌙','⚰️','🔮','🕯️','🌑','🧟','🎭','🗡️','🩸','🌹','👁️','🐺','🦉','🕸️','⚡'];
-const RKINFO={
-  vampire:{c:'#ff5555',border:'rgba(220,60,60,.5)',bg:'rgba(138,3,3,.12)',e:'🧛'},
-  villager:{c:'#90ee90',border:'rgba(0,150,0,.4)',bg:'rgba(0,80,0,.1)',e:'🏘️'},
-  doctor:{c:'#6ab3ff',border:'rgba(50,100,255,.4)',bg:'rgba(0,50,130,.1)',e:'💉'},
-  detective:{c:'#ffd700',border:'rgba(255,200,0,.4)',bg:'rgba(130,100,0,.1)',e:'🔍'},
-};
+const RK={vampire:{c:'#ff5555',border:'rgba(220,60,60,.5)',bg:'rgba(138,3,3,.14)',e:'🧛'},villager:{c:'#90ee90',border:'rgba(0,150,0,.4)',bg:'rgba(0,80,0,.1)',e:'🏘️'}};
 
-// ════ STATE ════
-let myUid=null,myRoomId=null;
-let roomData=null,pData={};
-let timerIv=null,chatUnsub=null,vchatUnsub=null;
-let detHistory={};
-let lastDocSave=null; // doctor cannot protect same person 2 nights in a row
+// State
+let myUid=null,myRoomId=null,roomData=null,pData={};
+let timerIv=null,chatUnsub=null;
 
-// ════ AUTH ════
 signInAnonymously(auth).then(r=>{myUid=r.user.uid;}).catch(console.error);
 
-// ════ APPLY LANG ════
+// Paths
+const rRef=()=>doc(db,'vk4_rooms',myRoomId);
+const pRef=u=>doc(db,'vk4_rooms',myRoomId,'players',u);
+const pCol=()=>collection(db,'vk4_rooms',myRoomId,'players');
+const chatCol=()=>collection(db,'vk4_rooms',myRoomId,'chat');
+
+// Apply language
 function applyLang(){
-  $('topbar-lang').textContent=t('lang_toggle');
-  $('s-main-title').textContent=t('title');
-  $('s-main-sub').textContent=t('sub');
-  ['home','create','join'].forEach(m=>{const el=$('tab-'+m);if(el)el.textContent=t('tab_'+m);});
-  // Setup labels
+  $('tb-title').textContent='🧛 '+t('title');
+  $('lang-btn').textContent=t('toggle');
+  $('main-title').textContent=t('title');
+  $('main-sub').textContent=t('sub');
+  ['home','create','join'].forEach(m=>{const el=$('tab-'+m);if(el)el.textContent=t('h_'+m);});
   const M={
-    'lbl-name':'lbl_name','lbl-avatar':'lbl_avatar',
-    'lbl-player-count':'lbl_player_count','lbl-code':'lbl_code',
-    'lbl-code-disp':'code_disp',
-    'lbl-lobby-title':'lobby_title','lbl-lobby-min':'lobby_min',
-    'lbl-lobby-wait':'lobby_wait',
-    'lbl-role-title':'role_title','lbl-role-tap':'role_tap',
-    'lbl-front-tap':'front_tap','lbl-team':'team_lbl',
-    'lbl-role-auto':'role_auto','lbl-im-ready':'im_ready',
-    'lbl-night-sub':'night_sub','lbl-day-sub':'day_sub',
-    'lbl-start-vote':'start_vote','lbl-day-wait':'day_wait',
-    'lbl-spectator':'spectator',
-    'lbl-vote-choose':'vote_choose','lbl-confirm-vote':'confirm_vote',
-    'lbl-dead-vote':'dead_vote','lbl-end-vote':'end_vote','lbl-vote-wait':'vote_wait',
-    'lbl-next-round':'next_round','lbl-res-wait':'res_wait',
-    'lbl-over-wait':'over_wait','lbl-replay':'replay','lbl-newgame':'newgame',
-    'btn-to-create':'btn_create','btn-to-join':'btn_join','lbl-btn-create':'btn_create',
-    'lbl-btn-join':'btn_join','lbl-btn-howto':'btn_howto',
-    'lbl-create-go':'create_go','lbl-join-go':'join_go',
-    'lbl-bot':'bot','lbl-start':'start',
-    'rl-vamp-lbl':'rl_vamp','rl-vamp-sub':'rl_vamp_s',
-    'rl-vill-lbl':'rl_vill','rl-vill-sub':'rl_vill_s',
-    'rl-doc-lbl':'rl_doc','rl-doc-sub':'rl_doc_s',
-    'rl-det-lbl':'rl_det','rl-det-sub':'rl_det_s',
-    'lbl-prev':'prev',
+    'lbl-name':'lbl_name','lbl-avatar':'lbl_av','lbl-max-p':'lbl_max','lbl-code':'lbl_code',
+    't-create':'create','t-join':'join','t-howto':'howto',
+    't-create-go':'create_go','t-join-go':'join_go',
+    't-code-lbl':'code_lbl','t-lobby':'lobby','t-lobby-min':'lobby_min',
+    't-bot':'bot','t-start':'start','t-lobby-wait':'lobby_wait',
+    'rl-vamp':'rl_vamp','rl-vamp-s':'rl_vamp_s','rl-vill':'rl_vill','rl-vill-s':'rl_vill_s',
+    't-phases-lbl':'phases',
+    't-p-night':'p_night','t-p-night-d':'p_night_d',
+    't-p-day':'p_day','t-p-day-d':'p_day_d',
+    't-p-eve':'p_eve','t-p-eve-d':'p_eve_d',
+    't-your-role':'your_role','t-tap':'tap','t-touch':'touch',
+    't-teammates':'teammates','t-ready-status':'ready_status',
+    't-im-ready':'im_ready','t-begin-night':'begin_night','t-role-wait':'role_wait',
+    't-night-sub':'night_sub','t-night-wait':'night_wait',
+    't-goto-vote':'goto_vote',
+    't-vote-sub':'vote_sub','t-vote-anon':'anon',
+    't-cast-vote':'cast_vote','t-voted':'voted','t-dead-vote':'dead_vote',
+    't-goto-eve':'goto_eve','t-end-vote':'end_vote','t-vote-wait':'vote_wait',
+    't-eve-title':'eve_title','t-eve-sub':'eve_sub','t-eve-desc':'eve_desc',
+    't-cast-eve':'cast_eve','t-eve-voted':'eve_voted','t-end-eve':'end_eve','t-eve-wait':'eve_wait',
+    't-next-night':'next_night','t-res-wait':'res_wait','alive-remain-lbl':'alive_remain',
+    't-replay':'replay','t-newgame':'newgame','t-over-wait':'over_wait',
+    't-prev':'prev','ht-sec':'ht_howto',
+    'sfl-0':'sf_night','sfl-1':'sf_vote','sfl-2':'sf_eve','sfl-3':'sf_result',
   };
   Object.entries(M).forEach(([id,k])=>{const el=$(id);if(el&&k)el.textContent=t(k);});
-  $('inp-name').placeholder=t('lbl_name')+'...';
-  $('inp-code').placeholder='• • • •';
-  if($('chat-inp'))$('chat-inp').placeholder=t('chat_ph');
-  if($('vote-chat-inp'))$('vote-chat-inp').placeholder=t('last_words_ph');
-  if($('btn-chat-send'))$('btn-chat-send').textContent=t('send');
-  if($('btn-vote-chat'))$('btn-vote-chat').textContent=t('send');
+  if($('inp-name'))$('inp-name').placeholder=t('lbl_name')+'...';
+  if($('inp-code'))$('inp-code').placeholder='• • • •';
+  if($('night-inp'))$('night-inp').placeholder=t('chat_ph');
 }
 window.toggleLang=()=>{window.lang=window.lang==='tr'?'en':'tr';applyLang();if(roomData)renderRoom();};
 
-// ════ AVATAR GRID ════
+// Avatar grid
 function buildAv(){
   const g=$('av-grid');g.innerHTML='';
   AVLIST.forEach(a=>{
-    const b=document.createElement('button');
+    const b=document.createElement('button');b.type='button';
     b.className='av-btn'+(a===window.selAv?' sel':'');
-    b.textContent=a;b.type='button';
+    b.textContent=a;
     b.onclick=()=>{window.selAv=a;g.querySelectorAll('.av-btn').forEach(x=>x.classList.remove('sel'));b.classList.add('sel');};
     g.appendChild(b);
   });
 }
 
-// ════ SETUP TABS ════
-window.sTab=mode=>{
-  ['home','create','join'].forEach(m=>{
-    $('tab-'+m).classList.toggle('on',m===mode);
-    $('pan-'+m).classList.toggle('hidden',m!==mode);
+// Setup tabs
+window.sTab=m=>{
+  ['home','create','join'].forEach(x=>{
+    $('tab-'+x).classList.toggle('on',x===m);
+    $('pan-'+x).classList.toggle('hidden',x!==m);
   });
-  if(mode==='create')buildCountBtns();
+  if(m==='create')buildCountBtns();
 };
 
-// ════ PLAYER COUNT ════
+// Count buttons
 function buildCountBtns(){
   const w=$('count-btns');w.innerHTML='';
   [4,5,6,7,8,9,10,12].forEach(n=>{
     const b=document.createElement('button');b.type='button';
-    b.className='btn btn-sm'+(n===window.selCount?' btn-r':' btn-g');
-    b.style.cssText='flex:0 0 auto;width:38px;padding:8px;font-size:.82rem;';
-    b.textContent=n;b.onclick=()=>{window.selCount=n;buildCountBtns();};
+    b.className='btn btn-sm'+(n===window.selMax?' btn-r':' btn-g');
+    b.style.cssText='flex:0 0 auto;width:37px;padding:8px;font-size:.8rem;';
+    b.textContent=n;b.onclick=()=>{window.selMax=n;buildCountBtns();};
     w.appendChild(b);
   });
-  const M={4:'🧛×1 💉×1 🏘️×2',5:'🧛×1 💉×1 🏘️×3',6:'🧛×2 💉×1 🏘️×3',
-    7:'🧛×2 💉×1 🔍×1 🏘️×3',8:'🧛×2 💉×1 🔍×1 🏘️×4',
-    9:'🧛×2 💉×1 🔍×1 🏘️×5',10:'🧛×2 💉×1 🔍×1 🏘️×6',12:'🧛×3 💉×1 🔍×1 🏘️×7'};
-  $('role-preview').textContent=M[window.selCount]||'';
+  const rp={4:'🧛×1 🏘️×3',5:'🧛×1 🏘️×4',6:'🧛×2 🏘️×4',7:'🧛×2 🏘️×5',8:'🧛×2 🏘️×6',9:'🧛×3 🏘️×6',10:'🧛×3 🏘️×7',12:'🧛×3 🏘️×9'};
+  $('role-preview').textContent=rp[window.selMax]||'';
 }
 
-// ════ NAME VALIDATION ════
+// Name validation
 function checkName(){
   const ok=$('inp-name').value.trim().length>=2;
   ['btn-to-create','btn-to-join','btn-create','btn-join'].forEach(id=>{const el=$(id);if(el)el.disabled=!ok;});
 }
 $('inp-name').addEventListener('input',checkName);
 $('inp-code').addEventListener('input',()=>{$('btn-join').disabled=$('inp-code').value.length!==4;});
-$('inp-name').addEventListener('keydown',e=>{if(e.key==='Enter')$('inp-name').blur();});
 
-// ════ CREATE ════
+// Create room
 window.doCreate=async()=>{
   const name=san($('inp-name').value.trim());
   if(name.length<2)return toast('⚠️ İsim çok kısa!');
-  const code=genCode();myRoomId=code;
-  try{
-    await setDoc(rRef(),{
-      hostId:myUid,status:'lobby',phase:1,winner:null,events:[],dayVotes:{},
-      nightActions:{submitted:{},vampireVotes:{},doctorSave:null,doctorLastSave:null,detectiveTarget:null},
-      phaseEndTime:0,settings:{maxPlayers:window.selCount}
-    });
-    await setDoc(pRef(myUid),{name,avatar:window.selAv,role:null,isAlive:true,isBot:false,isHost:true,ready:false});
-    listenRoom(code);
-  }catch(e){toast('❌ Hata: '+e.message);console.error(e);}
+  myRoomId=genCode();
+  await setDoc(rRef(),{
+    hostId:myUid,status:'lobby',round:1,winner:null,
+    votes:{},eveVotes:{},eveUsed:0,lastElim:null,
+    phaseEndTime:0,events:[],
+    settings:{maxPlayers:window.selMax}
+  });
+  await setDoc(pRef(myUid),{name,avatar:window.selAv,role:null,isAlive:true,isBot:false,isHost:true,ready:false});
+  listen();
 };
 
-// ════ JOIN ════
+// Join room
 window.doJoin=async()=>{
   const name=san($('inp-name').value.trim());
   const code=$('inp-code').value.trim().toUpperCase();
   if(name.length<2||code.length!==4)return;
   myRoomId=code;
-  try{
-    const snap=await getDoc(rRef());
-    if(!snap.exists())return toast('❌ Oda bulunamadı!');
-    if(snap.data().status!=='lobby')return toast('❌ Oyun başlamış!');
-    const pc=Object.keys((await getDocs(pCol())).docs.map(d=>d.id)).length;
-    if(pc>=12)return toast('❌ Oda dolu!');
-    await setDoc(pRef(myUid),{name,avatar:window.selAv,role:null,isAlive:true,isBot:false,isHost:false,ready:false});
-    listenRoom(code);
-  }catch(e){toast('❌ Hata: '+e.message);console.error(e);}
+  const snap=await getDoc(rRef()).catch(()=>null);
+  if(!snap?.exists())return toast('❌ '+(window.lang==='tr'?'Oda bulunamadı!':'Room not found!'));
+  if(snap.data().status!=='lobby')return toast('❌ '+(window.lang==='tr'?'Oyun başlamış!':'Game already started!'));
+  await setDoc(pRef(myUid),{name,avatar:window.selAv,role:null,isAlive:true,isBot:false,isHost:false,ready:false});
+  listen();
 };
 
-// ════ ADD BOT ════
+// Add bot
 window.addBot=async()=>{
-  if(Object.keys(pData).length>=12)return toast('❌ Oda dolu!');
+  if(Object.keys(pData).length>=12)return toast('❌ '+(window.lang==='tr'?'Oda dolu!':'Room full!'));
   const bid='bot_'+Date.now();
-  const bnames=['Kara Murat','Gece Hanım','Bela Jr','Nosferatu','Mina','Van Helsing','Renfield','Carmilla','Dracula','Igor','Salem','Ravena'];
-  await setDoc(pRef(bid),{name:rand(bnames),avatar:rand(AVLIST),role:null,isAlive:true,isBot:true,isHost:false,ready:true});
+  const names=['Kara Murat','Gece Hanım','Bela Jr','Nosferatu','Mina','Van Helsing','Renfield','Carmilla'];
+  await setDoc(pRef(bid),{name:rand(names),avatar:rand(AVLIST),role:null,isAlive:true,isBot:true,isHost:false,ready:true});
 };
 
-// ════ START GAME ════
+// Start game — assign roles randomly
 window.startGame=async()=>{
   const ids=Object.keys(pData);
-  if(ids.length<4)return toast('❌ En az 4 kişi gerekli!');
+  if(ids.length<4)return toast('❌ '+(window.lang==='tr'?'En az 4 kişi!':'Need 4 players!'));
   const roles=assignRoles(ids);
-  // Update all player roles
-  await Promise.all(ids.map(id=>updateDoc(pRef(id),{role:roles[id],ready:false})));
-  await updateDoc(rRef(),{status:'role_reveal',phaseEndTime:Date.now()+35000});
+  await Promise.all(ids.map(id=>updateDoc(pRef(id),{role:roles[id],ready:false,isAlive:true})));
+  await updateDoc(rRef(),{status:'role_reveal',round:1,votes:{},eveVotes:{},eveUsed:0,lastElim:null,events:[]});
 };
 
 function assignRoles(ids){
   const n=ids.length;
-  // Proper mafia ratio: ~1/3 mafia, never more than n/3
-  let vamps=Math.floor(n/3);
-  if(vamps<1)vamps=1;
-  if(vamps>3)vamps=3;
-  let list=['doctor'];
-  if(n>=7)list.push('detective');
-  for(let i=0;i<vamps;i++)list.push('vampire');
-  while(list.length<n)list.push('villager');
-  // Shuffle Fisher-Yates
-  for(let i=list.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[list[i],list[j]]=[list[j],list[i]];}
-  const m={};ids.forEach((id,i)=>m[id]=list[i]);return m;
+  // Vampire count: ~1/3 but proper balance
+  let vc=n<=5?1:n<=8?2:3;
+  const shuffled=[...ids].sort(()=>Math.random()-.5);
+  const m={};
+  shuffled.forEach((id,i)=>m[id]=i<vc?'vampire':'villager');
+  return m;
 }
 
-// ════ LISTEN ROOM ════
-function listenRoom(code){
-  myRoomId=code;
-  showScreen('s-lobby');
-  $('lobby-code-disp').textContent=code;
-
-  onSnapshot(rRef(),(snap)=>{
-    if(!snap.exists()){myRoomId=null;showScreen('s-setup');return;}
+// Listen to room
+function listen(){
+  showScr('s-lobby');
+  $('lobby-code').textContent=myRoomId;
+  onSnapshot(rRef(),snap=>{
+    if(!snap.exists()){myRoomId=null;showScr('s-setup');return;}
     roomData=snap.data();
     updateTopbar();
     renderRoom();
   });
-
-  onSnapshot(pCol(),(snap)=>{
+  onSnapshot(pCol(),snap=>{
     pData={};
     snap.forEach(d=>{pData[d.id]={...d.data(),id:d.id};});
     buildLobbyList();
-    updateLobbyButtons();
-    if(roomData?.status==='role_reveal')setupRoleCard();
-    if(roomData?.status==='day')buildDayList();
+    const n=Object.keys(pData).length;
+    if($('btn-start'))$('btn-start').disabled=n<4;
+    if($('lobby-info'))$('lobby-info').textContent=`${n} ${window.lang==='tr'?'oyuncu bağlı':'players connected'}`;
+    if(roomData?.status==='role_reveal'){setupRoleCard();buildReadyList();}
+    if(roomData?.status==='night')buildVoteDisplay('night-chat-msgs');
     if(roomData?.status==='vote')buildVoteList();
+    if(roomData?.status==='evening')buildEveList();
   });
 }
 
-function updateTopbar(){
-  if(!roomData)return;
-  const phase={lobby:'Bekleme',role_reveal:'Rol Açıklaması',night:`Gece ${roomData.phase||1}`,
-    day:`Gündüz ${roomData.phase||1}`,vote:'Oylama',result:'Sonuç',game_over:'Oyun Bitti'};
-  $('topbar-phase').textContent=phase[roomData.status]||'';
-}
-
-// ════ BUILD LOBBY LIST ════
+// Build lobby list
 function buildLobbyList(){
   const list=$('lobby-list');list.innerHTML='';
   Object.values(pData).forEach(p=>{
-    const li=document.createElement('li');
+    const li=document.createElement('div');
     li.className='pi'+(p.id===myUid?' me':'');
-    li.innerHTML=`<span style="font-size:1.3rem">${p.avatar}</span>
-      <span style="flex:1;font-size:.88rem">${p.name}${p.id===myUid?` <span style="font-size:.68rem;color:var(--gold)">${t('you')}</span>`:''}</span>
-      ${p.isHost?'<span style="font-size:.85rem">👑</span>':''}
-      ${p.isBot?`<span style="font-size:.68rem;color:var(--muted2)">${t('bot_lbl')}</span>`:''}
-      ${p.ready&&roomData?.status==='role_reveal'?'<span style="font-size:.75rem;color:#90ee90">✓</span>':''}`;
+    li.innerHTML=`<span style="font-size:1.25rem">${p.avatar}</span><span style="flex:1;font-size:.84rem">${p.name}${p.id===myUid?` <span style="font-size:.65rem;color:var(--gold)">${t('you')}</span>`:''}</span>${p.isHost?'<span style="font-size:.82rem">👑</span>':''}${p.isBot?`<span style="font-size:.65rem;color:var(--muted2)">${t('bot_l')}</span>`:''}`;
     list.appendChild(li);
   });
-  // Lobby info
-  const n=Object.keys(pData).length;
-  $('lobby-info').textContent=`${n} oyuncu bağlı`;
-}
-function updateLobbyButtons(){
-  const n=Object.keys(pData).length;
-  const btn=$('btn-start');
-  if(btn)btn.disabled=n<4;
 }
 
-// ════ ROLE CARD ════
+// Topbar update
+function updateTopbar(){
+  if(!roomData)return;
+  const phases={lobby:'',role_reveal:window.lang==='tr'?'Roller Açıklanıyor':'Roles Revealing',
+    night:`${t('sf_night')} ${roomData.round||1}`,vote:`${t('sf_vote')} ${roomData.round||1}`,
+    evening:`${t('sf_eve')} ${roomData.round||1}`,result:t('sf_result'),game_over:window.lang==='tr'?'Oyun Bitti':'Game Over'};
+  $('tb-phase').textContent=phases[roomData.status]||'';
+  // Timer in topbar
+  const td=$('tb-timer');
+  if(['night','vote','evening'].includes(roomData.status)){td.style.display='block';}
+  else{td.style.display='none';}
+}
+
+// Step flow bar
+function updateStepFlow(status){
+  const sf=$('step-flow');
+  if(['night','vote','evening','result'].includes(status)){
+    sf.style.display='flex';
+    const order={night:0,vote:1,evening:2,result:3};
+    const cur=order[status]??-1;
+    [0,1,2,3].forEach(i=>{
+      const dot=$('sf-'+i);const lbl=$('sfl-'+i);
+      if(!dot)return;
+      dot.classList.toggle('cur',i===cur);
+      dot.classList.toggle('done',i<cur);
+      if(lbl){lbl.classList.toggle('cur',i===cur);}
+    });
+  }else{
+    sf.style.display='none';
+  }
+}
+
+// ═══ ROLE CARD ═══
 window.flipCard=()=>$('rcard').classList.toggle('flip');
 
 function setupRoleCard(){
   const me=pData[myUid];
   if(!me?.role)return;
-  const rk=RKINFO[me.role];if(!rk)return;
+  const rk=RK[me.role];if(!rk)return;
   const back=$('rface-back');
   back.style.background=rk.bg;back.style.border=`2px solid ${rk.border}`;
-  back.style.boxShadow=`0 0 30px ${rk.border}`;
-  back.innerHTML=`
-    <div style="font-size:3.2rem;margin-bottom:10px;filter:drop-shadow(0 0 12px ${rk.border})">${rk.e}</div>
-    <h3 class="t-title" style="color:${rk.c};font-size:1.5rem;margin-bottom:8px">${t('r_'+me.role)}</h3>
-    <p style="color:#ccc;font-size:.78rem;line-height:1.5;font-weight:600;padding:0 8px">${t('r_'+me.role+'_desc')}</p>
-  `;
+  back.style.boxShadow=`0 0 28px ${rk.border}`;
+  back.innerHTML=`<div style="font-size:3rem;margin-bottom:9px;filter:drop-shadow(0 0 10px ${rk.border})">${rk.e}</div><h3 style="font-family:'Cinzel Decorative',serif;color:${rk.c};font-size:1.4rem;margin-bottom:8px">${t('r_'+me.role)}</h3><p style="color:#ccc;font-size:.75rem;line-height:1.5;font-weight:600;padding:0 6px">${t('r_'+me.role+'_desc')}</p>`;
+  // Role reminder
+  $('role-emoji').textContent=rk.e;
+  $('role-name-reminder').textContent=t('r_'+me.role);
+  $('role-name-reminder').style.color=rk.c;
+  // Teammates
   if(me.role==='vampire'){
     const partners=Object.values(pData).filter(p=>p.role==='vampire'&&p.id!==myUid);
     if(partners.length){
       $('team-box').classList.remove('hidden');
-      $('team-lbl').textContent=t('team_lbl');
-      $('team-list').innerHTML=partners.map(p=>`<div style="display:flex;align-items:center;gap:7px;background:rgba(0,0,0,.35);padding:6px 12px;border-radius:9px"><span style="font-size:1.2rem">${p.avatar}</span><span class="t-head" style="color:#ffaaaa;font-size:.85rem;font-weight:700">${p.name}</span></div>`).join('');
+      $('team-list').innerHTML=partners.map(p=>`<div style="display:flex;align-items:center;gap:7px;background:rgba(0,0,0,.35);padding:6px 11px;border-radius:9px"><span style="font-size:1.1rem">${p.avatar}</span><span style="font-family:'Cinzel',serif;color:#ffaaaa;font-size:.82rem;font-weight:700">${p.name}</span></div>`).join('');
+      $('partner-reminder').textContent='🩸 '+partners.map(p=>p.name).join(', ');
     }else{
       $('team-box').classList.add('hidden');
+      $('partner-reminder').textContent='';
     }
   }else{
     $('team-box').classList.add('hidden');
+    $('partner-reminder').textContent='';
   }
 }
 
-window.markReady=async()=>{
-  await updateDoc(pRef(myUid),{ready:true});
+function buildReadyList(){
+  const rl=$('ready-list');if(!rl)return;
+  rl.innerHTML='';
+  Object.values(pData).forEach(p=>{
+    const span=document.createElement('div');
+    span.style.cssText='display:flex;align-items:center;gap:5px;background:rgba(0,0,0,.3);border:1px solid var(--border);border-radius:16px;padding:4px 9px;font-size:.72rem;font-weight:700;';
+    span.innerHTML=`${p.avatar} ${p.name} ${p.ready?'<span style="color:#90ee90">✓</span>':'<span style="color:var(--muted)">…</span>'}`;
+    rl.appendChild(span);
+  });
+}
+
+window.markReady=async()=>updateDoc(pRef(myUid),{ready:true});
+
+window.beginNight=async()=>{
+  // Clear chat for new night
+  await updateDoc(rRef(),{
+    status:'night',
+    phaseEndTime:Date.now()+600000, // 10 minutes
+    votes:{},eveVotes:{},
+  });
+  // Add system message
+  sysmsg(window.lang==='tr'?`🌙 Gece ${roomData?.round||1} başladı — tartışın!`:`🌙 Night ${roomData?.round||1} begins — discuss!`);
 };
 
-// ════ RENDER ROOM ════
+// ═══ RENDER ROOM ═══
 function renderRoom(){
   if(!roomData)return;
   const isHost=roomData.hostId===myUid;
   document.body.classList.toggle('is-host',isHost);
   applyLang();
+  updateStepFlow(roomData.status);
   const st=roomData.status;
 
-  if(st==='lobby'){showScreen('s-lobby');return;}
+  if(st==='lobby'){showScr('s-lobby');return;}
 
   if(st==='role_reveal'){
-    showScreen('s-role');
-    setupRoleCard();
-    // Auto-go to night when phaseEndTime expires OR all ready
-    const alive=Object.values(pData).filter(p=>p.isAlive);
-    const allReady=alive.every(p=>p.ready);
-    if(isHost&&allReady&&alive.length>0){
-      beginNight();return;
-    }
-    const end=roomData.phaseEndTime||Date.now()+35000;
-    startSyncTimer('timer-role',end,()=>{if(isHost)beginNight();});
+    showScr('s-role');
+    setupRoleCard();buildReadyList();
+    // Check if all ready → enable host button
+    const alive=Object.values(pData);
+    const allReady=alive.length>0&&alive.every(p=>p.ready);
+    const btn=$('btn-begin-night');if(btn)btn.style.opacity=allReady?'1':'0.6';
     return;
   }
 
   if(st==='night'){
-    showScreen('s-night');
-    $('night-phase-label').textContent=`${t('night_phase')} ${roomData.phase||1}`;
-    if(!window.nightActionDone)buildNightPanel();
-    const aliveP=Object.values(pData).filter(p=>p.isAlive);
-    const sub=roomData.nightActions?.submitted||{};
-    const subN=aliveP.filter(p=>sub[p.id]).length;
-    $('night-progress').textContent=`${subN}/${aliveP.length} ${t('night_done')}`;
-    if(isHost&&aliveP.length>0&&aliveP.every(p=>sub[p.id]))processNight();
-    const end=roomData.phaseEndTime||Date.now()+120000;
-    startSyncTimer('timer-night',end,async()=>{if(!window.nightActionDone)await submitNightAction();});
-    return;
-  }
-
-  if(st==='day'){
-    showScreen('s-day');
-    $('day-phase-label').textContent=`${t('day_phase')} ${roomData.phase||1}`;
-    buildDayList();
-    const evts=roomData.events||[];
-    const eBox=$('day-events');
-    if(evts.length){eBox.classList.remove('hidden');eBox.innerHTML=evts.map(e=>`<div>${e}</div>`).join('');}
-    else eBox.classList.add('hidden');
-    // Spectator
-    const me=pData[myUid];
-    const isDead=me&&!me.isAlive;
-    $('day-spectator').classList.toggle('hidden',!isDead);
-    $('chat-input-area').classList.toggle('hidden',isDead);
-    // Chat listener
+    showScr('s-night');
+    $('night-title').textContent=`${t('sf_night')} ${roomData.round||1}`;
+    setupRoleCard(); // refresh reminder
     listenChat();
-    const end=roomData.phaseEndTime||Date.now()+300000;
-    startSyncTimer('timer-day',end,()=>{if(isHost)startVoting();});
+    syncTimer('timer-night','t-night',roomData.phaseEndTime,()=>{if(isHost)goToVote();});
+    syncTimer('tb-timer','t-night',roomData.phaseEndTime);
     return;
   }
 
   if(st==='vote'){
-    showScreen('s-vote');
+    showScr('s-vote');
+    $('vote-title').textContent=`${t('sf_vote')} ${roomData.round||1}`;
     buildVoteList();
-    listenVoteChat();
     const me=pData[myUid];
-    if(me&&!me.isAlive){$('btn-confirm-vote').classList.add('hidden');$('lbl-dead-vote').classList.remove('hidden');}
-    else{$('btn-confirm-vote').classList.remove('hidden');$('lbl-dead-vote').classList.add('hidden');}
-    // Vote chat - everyone can participate
-    $('vote-chat-area').classList.remove('hidden');
-    const end=roomData.phaseEndTime||Date.now()+90000;
-    startSyncTimer('timer-vote',end,()=>{if(isHost)endVoting();});
+    const isDead=me&&!me.isAlive;
+    if(isDead){$('btn-submit-vote').classList.add('hidden');$('t-dead-vote').classList.remove('hidden');}
+    else{$('btn-submit-vote').classList.remove('hidden');$('t-dead-vote').classList.add('hidden');}
+    // Already voted?
+    if(roomData.votes?.[myUid]){showVoteSubmitted();}
+    syncTimer('timer-vote','t-day',roomData.phaseEndTime,()=>{if(isHost)endVoteAndReveal();});
+    syncTimer('tb-timer','t-day',roomData.phaseEndTime);
+    // Eve button - only show if eveUsed < 2
+    const eveBtn=$('btn-goto-eve');
+    if(eveBtn)eveBtn.disabled=(roomData.eveUsed||0)>=2;
+    return;
+  }
+
+  if(st==='evening'){
+    showScr('s-eve');
+    const usesLeft=2-(roomData.eveUsed||0);
+    $('eve-uses-left').textContent=`${t('eve_uses')} ${usesLeft}/2 ${window.lang==='tr'?'kaldı':'remaining'}`;
+    buildEveList();
+    syncTimer('timer-eve','t-eve',roomData.phaseEndTime,()=>{if(isHost)endEveAndReveal();});
+    syncTimer('tb-timer','t-eve',roomData.phaseEndTime);
+    if(roomData.eveVotes?.[myUid]){$('eve-submitted-msg').classList.remove('hidden');$('btn-submit-eve').classList.add('hidden');}
     return;
   }
 
   if(st==='result'){
-    showScreen('s-result');
-    const el=roomData.lastElim||{};
-    if(el.role==='tie'){
-      $('res-icon').textContent='⚖️';
-      $('res-title').textContent=t('tie');$('res-title').style.color='var(--gold)';
-      $('res-name').textContent=t('nobody');$('res-name').style.color='var(--parchment)';
-      $('res-role-reveal').textContent=t('tie_msg');
-    }else{
-      const rk=RKINFO[el.role]||RKINFO.villager;
-      $('res-icon').textContent='💀';
-      $('res-title').textContent=t('executed');$('res-title').style.color='var(--blood2)';
-      $('res-name').textContent=el.name||'?';$('res-name').style.color='var(--blood2)';
-      $('res-role-reveal').innerHTML=`${t('true_role')} <span style="color:${rk.c};font-family:'Cinzel',serif;font-weight:700">${rk.e} ${t('r_'+(el.role||'villager'))}</span>`;
-    }
+    showScr('s-result');
+    renderResult();
     return;
   }
 
   if(st==='game_over'){
-    showScreen('s-over');
-    const w=roomData.winner;
-    const me=pData[myUid];
-    const iWon=(w==='vampires'&&me?.role==='vampire')||(w==='villagers'&&me?.role!=='vampire');
-    $('over-icon').textContent=w==='vampires'?'🧛':'🏘️';
-    $('over-title').textContent=t(w==='vampires'?'vamp_win':'vill_win');
-    $('over-title').style.color=w==='vampires'?'var(--blood2)':'var(--gold)';
-    $('over-desc').textContent=t(w==='vampires'?'vamp_desc':'vill_desc');
-    $('over-roles').innerHTML=Object.values(pData).map(p=>{
-      const rk=RKINFO[p.role]||RKINFO.villager;
-      return`<div style="background:${rk.bg};border:1px solid ${rk.border};border-radius:9px;padding:9px;text-align:center;${!p.isAlive?'opacity:.35':''}">
-        <div style="font-size:1.3rem">${p.avatar} ${rk.e}</div>
-        <div class="t-head" style="font-size:.72rem;color:var(--parchment);margin-top:3px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${p.name}</div>
-        <div style="font-size:.65rem;color:${rk.c};margin-top:2px">${t('r_'+p.role)}</div>
-        ${!p.isAlive?'<div style="font-size:.62rem;color:var(--blood2);margin-top:1px">💀</div>':''}
-      </div>`;
-    }).join('');
-    if(iWon)makeStars();
+    showScr('s-over');
+    renderGameOver();
     return;
   }
 }
 
-// ════ NIGHT ════
-async function beginNight(){
-  window.nightActionDone=false;window.selectedNight=null;
-  await updateDoc(rRef(),{
-    status:'night',
-    phaseEndTime:Date.now()+120000, // 2 minutes
-    nightActions:{submitted:{},vampireVotes:{},doctorSave:null,detectiveTarget:null,detectiveResults:{}}
-  });
-}
-window.goToNight=beginNight;
-
-function buildNightPanel(){
-  const me=pData[myUid];if(!me)return;
-  const role=me.role;
-  const panel=$('night-panel');
-  panel.innerHTML='';
-  window.nightActionDone=false;window.selectedNight=null;
-
-  if(!me.isAlive){
-    panel.innerHTML=`<div style="text-align:center;padding:30px 0;color:var(--muted);font-weight:600">${t('dead_night')}</div>`;
-    return;
-  }
-  if(role==='villager'){
-    panel.innerHTML=`<div style="text-align:center;padding:24px 0"><div style="font-size:3rem;opacity:.25;margin-bottom:12px">😴</div><p style="color:var(--muted);font-weight:600;font-size:.88rem;line-height:1.5">${t('vill_night')}</p></div>`;
-    // Auto-submit for villager
-    setTimeout(async()=>{
-      if(!window.nightActionDone&&roomData?.status==='night'){
-        window.nightActionDone=true;
-        await updateDoc(rRef(),{[`nightActions.submitted.${myUid}`]:true});
-      }
-    },1000);
-    return;
-  }
-  const alive=Object.values(pData).filter(p=>p.isAlive&&p.id!==myUid);
-  const nonVamp=alive.filter(p=>p.role!=='vampire');
-  const rk=RKINFO[role];
-  const hint=role==='vampire'?t('v_hint'):role==='doctor'?t('doc_hint'):t('det_hint');
-  let targets=role==='vampire'?nonVamp:alive;
-  if(role==='doctor')targets=[pData[myUid],...alive]; // doctor can protect self
-
-  const wrap=document.createElement('div');
-  wrap.style.cssText='background:rgba(0,0,0,.3);border-radius:11px;border:1px solid var(--border);padding:14px;';
-
-  const heading=document.createElement('div');
-  heading.style.cssText='display:flex;align-items:center;gap:8px;margin-bottom:12px';
-  heading.innerHTML=`<span style="font-size:1.2rem">${rk.e}</span><h3 class="t-head" style="color:${rk.c};font-size:.9rem;font-weight:700">${hint}</h3>`;
-  wrap.appendChild(heading);
-
-  // Show detective history
-  if(role==='detective'&&Object.keys(detHistory).length>0){
-    const hist=document.createElement('div');
-    hist.style.cssText='background:rgba(255,200,0,.06);border:1px solid rgba(255,200,0,.15);border-radius:8px;padding:8px;margin-bottom:10px;font-size:.72rem;font-weight:700';
-    hist.innerHTML='<div style="color:#ffd700;margin-bottom:4px;font-family:Cinzel,serif">📋 Geçmiş Sorgular</div>'+
-      Object.entries(detHistory).map(([uid,isV])=>{
-        const p=pData[uid];if(!p)return'';
-        return`<div style="color:${isV?'#ff8888':'#88ee88'};margin-top:2px">${p.avatar} ${p.name}: ${isV?'🧛 Vampir':'✓ Masum'}</div>`;
-      }).join('');
-    wrap.appendChild(hist);
-  }
-
-  targets.forEach(p=>{
-    const d=document.createElement('div');
-    d.className='nchoice';d.id='nc-'+p.id;
-    const prev=detHistory[p.id];
-    const badge=role==='detective'&&prev!==undefined?`<span style="font-size:.7rem;font-weight:800;color:${prev?'#ff8888':'#88ee88'};margin-left:4px">${prev?'🧛':'✓'}</span>`:'';
-    d.innerHTML=`<span style="font-size:1.2rem">${p.avatar}</span><span style="flex:1;font-weight:700;font-size:.85rem">${p.name}${p.id===myUid?` <span style="color:var(--muted);font-size:.7rem">${t('you')}</span>`:''}</span>${badge}`;
-    d.onclick=()=>selectNight(p.id);
-    wrap.appendChild(d);
-  });
-
-  const btn=document.createElement('button');
-  btn.className='btn btn-r mt2';btn.id='btn-night-ok';btn.type='button';
-  btn.innerHTML=`<span>${t('confirm_action')}</span>`;
-  btn.onclick=()=>submitNightAction();
-  wrap.appendChild(btn);
-  panel.appendChild(wrap);
-}
-
-window.selectNight=id=>{
-  window.selectedNight=id;
-  document.querySelectorAll('.nchoice').forEach(el=>el.classList.remove('on'));
-  const el=$('nc-'+id);if(el)el.classList.add('on');
-};
-
-window.submitNightAction=async()=>{
-  if(window.nightActionDone)return;
-  const me=pData[myUid];if(!me)return;
-  if(me.role!=='villager'&&!window.selectedNight)return toast('⚠️ '+(window.lang==='tr'?'Bir hedef seçmelisin!':'Choose a target!'));
-  window.nightActionDone=true;
-  const panel=$('night-panel');
-  panel.innerHTML=`<div style="text-align:center;padding:24px 0"><div style="font-size:2.5rem;animation:tpulse 2s infinite;margin-bottom:10px">🌙</div><p style="color:var(--muted);font-weight:600;font-size:.88rem">${t('night_done')}</p></div>`;
-
-  const upd={[`nightActions.submitted.${myUid}`]:true};
-  const role=me.role;
-  if(role==='vampire'&&window.selectedNight)upd[`nightActions.vampireVotes.${myUid}`]=window.selectedNight;
-  if(role==='doctor'&&window.selectedNight)upd['nightActions.doctorSave']=window.selectedNight;
-  if(role==='detective'&&window.selectedNight)upd['nightActions.detectiveTarget']=window.selectedNight;
-
-  // Host submits bots simultaneously
-  if(roomData?.hostId===myUid){
-    const bots=Object.values(pData).filter(p=>p.isBot&&p.isAlive);
-    const alive=Object.values(pData).filter(p=>p.isAlive);
-    const nonV=alive.filter(p=>p.role!=='vampire');
-    const subExisting=roomData.nightActions?.submitted||{};
-    for(const bot of bots){
-      if(subExisting[bot.id])continue;
-      upd[`nightActions.submitted.${bot.id}`]=true;
-      if(bot.role==='vampire'&&nonV.length>0){
-        // All vampires should agree on same target — pick most popular
-        const existingVV=roomData.nightActions?.vampireVotes||{};
-        const vCounts={};Object.values(existingVV).forEach(v=>{vCounts[v]=(vCounts[v]||0)+1;});
-        const topV=Object.entries(vCounts).sort((a,b)=>b[1]-a[1])[0]?.[0]||rand(nonV).id;
-        upd[`nightActions.vampireVotes.${bot.id}`]=topV;
-      }else if(bot.role==='doctor'){
-        // Doctor protects random (not same as last)
-        const notSelf=alive.filter(p=>p.id!==lastDocSave);
-        upd['nightActions.doctorSave']=rand(notSelf.length?notSelf:alive).id;
-      }else if(bot.role==='detective'){
-        const cands=alive.filter(p=>p.id!==bot.id&&!detHistory[p.id]);
-        if(cands.length)upd['nightActions.detectiveTarget']=rand(cands).id;
-      }
-    }
-  }
-  await updateDoc(rRef(),upd);
-};
-
-// ════ PROCESS NIGHT (host only) ════
-async function processNight(){
-  if(roomData.status!=='night')return; // guard against double-call
-  const na=roomData.nightActions||{};
-  // Vampire votes → most common target
-  const vv=na.vampireVotes||{};
-  const vc={};Object.values(vv).forEach(v=>{vc[v]=(vc[v]||0)+1;});
-  const vampTarget=Object.entries(vc).sort((a,b)=>b[1]-a[1])[0]?.[0]||null;
-  const docSave=na.doctorSave||null;
-  const detTgt=na.detectiveTarget||null;
-
-  // Detective result
-  const detResults={...(na.detectiveResults||{})};
-  if(detTgt&&pData[detTgt]){
-    detHistory[detTgt]=pData[detTgt].role==='vampire';
-    detResults[detTgt]=pData[detTgt].role==='vampire';
-  }
-
-  const events=[];
-  let killed=null;
-
-  if(vampTarget){
-    if(vampTarget===docSave){
-      events.push(t('ev_saved'));
-    }else{
-      killed=vampTarget;
-      const v=pData[vampTarget];
-      if(v)events.push(t('ev_killed').replace('{name}',v.name));
-    }
-  }else{
-    events.push(t('ev_safe'));
-  }
-
-  // Mark last doc save (for no-repeat rule)
-  if(docSave)lastDocSave=docSave;
-
-  // Update killed player
-  if(killed)await updateDoc(pRef(killed),{isAlive:false});
-
-  // Build updated players for win check
-  const updP={...pData};
-  if(killed&&updP[killed])updP[killed]={...updP[killed],isAlive:false};
-  const winner=checkWin(updP);
-
-  await updateDoc(rRef(),{
-    events,dayVotes:{},
-    status:winner?'game_over':'day',
-    winner:winner||null,
-    phaseEndTime:winner?0:Date.now()+300000, // 5 min day phase
-    'nightActions.detectiveResults':detResults,
-  });
-}
-
-// ════ DAY ════
-function buildDayList(){
-  const list=$('day-list');list.innerHTML='';
-  const alive=Object.values(pData).filter(p=>p.isAlive);
-  const dead=Object.values(pData).filter(p=>!p.isAlive);
-  $('lbl-alive-players').textContent=`${t('alive_players')} (${alive.length})`;
-  [...alive,...dead].forEach(p=>{
-    const li=document.createElement('li');
-    li.className='pi'+(p.id===myUid?' me':'')+(p.isAlive?'':' dead');
-    li.innerHTML=`<span style="font-size:1.2rem">${p.avatar}</span><span style="flex:1;font-size:.85rem">${p.name}${p.id===myUid?` <span style="font-size:.68rem;color:var(--gold)">${t('you')}</span>`:''}</span>${!p.isAlive?'<span style="font-size:.8rem">💀</span>':''}`;
-    list.appendChild(li);
-  });
-}
-
-// ════ CHAT ════
+// ═══ NIGHT CHAT ═══
 function listenChat(){
   if(chatUnsub){chatUnsub();chatUnsub=null;}
-  const q=query(chatCol(),orderBy('ts','asc'),limit(80));
+  const q=query(chatCol(),orderBy('ts','asc'),limit(100));
   chatUnsub=onSnapshot(q,snap=>{
-    const box=$('chat-msgs');if(!box)return;
+    const box=$('night-chat-msgs');if(!box)return;
     box.innerHTML='';
     snap.forEach(d=>{
       const m=d.data();
-      const isMine=m.uid===myUid;
       if(m.system){
-        const div=document.createElement('div');div.className='chat-system';div.textContent=m.text;box.appendChild(div);
-        return;
+        const div=document.createElement('div');div.className='c-sys';div.textContent=m.text;box.appendChild(div);return;
       }
-      const div=document.createElement('div');div.className='chat-msg'+(isMine?' mine':'');
-      div.innerHTML=`${!isMine?`<div class="chat-av">${m.av}</div>`:''}
-        <div><div class="chat-name" style="${isMine?'text-align:right;color:var(--muted2)':'color:var(--muted2)'}">${m.name}</div>
-        <div class="chat-bubble">${m.text.replace(/</g,'&lt;')}</div></div>
-        ${isMine?`<div class="chat-av">${m.av}</div>`:''}`;
+      const isMine=m.uid===myUid;
+      const div=document.createElement('div');div.className='c-row'+(isMine?' mine':'');
+      div.innerHTML=`${!isMine?`<div class="c-av">${m.av}</div>`:''}
+        <div><div class="c-name">${m.name}</div><div class="c-bub">${m.text.replace(/</g,'&lt;')}</div></div>
+        ${isMine?`<div class="c-av">${m.av}</div>`:''}`;
       box.appendChild(div);
     });
     box.scrollTop=box.scrollHeight;
   });
 }
-
-window.sendChat=async()=>{
-  const me=pData[myUid];
-  if(!me?.isAlive)return; // dead cannot chat in day
-  const inp=$('chat-inp');const txt=inp.value.trim();
+window.sendNightChat=async()=>{
+  const me=pData[myUid];if(!me)return;
+  const inp=$('night-inp');const txt=inp.value.trim();
   if(!txt)return;inp.value='';
   await addDoc(chatCol(),{uid:myUid,name:me.name,av:me.avatar,text:san(txt).substring(0,120),ts:serverTimestamp(),system:false});
 };
-$('chat-inp').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();window.sendChat();}});
+$('night-inp').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();window.sendNightChat();}});
 
-// ════ VOTE CHAT ════
-function listenVoteChat(){
-  if(vchatUnsub){vchatUnsub();vchatUnsub=null;}
-  const q=query(vchatCol(),orderBy('ts','asc'),limit(50));
-  vchatUnsub=onSnapshot(q,snap=>{
-    const box=$('vote-chat-msgs');if(!box)return;
-    box.innerHTML='';
-    snap.forEach(d=>{
-      const m=d.data();
-      const isMine=m.uid===myUid;
-      const div=document.createElement('div');div.className='chat-msg'+(isMine?' mine':'');
-      div.innerHTML=`${!isMine?`<div class="chat-av" style="font-size:1rem">${m.av}</div>`:''}
-        <div><div class="chat-name" style="color:var(--muted2)">${m.name}</div>
-        <div class="chat-bubble" style="font-size:.78rem">${m.text.replace(/</g,'&lt;')}</div></div>
-        ${isMine?`<div class="chat-av" style="font-size:1rem">${m.av}</div>`:''}`;
-      box.appendChild(div);
-    });
-    box.scrollTop=box.scrollHeight;
-  });
+async function sysmsg(text){
+  try{await addDoc(chatCol(),{uid:'sys',name:'',av:'',text,ts:serverTimestamp(),system:true});}catch{}
 }
-window.sendVoteChat=async()=>{
-  const me=pData[myUid];if(!me)return;
-  const inp=$('vote-chat-inp');const txt=inp.value.trim();
-  if(!txt)return;inp.value='';
-  await addDoc(vchatCol(),{uid:myUid,name:me.name,av:me.avatar,text:san(txt).substring(0,80),ts:serverTimestamp()});
-};
-$('vote-chat-inp').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();window.sendVoteChat();}});
 
-// ════ VOTING ════
-window.startVoting=async()=>{
-  // Clear vchat for new round
-  await updateDoc(rRef(),{status:'vote',phaseEndTime:Date.now()+90000,dayVotes:{}});
+// ═══ GO TO VOTE ═══
+window.goToVote=async()=>{
+  await updateDoc(rRef(),{status:'vote',votes:{},phaseEndTime:Date.now()+300000}); // 5 min
+  sysmsg(window.lang==='tr'?'⚖️ Oylama başladı! Gizli oy kullanın.':'⚖️ Voting started! Cast your secret vote.');
 };
 
+// ═══ VOTE LIST ═══
 function buildVoteList(){
-  const list=$('vote-list');list.innerHTML='';
-  const votes=roomData?.dayVotes||{};
-  const counts={};Object.values(votes).forEach(v=>{counts[v]=(counts[v]||0)+1;});
-  const maxV=Math.max(0,...Object.values(counts));
-  Object.values(pData).filter(p=>p.isAlive).forEach(p=>{
-    const li=document.createElement('li');
-    const isMine=votes[myUid]===p.id;
-    const isSel=window.selectedVote===p.id;
-    li.className='pi votable'+(isMine?' my-vote':'')+(isSel?' sel-v':'');
-    li.style.position='relative';li.style.overflow='hidden';
-    const vc=counts[p.id]||0;
-    const pct=maxV>0?(vc/maxV)*100:0;
-    li.innerHTML=`<div class="vbar" style="width:${pct}%"></div>
-      <span style="font-size:1.2rem;position:relative;z-index:1">${p.avatar}</span>
-      <span style="flex:1;font-size:.85rem;font-weight:700;position:relative;z-index:1">${p.name}${p.id===myUid?` <span style="font-size:.68rem;color:var(--gold)">${t('you')}</span>`:''}</span>
-      ${vc>0?`<span style="color:var(--blood2);font-family:'Cinzel',serif;font-size:.82rem;font-weight:700;position:relative;z-index:1">${vc} ${t('vote_lbl')}</span>`:''}`;
-    if(p.id!==myUid&&pData[myUid]?.isAlive){
-      li.onclick=()=>{window.selectedVote=p.id;buildVoteList();};
-    }
-    list.appendChild(li);
+  const list=$('vote-list');if(!list)return;list.innerHTML='';
+  const alive=Object.values(pData).filter(p=>p.isAlive&&p.id!==myUid);
+  const myVote=roomData?.votes?.[myUid];
+  alive.forEach(p=>{
+    const div=document.createElement('div');
+    div.className='vote-item'+(myVote===p.id?' submitted':'')+(window.selVote===p.id&&!myVote?' on':'');
+    div.innerHTML=`<span style="font-size:1.2rem">${p.avatar}</span><span style="flex:1;font-weight:700;font-size:.84rem">${p.name}</span>${myVote===p.id?'<span class="ck">✓</span>':''}`;
+    if(!myVote)div.onclick=()=>{window.selVote=p.id;buildVoteList();};
+    list.appendChild(div);
   });
 }
 
 window.submitVote=async()=>{
-  if(!window.selectedVote)return toast('⚠️ '+(window.lang==='tr'?'Birini seç!':'Select someone!'));
-  if(!pData[myUid]?.isAlive)return;
-  const upd={[`dayVotes.${myUid}`]:window.selectedVote};
-  // Bots vote (host)
+  const me=pData[myUid];if(!me?.isAlive)return;
+  if(!window.selVote)return toast('⚠️ '+(window.lang==='tr'?'Birini seç!':'Select someone!'));
+  await updateDoc(rRef(),{[`votes.${myUid}`]:window.selVote});
+  showVoteSubmitted();
+  // Bots vote
   if(roomData?.hostId===myUid){
-    const existing=roomData?.dayVotes||{};
+    const upd={};
     const alive=Object.values(pData).filter(p=>p.isAlive);
+    const existing=roomData?.votes||{};
     for(const bot of alive.filter(p=>p.isBot)){
       if(existing[bot.id])continue;
-      // Vampires vote for non-vampires strategically
-      const targets=bot.role==='vampire'
-        ?alive.filter(p=>p.id!==bot.id&&p.role!=='vampire')
-        :alive.filter(p=>p.id!==bot.id);
-      if(targets.length)upd[`dayVotes.${bot.id}`]=rand(targets).id;
+      const targets=alive.filter(p=>p.id!==bot.id);
+      // Vampires vote for villagers
+      const preferred=bot.role==='vampire'?targets.filter(p=>p.role==='villager'):targets;
+      if(preferred.length)upd[`votes.${bot.id}`]=rand(preferred.length?preferred:targets).id;
     }
+    if(Object.keys(upd).length)await updateDoc(rRef(),upd);
   }
-  await updateDoc(rRef(),upd);
-  buildVoteList();
+};
+function showVoteSubmitted(){
+  $('btn-submit-vote').classList.add('hidden');
+  $('vote-submitted-msg').classList.remove('hidden');
+}
+
+// ═══ EVENING ═══
+window.goToEvening=async()=>{
+  if((roomData?.eveUsed||0)>=2)return toast('❌ '+(window.lang==='tr'?'Akşam hakkı kalmadı!':'No evening uses left!'));
+  await updateDoc(rRef(),{status:'evening',eveVotes:{},eveUsed:(roomData?.eveUsed||0)+1,phaseEndTime:Date.now()+120000});
 };
 
-window.endVoting=async()=>{
-  const votes=roomData?.dayVotes||{};
-  const counts={};Object.values(votes).forEach(v=>{counts[v]=(counts[v]||0)+1;});
-  if(!Object.keys(counts).length){
-    // Nobody voted — tie
-    await updateDoc(rRef(),{status:'result',lastElim:{name:'',role:'tie'}});return;
-  }
+function buildEveList(){
+  const list=$('eve-vote-list');if(!list)return;list.innerHTML='';
+  const alive=Object.values(pData).filter(p=>p.isAlive&&p.id!==myUid);
+  const myEveVote=roomData?.eveVotes?.[myUid];
+  alive.forEach(p=>{
+    const div=document.createElement('div');
+    div.className='vote-item'+(myEveVote===p.id?' submitted':'')+(window.selEveVote===p.id&&!myEveVote?' on':'');
+    div.innerHTML=`<span style="font-size:1.2rem">${p.avatar}</span><span style="flex:1;font-weight:700;font-size:.84rem">${p.name}</span>${myEveVote===p.id?'<span class="ck">✓</span>':''}`;
+    if(!myEveVote)div.onclick=()=>{window.selEveVote=p.id;buildEveList();};
+    list.appendChild(div);
+  });
+}
+
+window.submitEveVote=async()=>{
+  const me=pData[myUid];if(!me?.isAlive)return;
+  if(!window.selEveVote)return toast('⚠️ '+(window.lang==='tr'?'Birini seç!':'Select someone!'));
+  await updateDoc(rRef(),{[`eveVotes.${myUid}`]:window.selEveVote});
+  $('btn-submit-eve').classList.add('hidden');
+  $('eve-submitted-msg').classList.remove('hidden');
+};
+
+// ═══ TALLY VOTES ═══
+function tallyVotes(votes,eveVotes){
+  // Combine: eve votes override day votes for those who voted in eve
+  const combined={...votes};
+  Object.entries(eveVotes||{}).forEach(([uid,target])=>{combined[uid]=target;});
+  const counts={};
+  Object.values(combined).forEach(v=>{counts[v]=(counts[v]||0)+1;});
+  if(!Object.keys(counts).length)return{elim:null,tie:true};
   const sorted=Object.entries(counts).sort((a,b)=>b[1]-a[1]);
-  // Tie check
-  if(sorted.length>1&&sorted[0][1]===sorted[1][1]){
-    await updateDoc(rRef(),{status:'result',lastElim:{name:'',role:'tie'}});return;
+  if(sorted.length>1&&sorted[0][1]===sorted[1][1])return{elim:null,tie:true};
+  return{elim:sorted[0][0],tie:false};
+}
+
+window.endVoteAndReveal=async()=>{
+  const {elim,tie}=tallyVotes(roomData?.votes||{},{}); // no eve yet
+  await resolveElim(elim,tie);
+};
+
+window.endEveAndReveal=async()=>{
+  const {elim,tie}=tallyVotes(roomData?.votes||{},roomData?.eveVotes||{});
+  await resolveElim(elim,tie);
+};
+
+async function resolveElim(elimId,tie){
+  let lastElim=null;
+  if(tie||!elimId){
+    lastElim={name:'',role:'tie'};
+    await updateDoc(rRef(),{status:'result',lastElim});
+    return;
   }
-  const elimId=sorted[0][0];
   const victim=pData[elimId];if(!victim)return;
   await updateDoc(pRef(elimId),{isAlive:false});
   const updP={...pData,[elimId]:{...victim,isAlive:false}};
   const winner=checkWin(updP);
-  const rk=RKINFO[victim.role]||RKINFO.villager;
-  const ev=[t('ev_elim').replace('{name}',victim.name).replace('{role}',`${rk.e} ${t('r_'+victim.role)}`)];
+  lastElim={name:victim.name,role:victim.role,avatar:victim.avatar};
   await updateDoc(rRef(),{
     status:winner?'game_over':'result',
-    winner:winner||null,
-    lastElim:{name:victim.name,role:victim.role},
-    events:ev,
+    winner:winner||null,lastElim,
+    events:[t('ev_elim').replace('{name}',victim.name).replace('{role}',`${RK[victim.role]?.e} ${t('r_'+victim.role)}`)],
   });
-  // Add system message to day chat
-  try{await addDoc(chatCol(),{uid:'system',name:'System',av:'⚖️',text:`${victim.avatar} ${victim.name} kasabadan kovuldu. ${rk.e} ${t('r_'+victim.role)} çıktı!`,ts:serverTimestamp(),system:true});}catch{}
-};
+  sysmsg(`⚖️ ${victim.name} → ${RK[victim.role]?.e} ${t('r_'+victim.role)}`);
+}
 
-// ════ WIN CHECK ════
+// Win check: vampires win if their count >= villagers count
 function checkWin(players){
   const alive=Object.values(players).filter(p=>p.isAlive);
   const v=alive.filter(p=>p.role==='vampire').length;
-  const o=alive.filter(p=>p.role!=='vampire').length;
+  const o=alive.filter(p=>p.role==='villager').length;
   if(v===0)return'villagers';
   if(v>=o)return'vampires';
   return null;
 }
 
-// ════ NEXT ROUND / RESET ════
+// ═══ RESULT ═══
+function renderResult(){
+  const el=roomData?.lastElim||{};
+  if(el.role==='tie'){
+    $('res-icon').textContent='⚖️';
+    $('res-title').textContent=t('tie');$('res-title').style.color='var(--gold)';
+    $('res-name').textContent=t('nobody');$('res-name').style.color='var(--parchment)';
+    $('res-role-reveal').textContent=t('tie_msg');
+  }else{
+    const rk=RK[el.role]||RK.villager;
+    $('res-icon').textContent='💀';
+    $('res-title').textContent=t('executed');$('res-title').style.color='var(--blood2)';
+    $('res-name').textContent=`${el.avatar||''} ${el.name||'?'}`;$('res-name').style.color='var(--blood2)';
+    $('res-role-reveal').innerHTML=`${t('true_role')} <span style="color:${rk.c};font-family:'Cinzel',serif;font-weight:700">${rk.e} ${t('r_'+el.role)}</span>`;
+  }
+  // Show alive players
+  const alive=Object.values(pData).filter(p=>p.isAlive);
+  $('res-alive').innerHTML=`<div style="font-family:'Cinzel',serif;font-size:.66rem;color:var(--muted2);text-transform:uppercase;letter-spacing:.15em;margin-bottom:7px">${t('alive_remain')} (${alive.length})</div>
+    <div style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center">
+      ${alive.map(p=>`<div style="display:flex;align-items:center;gap:5px;background:rgba(0,0,0,.3);border:1px solid var(--border);border-radius:16px;padding:4px 10px;font-size:.78rem;font-weight:700">${p.avatar} ${p.name}</div>`).join('')}
+    </div>`;
+}
+
 window.nextRound=async()=>{
-  window.nightActionDone=false;window.selectedNight=null;window.selectedVote=null;window.myVoteSubmitted=false;
-  await beginNight();
-};
-window.resetGame=async()=>{
-  window.nightActionDone=false;window.selectedNight=null;window.selectedVote=null;
-  await updateDoc(rRef(),{status:'lobby',winner:null,phase:1,events:[],dayVotes:{},
-    nightActions:{submitted:{},vampireVotes:{},doctorSave:null,detectiveTarget:null,detectiveResults:{}}});
-  // Reset all player roles
-  const alive=Object.values(pData);
-  await Promise.all(alive.map(p=>updateDoc(pRef(p.id),{role:null,isAlive:true,ready:false})));
+  window.selVote=null;window.selEveVote=null;
+  await updateDoc(rRef(),{
+    status:'night',
+    round:(roomData.round||1)+1,
+    votes:{},eveVotes:{},
+    phaseEndTime:Date.now()+600000,
+    events:[],lastElim:null,
+  });
+  sysmsg(window.lang==='tr'?`🌙 Gece ${(roomData.round||1)+1} başladı!`:`🌙 Night ${(roomData.round||1)+1} begins!`);
 };
 
-// ════ SERVER SYNCED TIMER ════
-function startSyncTimer(elId,endTime,onDone){
+// ═══ GAME OVER ═══
+function renderGameOver(){
+  const w=roomData?.winner;
+  $('over-icon').textContent=w==='vampires'?'🧛':'🏘️';
+  $('over-title').textContent=t(w==='vampires'?'vamp_win':'vill_win');
+  $('over-title').style.color=w==='vampires'?'var(--blood2)':'var(--gold)';
+  $('over-desc').textContent=t(w==='vampires'?'vamp_desc':'vill_desc');
+  // All players with roles
+  $('over-roles').innerHTML=Object.values(pData).map(p=>{
+    const rk=RK[p.role]||RK.villager;
+    return`<div style="background:${rk.bg};border:1px solid ${rk.border};border-radius:9px;padding:9px;text-align:center;${!p.isAlive?'opacity:.3':''}">
+      <div style="font-size:1.3rem">${p.avatar} ${rk.e}</div>
+      <div style="font-family:'Cinzel',serif;font-size:.7rem;color:var(--parchment);margin-top:3px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${p.name}</div>
+      <div style="font-size:.62rem;color:${rk.c};margin-top:2px">${t('r_'+p.role)}</div>
+      ${!p.isAlive?'<div style="font-size:.6rem;color:var(--blood2);margin-top:1px">💀</div>':''}
+    </div>`;
+  }).join('');
+  const me=pData[myUid];
+  const won=(w==='vampires'&&me?.role==='vampire')||(w==='villagers'&&me?.role==='villager');
+  if(won)makeStars();
+}
+
+window.resetLobby=async()=>{
+  window.selVote=null;window.selEveVote=null;
+  const ids=Object.keys(pData);
+  await Promise.all(ids.map(id=>updateDoc(pRef(id),{role:null,isAlive:true,ready:false})));
+  await updateDoc(rRef(),{status:'lobby',round:1,winner:null,votes:{},eveVotes:{},eveUsed:0,lastElim:null,events:[]});
+};
+
+// ═══ SERVER TIMER ═══
+function syncTimer(elId,cls,endTime,onDone){
+  const el=$(elId);if(!el)return;
   if(timerIv)clearInterval(timerIv);
   const tick=()=>{
-    const el=$(elId);if(!el)return;
     const rem=Math.max(0,Math.ceil((endTime-Date.now())/1000));
-    el.textContent=rem;
-    el.classList.toggle('urg',rem<=10);
-    if(rem<=0){clearInterval(timerIv);timerIv=null;if(onDone)onDone();}
+    const m=Math.floor(rem/60),s=rem%60;
+    const txt=`${m}:${s<10?'0'+s:s}`;
+    el.textContent=txt;
+    // Topbar timer
+    const tb=$('tb-timer');if(tb&&elId!=='tb-timer')tb.textContent=txt;
+    el.className=`timer ${cls}${rem<=30?' urg':''}`;
+    if(rem===0){clearInterval(timerIv);timerIv=null;if(onDone)onDone();}
   };
   tick();timerIv=setInterval(tick,500);
 }
 
-// ════ SCREEN SWITCHER ════
-function showScreen(id){
+// ═══ SHOW SCREEN ═══
+function showScr(id){
   document.querySelectorAll('.scr').forEach(s=>s.classList.remove('on'));
   $(id).classList.add('on');
-  // Stop chat listeners when leaving day/vote
-  if(id!=='s-day'&&chatUnsub){chatUnsub();chatUnsub=null;}
-  if(id!=='s-vote'&&vchatUnsub){vchatUnsub();vchatUnsub=null;}
-  // Scroll to top
-  setTimeout(()=>{$(id).scrollTop=0;},50);
+  if(id!=='s-night'&&chatUnsub){chatUnsub();chatUnsub=null;}
+  setTimeout(()=>{$(id).scrollTop=0;},40);
 }
 
-// ════ STARS ════
+// ═══ STARS ═══
 function makeStars(){
-  const c=$('stars-container');c.innerHTML='';
-  ['⭐','🌟','✨','💫','🎊'].forEach(s=>{
-    for(let j=0;j<4;j++){
+  const c=$('stars-c');c.innerHTML='';
+  ['⭐','🌟','✨','💫'].forEach(s=>{
+    for(let j=0;j<5;j++){
       const el=document.createElement('div');el.className='star';el.textContent=s;
-      el.style.cssText=`left:${Math.random()*100}%;font-size:${12+Math.random()*14}px;animation-duration:${2.5+Math.random()*3}s;animation-delay:${Math.random()*2}s;`;
+      el.style.cssText=`left:${Math.random()*100}%;font-size:${11+Math.random()*14}px;animation-duration:${2.5+Math.random()*3}s;animation-delay:${Math.random()*2}s;`;
       c.appendChild(el);
     }
   });
 }
 
-// ════ TOAST ════
-function toast(msg,dur=2500){
-  const existing=document.querySelector('.toast');if(existing)existing.remove();
+// ═══ TOAST ═══
+function toast(msg,dur=2400){
+  const ex=document.querySelector('.toast');if(ex)ex.remove();
   const el=document.createElement('div');el.className='toast';el.textContent=msg;
   document.body.appendChild(el);setTimeout(()=>el.remove(),dur);
 }
 
-// ════ HOWTO ════
-window.openHowto=()=>{window.htStep=0;renderHowto();$('modal-howto').classList.remove('hidden');};
+// ═══ HOWTO ═══
+window.openHowto=()=>{window.htStep=0;renderHt();$('modal-howto').classList.remove('hidden');};
 window.closeHowto=()=>$('modal-howto').classList.add('hidden');
 window.howtoNav=dir=>{
   const steps=t('ht');
   window.htStep=Math.max(0,Math.min(steps.length-1,window.htStep+dir));
-  renderHowto();
+  renderHt();
 };
-function renderHowto(){
-  const steps=t('ht');
-  const s=steps[window.htStep];if(!s)return;
-  $('howto-icon').textContent=s.i;
-  $('howto-title').textContent=s.t;
-  $('howto-sec-lbl').textContent=t('howto_lbl');
-  $('howto-head').style.background=`linear-gradient(135deg,${s.c},rgba(12,6,3,.95))`;
-  $('howto-body').innerHTML=s.b;
-  $('howto-dots').innerHTML=steps.map((_,i)=>`<div class="dot${i===window.htStep?' on':''}" onclick="window.htStep=${i};renderHowto()"></div>`).join('');
-  $('howto-prev').disabled=window.htStep===0;
-  const nxt=$('howto-next');
-  if(window.htStep===steps.length-1){nxt.textContent=t('ready');nxt.onclick=window.closeHowto;}
+function renderHt(){
+  const steps=t('ht');const s=steps[window.htStep];if(!s)return;
+  $('ht-icon').textContent=s.i;$('ht-title').textContent=s.t;
+  $('ht-sec').textContent=t('ht_howto');
+  $('howto-head').style.background=`linear-gradient(135deg,${s.c},rgba(10,5,2,.95))`;
+  $('ht-body').innerHTML=s.b;
+  $('ht-dots').innerHTML=steps.map((_,i)=>`<div class="dot${i===window.htStep?' on':''}" onclick="window.htStep=${i};renderHt()"></div>`).join('');
+  $('ht-prev').disabled=window.htStep===0;
+  const nxt=$('ht-next');
+  if(window.htStep===steps.length-1){nxt.textContent=t('ready_btn');nxt.onclick=window.closeHowto;}
   else{nxt.textContent=t('next');nxt.onclick=()=>window.howtoNav(1);}
-  $('lbl-prev').textContent=t('prev');
 }
 
-// ════ CODE GEN ════
-function genCode(){
-  const chars='ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // no ambiguous chars
-  let c='';for(let i=0;i<4;i++)c+=chars[Math.floor(Math.random()*chars.length)];
-  return c;
-}
+// ═══ CODE GEN ═══
+function genCode(){const c='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';let r='';for(let i=0;i<4;i++)r+=c[Math.floor(Math.random()*c.length)];return r;}
 
-// ════ INIT ════
+// ═══ INIT ═══
 buildAv();buildCountBtns();applyLang();
-$('inp-name').addEventListener('input',checkName);
-$('inp-code').addEventListener('input',()=>{$('btn-join').disabled=$('inp-code').value.length!==4;});
-
-// Chat send on Enter
-$('chat-inp').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();window.sendChat();}});
-$('vote-chat-inp').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();window.sendVoteChat();}});
-
+$('inp-name').addEventListener('keydown',e=>{if(e.key==='Enter')$('inp-name').blur();});
 </script>
 </body>
 </html>
