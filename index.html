@@ -2,7 +2,12 @@
 <html lang="tr">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="theme-color" content="#060302"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge"/>
 <title>Vampir Köylü / Vampire Village — Forge&Play</title>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Cinzel:wght@400;600;700;900&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet"/>
 <style>
@@ -468,7 +473,7 @@ if(!ok){document.getElementById('err').style.display='flex';throw new Error('Una
 
 // ── FIREBASE ──────────────────────────────────────────────────────────────────
 const fb=initializeApp({apiKey:"AIzaSyAu-9xnaZRgcYj58gX3Yrfbj4NqvPI4B5Q",authDomain:"vampirkoyluv3.firebaseapp.com",projectId:"vampirkoyluv3",storageBucket:"vampirkoyluv3.firebasestorage.app",messagingSenderId:"114861911533",appId:"1:114861911533:web:bb012b575860684c764be4"});
-const auth=getAuth(fb), db=getFirestore(fb), ROOT='vk3';
+const auth=getAuth(fb), db=getFirestore(fb);
 
 // ── I18N ──────────────────────────────────────────────────────────────────────
 const LANG={
@@ -639,9 +644,9 @@ let selVote=null,myVote=null;
 let nightChoice=null,nightDone=false;
 let timerIv=null,detHistory={};
 
-const rRef=()=>doc(db,ROOT,'r',myRoomId);
-const pRef=uid=>doc(db,ROOT,'r',myRoomId,'p',uid);
-const pCol=()=>collection(db,ROOT,'r',myRoomId,'p');
+const rRef=()=>doc(db,'vk_rooms',myRoomId);
+const pRef=uid=>doc(db,'vk_rooms',myRoomId,'players',uid);
+const pCol=()=>collection(db,'vk_rooms',myRoomId,'players');
 
 // ── AUTH ──────────────────────────────────────────────────────────────────────
 signInAnonymously(auth).then(r=>{myUid=r.user.uid;}).catch(console.error);
@@ -933,7 +938,9 @@ function renderRoom(){
     const waitEl=$('night-wait');
     waitEl.textContent=`${subCount}/${aliveP.length} ${t('night_submit_wait')}`;
     if(isHost&&aliveP.length>0&&aliveP.every(p=>submitted[p.id]))processNight();
-    startTimer('timer-night',45,async()=>{if(!nightDone)await submitNight();});
+    // Server-synced timer: use phaseEndTime from Firestore if available
+    const nightEnd=roomData.phaseEndTime||Date.now()+45000;
+    startTimerFromEnd('timer-night',nightEnd,async()=>{if(!nightDone)await submitNight();});
     return;
   }
 
@@ -946,7 +953,8 @@ function renderRoom(){
     if(evts.length>0){eBox.classList.remove('hidden');eBox.innerHTML=evts.map(e=>`<p style="margin:3px 0">${e}</p>`).join('');}
     else eBox.classList.add('hidden');
     if(!$('qtxt').textContent.trim())showQ();
-    startTimer('timer-day',90);
+    const dayEnd=roomData.phaseEndTime||Date.now()+90000;
+    startTimerFromEnd('timer-day',dayEnd);
     return;
   }
 
@@ -961,7 +969,8 @@ function renderRoom(){
       const alive=Object.values(pData).filter(p=>p.isAlive);
       if(alive.length>0&&alive.every(p=>roomData.dayVotes[p.id]))endVoting();
     }
-    startTimer('timer-vote',60,()=>{if(isHost)endVoting();});
+    const voteEnd=roomData.phaseEndTime||Date.now()+60000;
+    startTimerFromEnd('timer-vote',voteEnd,()=>{if(isHost)endVoting();});
     return;
   }
 
@@ -1008,7 +1017,7 @@ function renderRoom(){
 
 // ── NIGHT ─────────────────────────────────────────────────────────────────────
 window.goToNight=async()=>{
-  await updateDoc(rRef(),{status:'night',nightActions:{submitted:{},vampireVotes:{},target:null,doctorSave:null,detectiveTarget:null}});
+  await updateDoc(rRef(),{status:'night',phaseEndTime:Date.now()+45000,nightActions:{submitted:{},vampireVotes:{},target:null,doctorSave:null,detectiveTarget:null}});
 };
 
 function buildNightPanel(){
@@ -1101,7 +1110,7 @@ async function processNight(){
   if(vampTarget&&vampTarget!==docSave)up[`players.${vampTarget}.isAlive`]=false;
   // Update player docs
   if(vampTarget&&vampTarget!==docSave)await updateDoc(pRef(vampTarget),{isAlive:false});
-  await updateDoc(rRef(),{events,dayVotes:{},status:winner?'game_over':'day',winner:winner||null});
+  await updateDoc(rRef(),{events,dayVotes:{},status:winner?'game_over':'day',phaseEndTime:Date.now()+90000,winner:winner||null});
 }
 
 // ── DAY ───────────────────────────────────────────────────────────────────────
@@ -1118,7 +1127,7 @@ window.showQ=()=>{
   const el=$('qtxt');el.style.opacity=0;
   setTimeout(()=>{el.textContent=`"${rand(t('questions'))}"`;el.style.transition='opacity .3s';el.style.opacity=1;},300);
 };
-window.startVoting=async()=>updateDoc(rRef(),{status:'vote',dayVotes:{}});
+window.startVoting=async()=>updateDoc(rRef(),{status:'vote',phaseEndTime:Date.now()+60000,dayVotes:{}});
 
 // ── VOTE ──────────────────────────────────────────────────────────────────────
 function buildVoteList(){
@@ -1187,7 +1196,7 @@ function checkWin(players){
 
 // ── NEXT / RESET ──────────────────────────────────────────────────────────────
 window.nextRound=async()=>{
-  await updateDoc(rRef(),{status:'night',phase:(roomData.phase||1)+1,
+  await updateDoc(rRef(),{status:'night',phase:(roomData.phase||1)+1,phaseEndTime:Date.now()+45000,
     dayVotes:{},events:[],nightActions:{submitted:{},vampireVotes:{},target:null,doctorSave:null,detectiveTarget:null}});
   nightDone=false;nightChoice=null;
 };
@@ -1196,17 +1205,27 @@ window.resetGame=async()=>{
   await updateDoc(rRef(),{status:'lobby'});
 };
 
-// ── TIMER ─────────────────────────────────────────────────────────────────────
-function startTimer(id,sec,done){
+
+// ── TIMER — SERVER SYNCED ─────────────────────────────────────────────────────
+// phaseEndTime is stored in Firestore (ms timestamp) by host when phase starts.
+// All clients read it and count down from there → everyone sees same timer.
+function startTimerFromEnd(id, endTime, onDone){
   if(timerIv)clearInterval(timerIv);
-  let t=sec;
   const tick=()=>{
-    const el=$(id);if(!el)return;
-    el.textContent=t;el.classList.toggle('urgent',t<=10);
-    if(t<=0){clearInterval(timerIv);if(done)done();return;}t--;
+    const el=$(id); if(!el)return;
+    const rem=Math.max(0, Math.ceil((endTime - Date.now()) / 1000));
+    el.textContent=rem;
+    el.classList.toggle('urgent', rem<=10);
+    if(rem<=0){clearInterval(timerIv); if(onDone)onDone(); return;}
   };
-  tick();timerIv=setInterval(tick,1000);
+  tick(); timerIv=setInterval(tick,500);
 }
+// Fallback: local timer when no endTime stored yet
+function startTimer(id,sec,done){
+  const endTime=Date.now()+sec*1000;
+  startTimerFromEnd(id,endTime,done);
+}
+
 
 // ── STARS ─────────────────────────────────────────────────────────────────────
 function makeStars(){
